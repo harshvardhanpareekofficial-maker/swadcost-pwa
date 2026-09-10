@@ -142,6 +142,15 @@ export function calculateSingle(input: SingleInputs): CostBreakdown {
   if (input.warpCount <= 0 || input.weftCount <= 0) {
     throw new Error('Warp and weft counts must be > 0')
   }
+  if (input.reed <= 0 || input.warpReedspace <= 0) {
+    throw new Error('Reed and warp reedspace must be > 0 (total ends would be 0)')
+  }
+  if (input.l2l <= 0) {
+    throw new Error('L2L must be > 0')
+  }
+  if (input.pick <= 0 || input.weftReedspace <= 0) {
+    throw new Error('Pick and weft reedspace must be > 0 when weft is expected')
+  }
 
   const k = K_SINGLE
   const ends = totalEnds(input.reed, input.warpReedspace)
@@ -199,6 +208,15 @@ export function calculateMulti(input: MultiInputs): CostBreakdown {
     [input.reed, input.warpReedspace, input.l2l, input.pick, input.weftReedspace, input.wastagePct, input.majuri, input.warping],
     'multi costing',
   )
+  if (input.reed <= 0 || input.warpReedspace <= 0) {
+    throw new Error('Reed and warp reedspace must be > 0 (total ends would be 0)')
+  }
+  if (input.l2l <= 0) {
+    throw new Error('L2L must be > 0')
+  }
+  if (input.pick <= 0 || input.weftReedspace <= 0) {
+    throw new Error('Pick and weft reedspace must be > 0 when weft is expected')
+  }
   const warpYarns = activeYarns(input.warpYarns)
   const weftYarns = activeYarns(input.weftYarns)
 
