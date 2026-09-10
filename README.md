@@ -1,0 +1,62 @@
+# SwadCost PWA — Textile Fabric Cost Calculator
+
+Polished, installable Progressive Web App mirroring SwadCost (pareektech) single + multi warp/weft grey fabric costing.
+
+**Author:** Harshvardhan Pareek  
+**Stack:** Vite + React + TypeScript + Tailwind CSS + vite-plugin-pwa  
+**Target domain:** `harshvardhanpareek.com`
+
+## Features
+
+- Client-side login gate (`rohitbohara` / `rohitbohara`, overridable via env)
+- Home: fabric name + **Single Warp** / **Multiple Warp / Weft**
+- Speak (Web Speech API) or Type input; mic fills current field and advances
+- Full cost breakdown with editable inputs + recalculate
+- Markup table (5%–16%)
+- SEO meta, OG tags, manifest, icons, `robots.txt`, `sitemap.xml`
+- Footer on every page: *Made by Harshvardhan Pareek*
+
+## Local development
+
+```bash
+cd swadcost-pwa
+cp .env.example .env   # optional
+npm install
+npm run dev
+```
+
+### Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `npm run dev` | Vite dev server |
+| `npm test` | Vitest (oracle formula fixtures) |
+| `npm run build` | Typecheck + production build → `dist/` |
+| `npm run preview` | Preview production build |
+
+## Formula calibration
+
+See [`../fabric-cost-notes/FORMULAS.md`](../fabric-cost-notes/FORMULAS.md).
+
+Single oracle Final Cost **1698.77** and multi yarn1-only **1482.17** are locked in vitest.
+
+## Deploy on Render (static site)
+
+1. Push this repo to GitHub/GitLab/Bitbucket (or Origin) and connect the remote.
+2. Create a **Static Site** on [Render](https://render.com) (or use `render.yaml`):
+   - **Build command:** `npm ci && npm run build`
+   - **Publish directory:** `dist`
+3. Optional env vars: `VITE_AUTH_USERNAME`, `VITE_AUTH_PASSWORD` (baked in at build time).
+4. Custom domain: add `harshvardhanpareek.com` in Render → Domains, then point DNS:
+   - Apex: A/ALIAS to Render, or CNAME flattening per Render docs
+   - `www` CNAME → your Render host
+
+SPA fallback is configured in `render.yaml` (`/*` → `/index.html`).
+
+## Auth note
+
+Auth is a **simple client-side gate** for convenience — not server security. Anyone can inspect the bundle. Replace with real auth before exposing sensitive business data.
+
+## Remaining blockers
+
+- No git remote yet — create one, then `git init && git add . && git commit` and push, then wire Render.

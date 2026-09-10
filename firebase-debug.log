@@ -1,0 +1,33 @@
+[debug] [2026-09-10T18:08:23.866Z] ----------------------------------------------------------------------
+[debug] [2026-09-10T18:08:23.868Z] Command:       /usr/bin/node /home/box/.npm/_npx/ba4f1959e38407b5/node_modules/.bin/firebase projects:create swadcost-fabric --display-name SwadCost Fabric Calculator
+[debug] [2026-09-10T18:08:23.868Z] CLI Version:   15.30.0
+[debug] [2026-09-10T18:08:23.869Z] Platform:      linux
+[debug] [2026-09-10T18:08:23.869Z] Node Version:  v20.19.2
+[debug] [2026-09-10T18:08:23.869Z] Detected Agent: cursor
+[debug] [2026-09-10T18:08:23.869Z] Time:          Thu Sep 10 2026 18:08:23 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-09-10T18:08:23.869Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-09-10T18:08:23.888Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-09-10T18:08:23.918Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-09-10T18:08:23.919Z] > authorizing via signed-in user (harshvardhanpareekofficial@gmail.com)
+[debug] [2026-09-10T18:08:23.921Z] Checked if tokens are valid: true, expires at: 1789067267677
+[debug] [2026-09-10T18:08:23.922Z] Checked if tokens are valid: true, expires at: 1789067267677
+[debug] [2026-09-10T18:08:23.922Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects [none]
+[debug] [2026-09-10T18:08:23.922Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects {"projectId":"swadcost-fabric","name":"SwadCost Fabric Calculator"}
+[debug] [2026-09-10T18:08:24.133Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-09-10T18:08:24.133Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-09-10T18:08:24.473Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects 200
+[debug] [2026-09-10T18:08:24.474Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects {"name":"operations/create_project.global.8272542503945292143"}
+[debug] [2026-09-10T18:08:24.475Z] Checked if tokens are valid: true, expires at: 1789067267677
+[debug] [2026-09-10T18:08:24.475Z] Checked if tokens are valid: true, expires at: 1789067267677
+[debug] [2026-09-10T18:08:24.475Z] >>> [apiv2][query] GET https://cloudresourcemanager.googleapis.com/v1/operations/create_project.global.8272542503945292143 [none]
+[debug] [2026-09-10T18:08:24.712Z] <<< [apiv2][status] GET https://cloudresourcemanager.googleapis.com/v1/operations/create_project.global.8272542503945292143 200
+[debug] [2026-09-10T18:08:24.712Z] <<< [apiv2][body] GET https://cloudresourcemanager.googleapis.com/v1/operations/create_project.global.8272542503945292143 {"name":"operations/create_project.global.8272542503945292143","metadata":{"@type":"type.googleapis.com/google.cloudresourcemanager.v1.ProjectCreationStatus","ready":true},"done":true,"error":{"code":8,"message":"The project cannot be created because you have exceeded your allotted project quota.","details":[{"@type":"type.googleapis.com/google.rpc.QuotaFailure","violations":[{"description":"The project cannot be created because you have exceeded your allotted project quota."}]}]}}
+[debug] [2026-09-10T18:08:24.714Z] FirebaseError: The project cannot be created because you have exceeded your allotted project quota.
+    at OperationPoller.poll (/home/box/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/operation-poller.js:25:19)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async createCloudProject (/home/box/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/management/projects.js:237:29)
+    at async createFirebaseProjectAndLog (/home/box/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/management/projects.js:102:9)
+    at async /home/box/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/command.js:280:28
+[error] 
+[error] Error: Failed to create project. See firebase-debug.log for more info.
