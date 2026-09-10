@@ -1,7 +1,14 @@
 import { useCallback, useMemo, useState } from 'react'
 import { isAuthenticated, logout } from './lib/auth'
 import { calculateMulti, calculateSingle, type CostBreakdown } from './lib/costing'
-import { emptyMulti, emptySingle, type CostMode, type InputMethod } from './lib/types'
+import {
+  emptyMulti,
+  emptySingle,
+  validateMultiInputs,
+  validateSingleInputs,
+  type CostMode,
+  type InputMethod,
+} from './lib/types'
 import { LoginPage } from './pages/LoginPage'
 import { HomePage } from './pages/HomePage'
 import { InputMethodPage } from './pages/InputMethodPage'
@@ -98,6 +105,12 @@ export default function App() {
           onCalculate={() => {
             try {
               setCalcError(null)
+              const err =
+                mode === 'single' ? validateSingleInputs(single) : validateMultiInputs(multi)
+              if (err) {
+                setCalcError(err)
+                return
+              }
               const r = mode === 'single' ? calculateSingle(single) : calculateMulti(multi)
               setResult(r)
               setScreen('results')
