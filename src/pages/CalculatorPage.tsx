@@ -4,8 +4,8 @@ import { Stepper } from '../components/Stepper'
 import { NumberField } from '../components/NumberField'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { useSpeechFill } from '../hooks/useSpeechFill'
-import type { MultiInputs, SingleInputs } from '../lib/costing'
-import type { CostMode, InputMethod } from '../lib/types'
+import { DEMO_SINGLE, type MultiInputs, type SingleInputs } from '../lib/costing'
+import { emptyMulti, type CostMode, type InputMethod } from '../lib/types'
 
 type Num = number | ''
 
@@ -135,13 +135,6 @@ export function CalculatorPage({
     }
   }, [inputMethod, speech.supported, speech.listening])
 
-  const canCalc =
-    mode === 'single'
-      ? single.warpCount > 0 && single.weftCount > 0 && single.l2l > 0
-      : multi.warpYarns.some((y) => y.pct > 0 && y.count > 0) &&
-        multi.weftYarns.some((y) => y.pct > 0 && y.count > 0) &&
-        multi.l2l > 0
-
   return (
     <Layout
       title={mode === 'single' ? 'Single Warp' : 'Multiple Warp / Weft'}
@@ -241,8 +234,17 @@ export function CalculatorPage({
       </div>
 
       <div className="mt-6 space-y-3">
-        <PrimaryButton disabled={!canCalc} onClick={onCalculate}>
+        <PrimaryButton onClick={onCalculate}>
           Calculate
+        </PrimaryButton>
+        <PrimaryButton
+          variant="secondary"
+          onClick={() => {
+            if (mode === 'single') onChangeSingle({ ...DEMO_SINGLE })
+            else onChangeMulti(emptyMulti())
+          }}
+        >
+          Load demo sample
         </PrimaryButton>
         <PrimaryButton variant="secondary" onClick={onBack}>
           Back

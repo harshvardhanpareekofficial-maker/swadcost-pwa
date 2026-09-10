@@ -11,7 +11,7 @@ import {
   type MultiInputs,
   type SingleInputs,
 } from '../lib/costing'
-import type { CostMode } from '../lib/types'
+import { validateMultiInputs, validateSingleInputs, type CostMode } from '../lib/types'
 
 type Props = {
   fabricName: string
@@ -44,6 +44,11 @@ export function ResultsPage({
   function recalculate() {
     try {
       setError(null)
+      const err = mode === 'single' ? validateSingleInputs(single) : validateMultiInputs(multi)
+      if (err) {
+        setError(err)
+        return
+      }
       const r = mode === 'single' ? calculateSingle(single) : calculateMulti(multi)
       onResult(r)
       setEditing(false)
