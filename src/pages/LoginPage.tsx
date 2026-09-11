@@ -54,7 +54,7 @@ function PasswordField({
   const [visible, setVisible] = useState(false)
   return (
     <label className="block">
-      <span className={`mb-1.5 block ${studioLabelClass}`}>{label}</span>
+      <span className={`mb-1 block ${studioLabelClass}`}>{label}</span>
       <div className="relative">
         <input
           type={visible ? 'text' : 'password'}
@@ -132,16 +132,16 @@ export function LoginPage({ onSuccess }: Props) {
     <div className="studio-atmosphere flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">
       <StudioBar />
 
-      <main className="mx-auto flex w-full min-w-0 max-w-6xl flex-1 flex-col gap-8 px-[max(1rem,env(safe-area-inset-left))] py-6 pr-[max(1rem,env(safe-area-inset-right))] sm:gap-10 sm:px-8 sm:py-10 lg:grid lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16 lg:py-8">
-        <section className="relative">
+      <main className="mx-auto grid w-full min-w-0 max-w-6xl flex-1 grid-cols-1 content-start gap-3 px-[max(1rem,env(safe-area-inset-left))] py-3 pr-[max(1rem,env(safe-area-inset-right))] sm:gap-4 sm:px-8 sm:py-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16 lg:py-8">
+        <section className="relative hidden lg:col-start-1 lg:row-start-1 lg:block">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-plum/55">
             The fabric costing workspace
           </p>
-          <h1 className="font-display mt-3 text-[2.15rem] font-semibold leading-[1.06] tracking-[-0.03em] text-ink sm:text-5xl lg:text-[3.25rem]">
+          <p className="font-display mt-3 text-[2.15rem] font-semibold leading-[1.06] tracking-[-0.03em] text-ink sm:text-5xl lg:text-[3.25rem]">
             <span className="block">Every thread.</span>
             <span className="block">Every rupee.</span>
             <span className="block text-plum">Clearly accounted for.</span>
-          </h1>
+          </p>
           <p className="mt-4 max-w-[38ch] text-base leading-relaxed text-plum/75">
             Bring your warp, weft and making charges together in one considered cost sheet.
           </p>
@@ -154,23 +154,23 @@ export function LoginPage({ onSuccess }: Props) {
           </div>
         </section>
 
-        <section className="flex items-start justify-center lg:items-center">
-          <div className="studio-sheet w-full max-w-md p-5 sm:p-8">
+        <section className="flex items-start justify-center lg:col-start-2 lg:row-start-1 lg:items-center">
+          <div className="studio-sheet w-full max-w-md p-4 sm:p-6 lg:p-8">
             <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-plum/55">
               Your work, in one place
             </p>
-            <h2 className="font-display mt-2 text-[1.85rem] font-semibold leading-[1.12] tracking-[-0.03em] text-ink">
+            <h1 className="font-display mt-1.5 text-[1.5rem] font-semibold leading-[1.12] tracking-[-0.03em] text-ink lg:mt-2 lg:text-[1.85rem]">
               {signingIn ? 'Welcome to the studio.' : 'Create your studio account.'}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-plum/70">
+            </h1>
+            <p className="mt-1 text-sm leading-snug text-plum/70 lg:mt-2 lg:leading-relaxed">
               {signingIn
                 ? 'Sign in to keep your cost sheets together.'
                 : 'Choose a name and password. They stay on this device.'}
             </p>
 
-            <form onSubmit={submit} className="mt-6 space-y-4">
+            <form onSubmit={submit} className="mt-4 space-y-3 lg:mt-6 lg:space-y-4">
               <label className="block">
-                <span className={`mb-1.5 block ${studioLabelClass}`}>
+                <span className={`mb-1 block ${studioLabelClass}`}>
                   {signingIn ? 'User ID' : 'Name'}
                 </span>
                 <input
@@ -225,7 +225,7 @@ export function LoginPage({ onSuccess }: Props) {
               </PrimaryButton>
             </form>
 
-            <p className="mt-5 text-center text-sm text-plum/70">
+            <p className="mt-3 text-center text-sm text-plum/70 lg:mt-5">
               {signingIn ? (
                 <>
                   New to the studio?{' '}
@@ -252,9 +252,19 @@ export function LoginPage({ onSuccess }: Props) {
             </p>
           </div>
         </section>
+
+        <details className="lg:hidden">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center text-sm font-semibold text-plum [&::-webkit-details-marker]:hidden">
+            About the studio
+          </summary>
+          <p className="pb-1 text-sm leading-relaxed text-plum/70">
+            Every thread. Every rupee. Clearly accounted for. Warp, weft and making charges on one mill
+            sheet — single or multiple yarns, with voice entry if you want it.
+          </p>
+        </details>
       </main>
 
-      <Footer className="px-[max(1rem,env(safe-area-inset-left))] py-4 pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-8" />
+      <Footer className="px-[max(1rem,env(safe-area-inset-left))] py-2.5 pr-[max(1rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-4" />
     </div>
   )
 }

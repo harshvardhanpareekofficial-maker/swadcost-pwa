@@ -31,6 +31,12 @@ describe('studio chrome', () => {
   const results = read('src/pages/ResultsPage.tsx')
   const ui = uiFiles.map(read).join('\n')
 
+  it('shows the sign-in card first on small screens', () => {
+    expect(login).toContain('hidden lg:col-start-1 lg:row-start-1 lg:block')
+    expect(login).toContain('About the studio')
+    expect(login).toContain('lg:hidden')
+  })
+
   it('keeps the mockup welcome line and omits explore/guest', () => {
     expect(login).toContain('Welcome to the studio.')
     expect(login).toContain('Sign in to keep your cost sheets together.')

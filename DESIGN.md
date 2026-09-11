@@ -88,7 +88,7 @@ fabriccost STUDIO is a mill-office on warm paper: ivory canvas, plum ink, saffro
 
 ## Layout
 
-- Login: StudioBar / split main on one wash / footer. Mobile stacks brand story above the card (never a bare form).
+- Login: StudioBar / split main on one wash / footer. Below `lg`, the sign-in card is first so User ID, Password, and Sign in sit above the fold; brand story is a collapsed “About the studio” under the card (no weave). Desktop (`lg+`) keeps the split brand + card.
 - **Back** and **Log out** live on the StudioBar, same row as the wordmark, on Home / Speak-Type / Calculator / Results.
 - App: max 36rem column, generous vertical rhythm, proximity over extra wrappers.
 - One primary CTA per view. Calculator keeps Calculate sticky at the thumb. Secondary actions are quieter text.
