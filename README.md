@@ -10,7 +10,7 @@ Polished, installable Progressive Web App for single + multi warp/weft grey fabr
 
 - Client-side accounts in `localStorage` (Sign in + Create account). Fresh installs start empty — there is no baked-in demo user.
 - Home: fabric name + **Single Warp** / **Multiple Warp / Weft**
-- Speak (Web Speech API) or Type input; mic fills current field and advances
+- Speak (Chrome Web Speech, Hindi/English mill numbers) or Type; in-range values auto-advance; TTS via ElevenLabs or `speechSynthesis`
 - Full cost breakdown with editable inputs + recalculate
 - Markup table (5%–16%)
 - SEO meta, OG tags, manifest, icons, `robots.txt`, `sitemap.xml`
@@ -57,6 +57,7 @@ See [`FORMULA_CROSSCHECK.md`](FORMULA_CROSSCHECK.md) for the live SwadCost demo 
 3. Env vars (baked in at **build** time — a Dashboard-only save without rebuild will not update the bundle):
    - `VITE_OWNER_GATE` (optional)
    - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (**required** for Finish setup / studio-list lookup). Set them on the Render static site, then rebuild. Do not commit the anon key. Without them, Sign in shows a connection/config error instead of pretending the username is new.
+   - `VITE_ELEVENLABS_API_KEY` / `VITE_ELEVENLABS_VOICE_ID` (optional Speak TTS prompts; omit to use `speechSynthesis`)
 4. Custom domain: add `harshvardhanpareek.com` in Render → Domains, then point DNS:
    - Apex: A/ALIAS to Render, or CNAME flattening per Render docs
    - `www` CNAME → your Render host

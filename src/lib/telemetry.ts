@@ -2,6 +2,7 @@ import { touchAccountLastActive } from './auth'
 import { usernameNorm } from './usernames'
 import type { CostBreakdown, MultiInputs, SingleInputs } from './costing'
 import { idleCutoffIso, isIdleTimestamp, parseIsoMillis } from './idle'
+import { rankQualities, type RankedQuality } from './qualities'
 import { ACCOUNT_META_KEY, CALC_EVENTS_KEY, migrateTelemetryStorage } from './storage'
 import { getSupabase } from './supabase'
 import type { CostMode } from './types'
@@ -35,6 +36,8 @@ export type UsageReport = {
   topFabrics: RankedItem[]
   topReedPick: RankedItem[]
   topQualities: RankedItem[]
+  rankedQualities: RankedQuality[]
+  topQuality: RankedQuality | null
   modeCounts: { single: number; multi: number }
 }
 
@@ -126,10 +129,13 @@ export function rankLabels(values: string[], limit = 8): RankedItem[] {
 }
 
 export function buildUsageReport(calcs: CalcEvent[]): UsageReport {
+  const rankedQualities = rankQualities(calcs)
   return {
     topFabrics: rankLabels(calcs.map((c) => c.fabricName)),
     topReedPick: rankLabels(calcs.map((c) => qualityLabel(c.reed, c.pick) || '(n/a)')),
-    topQualities: rankLabels(calcs.map((c) => c.qualityLabel || qualityLabel(c.reed, c.pick) || '(n/a)')),
+    topQualities: rankedQualities.map((q) => ({ label: q.label, count: q.count })),
+    rankedQualities,
+    topQuality: rankedQualities[0] ?? null,
     modeCounts: {
       single: calcs.filter((c) => c.mode === 'single').length,
       multi: calcs.filter((c) => c.mode === 'multi').length,

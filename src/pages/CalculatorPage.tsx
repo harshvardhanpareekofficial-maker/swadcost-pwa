@@ -8,6 +8,8 @@ import { StudioSheet } from '../components/StudioSheet'
 import { useSpeechFill } from '../hooks/useSpeechFill'
 import { SAMPLE_MULTI, SAMPLE_SINGLE, type MultiInputs, type SingleInputs } from '../lib/costing'
 import { DALAL_SECTION_LABEL, PICK_RATE_HINT, PICK_RATE_LABEL } from '../lib/labels'
+import { rangeHint, shouldAutoAdvance, spokenPromptFor } from '../lib/metricRanges'
+import { cancelSpeak, speakPrompt } from '../lib/speakPrompt'
 import type { CostMode, InputMethod } from '../lib/types'
 
 type Num = number | ''
@@ -51,6 +53,7 @@ export function CalculatorPage({
   onLogout,
 }: Props) {
   const [focusIdx, setFocusIdx] = useState(0)
+  const [rangeNote, setRangeNote] = useState<string | null>(null)
   const fieldRefs = useRef<(HTMLInputElement | null)[]>([])
 
   const fields: FieldDef[] = useMemo(() => {
@@ -123,16 +126,30 @@ export function CalculatorPage({
       const f = fields[focusIdx]
       if (!f) return
       f.set(num)
+      if (!shouldAutoAdvance(f.key, num)) {
+        setRangeNote(`“${num}” is outside the usual ${rangeHint(f.key).toLowerCase()} for ${f.label}. Stay on this field.`)
+        return
+      }
+      setRangeNote(null)
+      // In-range mill number → next metric at once. No extra confirm.
       setFocusIdx((i) => Math.min(i + 1, fields.length - 1))
     },
     [fields, focusIdx],
   )
 
   const speech = useSpeechFill(inputMethod === 'speak', onNumber)
+  const activeKey = fields[focusIdx]?.key
+  const activeLabel = fields[focusIdx]?.label
 
   useEffect(() => {
     fieldRefs.current[focusIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [focusIdx])
+
+  useEffect(() => {
+    if (inputMethod !== 'speak' || !speech.listening || !activeKey) return
+    void speakPrompt(spokenPromptFor(activeKey, activeLabel))
+    return () => cancelSpeak()
+  }, [inputMethod, speech.listening, focusIdx, activeKey, activeLabel])
 
   const renderField = (i: number) => {
     const f = fields[i]
@@ -206,10 +223,11 @@ export function CalculatorPage({
         <StudioSheet className="mb-3 sm:mb-4">
           <p className="text-sm text-ink">
             Active field: <strong>{fields[focusIdx]?.label}</strong>
+            {activeKey ? <span className="text-plum/60"> · {rangeHint(activeKey)}</span> : null}
           </p>
           <p className="mt-1 text-xs text-plum/70">
-            Web Speech API (Chrome on HTTPS). Say one mill number. Fields stay editable if you need to
-            type a correction.
+            Chrome Web Speech on HTTPS (Android or desktop). Say one mill number in Hindi or English.
+            A value in the usual range moves to the next metric at once — no extra confirm.
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             {speech.listening ? (
@@ -234,6 +252,7 @@ export function CalculatorPage({
               {speech.ignored ? ' — not a mill number, field unchanged.' : null}
             </p>
           ) : null}
+          {rangeNote ? <p className="mt-2 text-xs text-rose">{rangeNote}</p> : null}
         </StudioSheet>
       ) : null}
 
