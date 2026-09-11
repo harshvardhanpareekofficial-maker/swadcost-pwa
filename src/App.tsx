@@ -83,6 +83,7 @@ export default function App() {
         fabricName={fabricName}
         modeLabel={modeLabel}
         onBack={() => setScreen('home')}
+        onLogout={handleLogout}
         onChoose={(im) => {
           setInputMethod(im)
           setScreen('calc')
@@ -103,6 +104,7 @@ export default function App() {
           onChangeSingle={setSingle}
           onChangeMulti={setMulti}
           onBack={() => setScreen('method')}
+          onLogout={handleLogout}
           onCalculate={() => {
             try {
               setCalcError(null)
@@ -129,7 +131,7 @@ export default function App() {
           }}
         />
         {calcError ? (
-          <p className="fixed bottom-[max(5rem,calc(env(safe-area-inset-bottom)+4.5rem))] left-1/2 z-50 w-[min(92%,24rem)] -translate-x-1/2 rounded-[14px] border border-rose/30 bg-paper px-4 py-3 text-center text-sm text-rose shadow-sheet">
+          <p className="fixed bottom-[max(6.5rem,calc(env(safe-area-inset-bottom)+6rem))] left-1/2 z-50 w-[min(92%,24rem)] -translate-x-1/2 rounded-[14px] border border-rose/25 bg-paper px-4 py-3 text-center text-sm text-rose shadow-sheet">
             {calcError}
           </p>
         ) : null}
@@ -150,6 +152,7 @@ export default function App() {
         onResult={setResult}
         onHome={resetJob}
         onBackEdit={() => setScreen('calc')}
+        onLogout={handleLogout}
       />
     )
   }

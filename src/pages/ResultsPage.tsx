@@ -28,6 +28,7 @@ type Props = {
   onResult: (r: CostBreakdown) => void
   onHome: () => void
   onBackEdit: () => void
+  onLogout: () => void
 }
 
 export function ResultsPage({
@@ -41,6 +42,7 @@ export function ResultsPage({
   onResult,
   onHome,
   onBackEdit,
+  onLogout,
 }: Props) {
   const [editing, setEditing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -70,12 +72,12 @@ export function ResultsPage({
   }
 
   return (
-    <Layout title="Cost breakdown" subtitle={fabricName || 'Untitled fabric'}>
+    <Layout title="Cost breakdown" subtitle={fabricName || 'Untitled fabric'} onBack={onBackEdit} onLogout={onLogout}>
       <Stepper step={3} />
 
       <StudioSheet className="mb-6 overflow-hidden sm:mb-8">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/55">Final cost</p>
-        <p className="font-display mt-1 break-words text-[2rem] font-semibold tabular-nums tracking-[-0.03em] text-ink sm:text-4xl">
+        <p className="font-display mt-1 break-words text-[2.35rem] font-semibold tabular-nums tracking-[-0.03em] text-ink sm:text-5xl">
           {formatInr(result.grandTotal)}
         </p>
         {result.length > 0 ? (
@@ -218,9 +220,6 @@ export function ResultsPage({
         {!editing ? (
           <PrimaryButton onClick={() => setEditing(true)}>Edit inputs</PrimaryButton>
         ) : null}
-        <PrimaryButton variant="secondary" onClick={onBackEdit}>
-          Back to all fields
-        </PrimaryButton>
         <PrimaryButton variant="ghost" onClick={onHome}>
           New costing
         </PrimaryButton>
@@ -231,8 +230,9 @@ export function ResultsPage({
 
 function Row({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
   return (
-    <div className="flex min-w-0 items-baseline justify-between gap-3 text-sm">
+    <div className="flex min-w-0 items-baseline gap-3 text-sm">
       <span className={`min-w-0 break-words ${muted ? 'text-plum/50' : 'text-plum/70'}`}>{label}</span>
+      <span className="min-w-4 flex-1 border-b border-dotted border-plum/20" aria-hidden />
       <span className={`max-w-[48%] shrink-0 text-right tabular-nums ${muted ? 'text-plum/50' : 'font-semibold text-ink'}`}>
         {value}
       </span>

@@ -1,7 +1,6 @@
 import { Layout } from '../components/Layout'
 import { CardButton } from '../components/CardButton'
 import { Stepper } from '../components/Stepper'
-import { PrimaryButton } from '../components/PrimaryButton'
 import { IconKeys, IconMic } from '../components/Icons'
 import { SectionLabel } from '../components/SectionLabel'
 import type { InputMethod } from '../lib/types'
@@ -11,13 +10,16 @@ type Props = {
   modeLabel: string
   onChoose: (m: InputMethod) => void
   onBack: () => void
+  onLogout: () => void
 }
 
-export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack }: Props) {
+export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack, onLogout }: Props) {
   return (
     <Layout
       title="How will you enter values?"
       subtitle={`${fabricName || 'Untitled'} · ${modeLabel}`}
+      onBack={onBack}
+      onLogout={onLogout}
     >
       <Stepper step={1} />
       <div className="space-y-3">
@@ -34,11 +36,6 @@ export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack }: Pro
           icon={<IconKeys />}
           onClick={() => onChoose('type')}
         />
-      </div>
-      <div className="mt-8">
-        <PrimaryButton variant="secondary" onClick={onBack}>
-          Back
-        </PrimaryButton>
       </div>
     </Layout>
   )
