@@ -23,11 +23,30 @@ describe('helpers', () => {
     const w = warpWeight(65, 120, 61, 102)
     expect(w).toBeCloseTo(0.082, 3)
     expect(Number(w.toFixed(3))).toBe(0.082)
+    expect((65 * 120 * 120) / (1825 * 61 * 102)).toBeCloseTo(w, 12)
   })
 
-  it('keeps weft 1693.33 as cotton Ne kg/m (840 × 2.2046 × 0.9144)', () => {
+  it('weft base agrees with cotton Ne kg per metre of cloth (no crimp, 1 m)', () => {
+    // (PPI × reed width in) / (840 × 2.2046 × 0.9144 × Ne)
+    const rs = 65
+    const pick = 68
+    const count = 61
+    const textbookKgPerM = (pick * rs) / (840 * 2.2046 * 0.9144 * count)
+    expect(weftWeightBase(rs, pick, count)).toBeCloseTo(textbookKgPerM, 3)
     expect(WEFT_DENOMINATOR).toBe(1693.33)
     expect(840 * 2.2046 * 0.9144).toBeCloseTo(1693.33, 1)
+  })
+
+  it('warp 120/1825 is the mill sheet, not textbook kg/m', () => {
+    const rs = 65
+    const reed = 120
+    const count = 61
+    const l2l = 102
+    const ends = reed * rs
+    const textbookKgPerM = ends / (840 * 2.2046 * 0.9144 * count)
+    const notebook = warpWeight(rs, reed, count, l2l)
+    expect(notebook).toBeCloseTo(0.082, 3)
+    expect(Math.abs(notebook - textbookKgPerM)).toBeGreaterThan(0.005)
   })
 
   it('computes weft base without L2L or wastage', () => {
@@ -79,9 +98,14 @@ describe('calculateSingle', () => {
 
   it('does not silently match the live SwadCost 1698.77 oracle', () => {
     const asPickRate = calculateSingle(SWADCOST_LIVE_SAMPLE)
-    const majuriAsFlat = calculateSingle({ ...SWADCOST_LIVE_SAMPLE, pickRate: 0 })
+    const noMajuri = calculateSingle({ ...SWADCOST_LIVE_SAMPLE, pickRate: 0 })
+    const majuriAsFlat = calculateSingle({ ...SWADCOST_LIVE_SAMPLE, pickRate: 0, warping: 10 })
     expect(asPickRate.grandTotal).not.toBe(1698.77)
+    expect(noMajuri.grandTotal).not.toBe(1698.77)
     expect(majuriAsFlat.grandTotal).not.toBe(1698.77)
+    expect(asPickRate.grandTotal).toBeCloseTo(1716.31, 2)
+    expect(noMajuri.grandTotal).toBeCloseTo(1216.31, 2)
+    expect(majuriAsFlat.grandTotal).toBeCloseTo(1226.31, 2)
     expect(asPickRate.warpWeight).toBeCloseTo((60 * 80 * 120) / (1825 * 40 * 2), 6)
   })
 })

@@ -22,7 +22,7 @@
  *
  * 4) Job rate = Pick × Pick rate  (maps to the old flat majuri field)
  *
- * Cost assembly (hypothesis — sheet lists weights and rates separately):
+ * Cost assembly (matches mill listing of weights × rates; see FORMULA_CROSSCHECK.md):
  *   warpCost    = warpWeight × warpRate
  *   weftCost    = weftWeight × weftRate
  *   sizingCost  = warpWeight × sizingRate

@@ -131,12 +131,6 @@ export function CalculatorPage({
     fieldRefs.current[focusIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [focusIdx])
 
-  useEffect(() => {
-    if (inputMethod === 'speak' && speech.supported && !speech.listening) {
-      // user starts via button
-    }
-  }, [inputMethod, speech.supported, speech.listening])
-
   const renderField = (i: number) => {
     const f = fields[i]
     if (!f) return null
@@ -177,7 +171,10 @@ export function CalculatorPage({
           <p className="text-sm text-ink">
             Active field: <strong>{fields[focusIdx]?.label}</strong>
           </p>
-          <p className="mt-1 text-xs text-plum/70">Say a number — it fills this field and moves to the next.</p>
+          <p className="mt-1 text-xs text-plum/70">
+            Web Speech API (Chrome on HTTPS). Say one mill number. Fields stay editable if you need to
+            type a correction.
+          </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             {speech.listening ? (
               <PrimaryButton variant="secondary" onClick={speech.stop}>
@@ -189,7 +186,18 @@ export function CalculatorPage({
               </PrimaryButton>
             )}
           </div>
+          {!speech.supported ? (
+            <p className="mt-2 text-xs text-plum/70">
+              This browser has no speech engine. Use Type, or Chrome on Android / desktop over HTTPS.
+            </p>
+          ) : null}
           {speech.error ? <p className="mt-2 text-xs text-rose">{speech.error}</p> : null}
+          {speech.lastHeard ? (
+            <p className="mt-2 text-xs text-plum/70">
+              Heard: “{speech.lastHeard}”
+              {speech.ignored ? ' — not a mill number, field unchanged.' : null}
+            </p>
+          ) : null}
         </StudioSheet>
       ) : null}
 

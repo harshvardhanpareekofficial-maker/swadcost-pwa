@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 const SMALL: Record<string, number> = {
   zero: 0,
   oh: 0,
+  nought: 0,
   one: 1,
   two: 2,
   three: 3,
@@ -32,39 +33,138 @@ const SMALL: Record<string, number> = {
   ninety: 90,
 }
 
+const UNIT_RE = /\b(percent|percentage|inch|inches|picks?|reed|rupees?|rs|dents?)\b/g
+const RESTART_MS = 180
+
+function speechEngine(): (new () => SpeechRecognition) | null {
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null
+}
+
 function tokenValue(token: string): number | null {
-  if (/^-?\d+(?:\.\d+)?$/.test(token)) {
+  if (/^\d+(?:\.\d+)?$/.test(token)) {
     const n = Number(token)
     return Number.isFinite(n) ? n : null
   }
   return SMALL[token] ?? null
 }
 
-/** Parse a short mill number such as "65", "sixty five", or "eighty". */
-export function parseSpokenTokens(stripped: string): number | null {
-  const parts = stripped.split(' ').filter((p) => p && p !== 'and')
-  if (parts.length === 0 || parts.length > 2) return null
-  if (parts.length === 1) return tokenValue(parts[0])
-  const a = tokenValue(parts[0])
-  const b = tokenValue(parts[1])
+/** 0–99 from one or two mill-English tokens. */
+function parseSmall(tokens: string[]): number | null {
+  if (tokens.length === 0 || tokens.length > 2) return null
+  if (tokens.length === 1) {
+    const v = tokenValue(tokens[0])
+    if (v === null || v < 0 || v > 99) return null
+    return v
+  }
+  const a = tokenValue(tokens[0])
+  const b = tokenValue(tokens[1])
   if (a === null || b === null) return null
   if (a >= 20 && a % 10 === 0 && b > 0 && b < 10) return a + b
   return null
 }
 
+function parseIntWords(tokens: string[]): number | null {
+  if (tokens.length === 0 || tokens.length > 4) return null
+  if (tokens.length === 1) {
+    const v = tokenValue(tokens[0])
+    if (v === null || v < 0) return null
+    return v
+  }
+
+  const hundredAt = tokens.indexOf('hundred')
+  if (hundredAt !== -1) {
+    const left = tokens.slice(0, hundredAt)
+    const right = tokens.slice(hundredAt + 1)
+    const hundreds = left.length === 0 ? 1 : parseSmall(left)
+    if (hundreds === null || hundreds < 1 || hundreds > 9) return null
+    const rest = right.length === 0 ? 0 : parseSmall(right)
+    if (rest === null) return null
+    return hundreds * 100 + rest
+  }
+
+  // “one oh two” / “one zero two” → 102 (common for L2L)
+  if (tokens.length === 3) {
+    const a = tokenValue(tokens[0])
+    const b = tokenValue(tokens[1])
+    const c = tokenValue(tokens[2])
+    const middleOh = tokens[1] === 'oh' || tokens[1] === 'zero'
+    if (
+      a !== null &&
+      b !== null &&
+      c !== null &&
+      middleOh &&
+      a >= 1 &&
+      a <= 9 &&
+      c >= 0 &&
+      c <= 9
+    ) {
+      return a * 100 + b * 10 + c
+    }
+  }
+
+  return parseSmall(tokens)
+}
+
+function parseFracTokens(tokens: string[]): number | null {
+  if (tokens.length === 0 || tokens.length > 3) return null
+  let digits = ''
+  for (const t of tokens) {
+    if (/^\d+$/.test(t)) {
+      digits += t
+      continue
+    }
+    const v = SMALL[t]
+    if (v === undefined || v > 9) return null
+    digits += String(v)
+  }
+  if (!digits) return null
+  const frac = Number(`0.${digits}`)
+  return Number.isFinite(frac) ? frac : null
+}
+
+function parseNumberPhrase(stripped: string): number | null {
+  const tokens = stripped.split(' ').filter((t) => t && t !== 'and' && t !== 'a')
+  if (tokens.length === 0) return null
+
+  const pointAt = tokens.indexOf('point')
+  if (pointAt !== -1) {
+    const left = tokens.slice(0, pointAt)
+    const right = tokens.slice(pointAt + 1)
+    const intPart = left.length === 0 ? 0 : parseIntWords(left)
+    const frac = parseFracTokens(right)
+    if (intPart === null || frac === null) return null
+    return intPart + frac
+  }
+
+  return parseIntWords(tokens)
+}
+
+export function parseSpokenTokens(stripped: string): number | null {
+  return parseNumberPhrase(stripped)
+}
+
 /**
- * Accept a spoken number only when the utterance is essentially numeric.
- * Avoids filling a field from a long misheard sentence.
+ * Accept a spoken mill number only when the utterance is essentially numeric.
+ * Does not pull a digit out of a long misheard sentence.
  */
 export function extractSpokenNumber(transcript: string): number | null {
-  const cleaned = transcript.replace(/,/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase()
+  const cleaned = transcript
+    .replace(/,/g, ' ')
+    .replace(/([a-z])-([a-z])/gi, '$1 $2')
+    .replace(/[^\w.\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
   if (!cleaned) return null
   const stripped = cleaned
-    .replace(/\b(percent|percentage|inch|inches|picks?|reed|rupees?|rs|point)\b/g, ' ')
+    .replace(UNIT_RE, ' ')
+    .replace(/(\d)\.(?=\s|$)/g, '$1')
     .replace(/\s+/g, ' ')
     .trim()
   if (!stripped) return null
-  return parseSpokenTokens(stripped)
+  const n = parseNumberPhrase(stripped)
+  if (n === null || !Number.isFinite(n) || n < 0 || n > 1_000_000) return null
+  return n
 }
 
 function speechErrorMessage(code: string): string {
@@ -91,39 +191,59 @@ export function useSpeechFill(
   listening: boolean
   supported: boolean
   error: string | null
+  lastHeard: string | null
+  ignored: boolean
   start: () => void
   stop: () => void
 } {
   const [listening, setListening] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [supported, setSupported] = useState(false)
+  const [lastHeard, setLastHeard] = useState<string | null>(null)
+  const [ignored, setIgnored] = useState(false)
   const recRef = useRef<SpeechRecognition | null>(null)
   const wantListenRef = useRef(false)
+  const enabledRef = useRef(enabled)
+  const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onNumberRef = useRef(onNumber)
+  enabledRef.current = enabled
   onNumberRef.current = onNumber
 
   useEffect(() => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
-    setSupported(Boolean(SR) && enabled)
-  }, [enabled])
+    setSupported(Boolean(speechEngine()))
+  }, [])
 
-  const stop = useCallback(() => {
+  const clearRestart = () => {
+    if (restartTimerRef.current) {
+      clearTimeout(restartTimerRef.current)
+      restartTimerRef.current = null
+    }
+  }
+
+  const halt = useCallback(() => {
     wantListenRef.current = false
-    recRef.current?.stop()
+    clearRestart()
+    const rec = recRef.current
+    recRef.current = null
+    rec?.abort()
     setListening(false)
   }, [])
 
+  const stop = useCallback(() => {
+    halt()
+  }, [halt])
+
   const start = useCallback(() => {
-    if (!enabled) return
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!enabledRef.current) return
+    const SR = speechEngine()
     if (!SR) {
       setError('Speech recognition is not supported in this browser. Use Type, or try Chrome.')
       return
     }
-    wantListenRef.current = false
-    recRef.current?.abort()
-    recRef.current = null
+    halt()
     setError(null)
+    setLastHeard(null)
+    setIgnored(false)
     wantListenRef.current = true
     const rec = new SR()
     rec.continuous = true
@@ -133,55 +253,77 @@ export function useSpeechFill(
     rec.onresult = (ev) => {
       for (let i = ev.resultIndex; i < ev.results.length; i++) {
         if (!ev.results[i].isFinal) continue
-        const t = ev.results[i][0]?.transcript ?? ''
+        const alt = ev.results[i][0]
+        const t = alt?.transcript ?? ''
+        const confidence = alt?.confidence ?? 0
+        // Chrome often reports 0; only skip a genuinely low non-zero score.
+        if (confidence > 0 && confidence < 0.35) {
+          setLastHeard(t.trim())
+          setIgnored(true)
+          continue
+        }
         const n = extractSpokenNumber(t)
-        if (n !== null) onNumberRef.current(n)
+        setLastHeard(t.trim() || null)
+        if (n === null) {
+          setIgnored(true)
+          continue
+        }
+        setIgnored(false)
+        onNumberRef.current(n)
       }
     }
     rec.onerror = (ev) => {
       if (ev.error === 'aborted' || ev.error === 'no-speech') return
       wantListenRef.current = false
+      clearRestart()
       setError(speechErrorMessage(ev.error))
       setListening(false)
     }
     rec.onend = () => {
-      if (wantListenRef.current && enabled) {
+      if (recRef.current !== rec) return
+      if (!wantListenRef.current || !enabledRef.current) {
+        setListening(false)
+        return
+      }
+      // Chrome drops continuous sessions; restart after a beat so start() is legal.
+      restartTimerRef.current = setTimeout(() => {
+        restartTimerRef.current = null
+        if (!wantListenRef.current || !enabledRef.current) return
         try {
           rec.start()
           setListening(true)
-          return
         } catch {
           wantListenRef.current = false
+          setListening(false)
         }
-      }
-      setListening(false)
+      }, RESTART_MS)
     }
     recRef.current = rec
     try {
       rec.start()
       setListening(true)
-    } catch {
+    } catch (err) {
       wantListenRef.current = false
-      setError('Could not start the microphone. Check permission and try again.')
+      const name = err instanceof DOMException ? err.name : ''
+      setError(
+        name === 'NotAllowedError'
+          ? speechErrorMessage('not-allowed')
+          : 'Could not start the microphone. Check permission and try again.',
+      )
       setListening(false)
     }
-  }, [enabled])
+  }, [halt])
 
   useEffect(() => {
-    if (!enabled) {
-      wantListenRef.current = false
-      recRef.current?.abort()
-      setListening(false)
-    }
-  }, [enabled])
+    if (!enabled) halt()
+  }, [enabled, halt])
 
   useEffect(
     () => () => {
-      wantListenRef.current = false
-      recRef.current?.abort()
+      halt()
     },
-    [],
+    [halt],
   )
 
-  return { listening, supported, error, start, stop }
+  return { listening, supported, error, lastHeard, ignored, start, stop }
 }
