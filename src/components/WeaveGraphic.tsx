@@ -16,25 +16,26 @@ export function WeaveGraphic({ className = '', compact = false }: Props) {
   const height = pad * 2 + rows * (tw + gap) - gap
 
   return (
-    <figure className={`relative ${className}`}>
+    <figure className={className}>
       <p className="mb-2 text-center text-[10px] font-semibold tracking-[0.28em] text-plum/45">
         WEFT / CROSSWISE
       </p>
-      <div className="relative">
-        <p className="pointer-events-none absolute -right-2 top-1/2 hidden origin-center -translate-y-1/2 rotate-90 text-[10px] font-semibold tracking-[0.28em] text-plum/45 sm:block lg:-right-3">
+      <div className="flex items-center gap-2 sm:gap-3">
+        <p
+          className="hidden shrink-0 text-[9px] font-semibold tracking-[0.28em] text-plum/45 sm:block"
+          style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+        >
           WARP / LENGTHWISE
         </p>
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="h-auto w-full max-w-md"
+          className="h-auto w-full"
           role="img"
           aria-label="Warp and weft weave"
           style={{
-            maskImage:
-              'linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 10%, #000 90%, transparent 100%)',
             WebkitMaskImage:
-              'linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%)',
-            maskComposite: 'intersect',
+              'linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%)',
+            maskImage: 'linear-gradient(90deg, transparent 0%, #000 6%, #000 94%, transparent 100%)',
           }}
         >
           {Array.from({ length: rows }, (_, r) => (

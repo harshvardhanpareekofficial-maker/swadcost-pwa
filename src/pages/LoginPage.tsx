@@ -137,17 +137,15 @@ export function LoginPage({ onSuccess }: Props) {
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-plum/55">
             The fabric costing workspace
           </p>
-          <h1 className="font-display mt-3 max-w-[14ch] text-[2.15rem] font-semibold leading-[1.06] tracking-[-0.03em] text-ink sm:text-5xl lg:text-[3.35rem]">
-            Every thread.
-            <br />
-            Every rupee.
-            <br />
-            <span className="text-plum">Clearly accounted for.</span>
+          <h1 className="font-display mt-3 text-[2.15rem] font-semibold leading-[1.06] tracking-[-0.03em] text-ink sm:text-5xl lg:text-[3.25rem]">
+            <span className="block">Every thread.</span>
+            <span className="block">Every rupee.</span>
+            <span className="block text-plum">Clearly accounted for.</span>
           </h1>
           <p className="mt-4 max-w-[38ch] text-base leading-relaxed text-plum/75">
             Bring your warp, weft and making charges together in one considered cost sheet.
           </p>
-          <WeaveGraphic className="mt-6 max-w-md sm:mt-8" />
+          <WeaveGraphic className="mt-5 max-w-[18rem] sm:mt-7 sm:max-w-md" />
           <div className="mt-6 sm:mt-8">
             <CheckList
               layout="row"
