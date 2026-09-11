@@ -14,6 +14,7 @@ import {
   unlockOwner,
 } from '../lib/owner'
 import { applyDocumentIndexing, PUBLIC_ROBOTS } from '../lib/seo'
+import type { RankedQuality } from '../lib/qualities'
 import {
   buildUsageReport,
   loadOwnerSnapshot,
@@ -61,6 +62,73 @@ function RankList({ title, items }: { title: string; items: { label: string; cou
               <span className="min-w-0 break-words text-ink">
                 <span className="mr-2 text-plum/40">{index + 1}.</span>
                 {item.label}
+              </span>
+              <span className="tabular-nums font-semibold text-plum">{item.count}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </StudioSheet>
+  )
+}
+
+function qualityMeta(q: RankedQuality): string {
+  const bits: string[] = []
+  if (q.reed !== null) bits.push(`Reed ${q.reed}`)
+  if (q.pick !== null) bits.push(`Pick ${q.pick}`)
+  if (q.warpRs !== null) bits.push(`Warp ${q.warpRs}`)
+  if (q.qualityLabel && q.qualityLabel !== q.label) bits.push(q.qualityLabel)
+  if (q.fabricName) bits.push(q.fabricName)
+  return bits.join(' · ')
+}
+
+function MostUsedQuality({ quality }: { quality: RankedQuality | null }) {
+  return (
+    <div className="rounded-3xl bg-plum px-5 py-5 text-ivory shadow-sheet sm:px-6 sm:py-6">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ivory/70">
+        Most-used quality
+      </p>
+      {quality ? (
+        <>
+          <p className="font-display mt-2 text-3xl font-semibold tracking-[-0.03em] sm:text-4xl">
+            {quality.label}
+          </p>
+          {qualityMeta(quality) ? (
+            <p className="mt-2 text-sm leading-relaxed text-ivory/80">{qualityMeta(quality)}</p>
+          ) : null}
+          <p className="mt-3 text-sm font-semibold tabular-nums text-ivory/90">
+            {quality.count} {quality.count === 1 ? 'calculation' : 'calculations'}
+          </p>
+        </>
+      ) : (
+        <p className="mt-3 text-sm leading-relaxed text-ivory/75">
+          No calculations yet. Qualities appear here after the first Calculate — reed, warp / pick,
+          quality label, and fabric name when they are on the sheet.
+        </p>
+      )}
+    </div>
+  )
+}
+
+function QualityRankList({ items }: { items: RankedQuality[] }) {
+  return (
+    <StudioSheet>
+      <SectionLabel>Top qualities</SectionLabel>
+      <p className="mt-1.5 text-xs leading-relaxed text-plum/60">
+        Ranked by how often the same reed, warp / pick, and quality label are run.
+      </p>
+      {items.length === 0 ? (
+        <EmptyHint>No calculations yet. Ranked qualities will list here with counts.</EmptyHint>
+      ) : (
+        <ol className="mt-3 space-y-2.5">
+          {items.map((item, index) => (
+            <li key={`${item.label}-${index}`} className="flex items-baseline justify-between gap-3 text-sm">
+              <span className="min-w-0 break-words text-ink">
+                <span className="mr-2 text-plum/40">{index + 1}.</span>
+                <span className="font-medium">{item.label}</span>
+                {qualityMeta(item) ? (
+                  <span className="mt-0.5 block pl-5 text-xs text-plum/60">{qualityMeta(item)}</span>
+                ) : null}
               </span>
               <span className="tabular-nums font-semibold text-plum">{item.count}</span>
             </li>
@@ -189,16 +257,20 @@ export function OwnerVaultPage() {
             Usage ledger
           </h1>
           <p className="mt-1.5 max-w-[46ch] text-sm leading-relaxed text-plum/75 sm:text-[0.95rem]">
-            Accounts and quality reports from this workspace. Passwords never appear here. Idle accounts
-            auto-delete after {IDLE_TTL_DAYS} days without a sign-in or Calculate.
+            Most-used quality sits at the top. Passwords never appear here. Idle accounts auto-delete
+            after {IDLE_TTL_DAYS} days without a sign-in or Calculate.
           </p>
         </div>
 
+        <MostUsedQuality quality={report.topQuality} />
+
+        <QualityRankList items={report.rankedQualities} />
+
         <section className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">
-          <div className="rounded-3xl bg-plum px-5 py-4 text-ivory shadow-sheet sm:py-5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ivory/70">Accounts</p>
-            <p className="mt-1 font-display text-3xl font-semibold tabular-nums">{accounts.length}</p>
-          </div>
+          <StudioSheet>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Accounts</p>
+            <p className="mt-1 font-display text-3xl font-semibold tabular-nums text-ink">{accounts.length}</p>
+          </StudioSheet>
           <StudioSheet>
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Calculations</p>
             <p className="mt-1 font-display text-3xl font-semibold tabular-nums text-ink">{calcs.length}</p>
@@ -211,11 +283,7 @@ export function OwnerVaultPage() {
           </StudioSheet>
         </section>
 
-        <div className="grid gap-3 lg:grid-cols-3 lg:gap-4">
-          <RankList title="Most-used fabric names" items={report.topFabrics} />
-          <RankList title="Top reed × pick" items={report.topReedPick} />
-          <RankList title="Top quality labels" items={report.topQualities} />
-        </div>
+        <RankList title="Most-used fabric names" items={report.topFabrics} />
 
         <StudioSheet>
           <SectionLabel>Accounts</SectionLabel>

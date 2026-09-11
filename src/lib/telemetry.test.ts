@@ -58,6 +58,20 @@ describe('buildUsageReport', () => {
     expect(report.topFabrics[0]).toEqual({ label: 'Grey 40s', count: 2 })
     expect(report.topReedPick[0]).toEqual({ label: '80×50', count: 2 })
     expect(report.topQualities[0]).toEqual({ label: '80×50', count: 2 })
+    expect(report.topQuality).toMatchObject({
+      label: '80×50',
+      count: 2,
+      reed: 80,
+      pick: 50,
+      fabricName: 'Grey 40s',
+    })
+    expect(report.rankedQualities[0]?.count).toBe(2)
+  })
+
+  it('has no top quality when the ledger is empty', () => {
+    const report = buildUsageReport([])
+    expect(report.topQuality).toBeNull()
+    expect(report.rankedQualities).toEqual([])
   })
 })
 
