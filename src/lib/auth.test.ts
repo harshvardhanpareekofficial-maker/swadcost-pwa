@@ -3,6 +3,7 @@ import { webcrypto } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   ACCOUNT_SAVE_FAILED,
+  boundUsername,
   createAccount,
   currentUser,
   findAccount,
@@ -11,6 +12,7 @@ import {
   loadAccounts,
   login,
   logout,
+  switchAccount,
   MIN_PASSWORD_LENGTH,
   NO_LOCAL_ACCOUNT,
   normalizeUsername,
@@ -29,6 +31,7 @@ function clearAuthStorage() {
   localStorage.removeItem('fabriccost.accounts')
   localStorage.removeItem('fabriccost.auth_session')
   localStorage.removeItem('fabriccost.auth_user')
+  localStorage.removeItem('fabriccost.device_bind')
   localStorage.removeItem('fabriccost.accounts_epoch')
   localStorage.removeItem('fabriccost.account_meta')
   localStorage.removeItem('swadcost.accounts')
@@ -233,5 +236,27 @@ describe('last active + idle purge', () => {
     touchAccountLastActive('Maya', now - IDLE_TTL_MS + 60_000)
     expect(purgeIdleLocalAccounts(now)).toEqual([])
     expect(findAccount('Maya')?.username).toBe('Maya')
+  })
+})
+
+describe('device bind', () => {
+  it('binds the device after Create / Sign in and keeps the stamp after logout', async () => {
+    await createAccount('Harshvardhan', 'loompass', 'loompass')
+    expect(boundUsername()).toBe('Harshvardhan')
+    expect(localStorage.getItem('fabriccost.device_bind')).toBe('Harshvardhan')
+    logout()
+    expect(isAuthenticated()).toBe(false)
+    expect(boundUsername()).toBe('Harshvardhan')
+    expect(await login('harshvardhan', 'loompass')).toEqual({ ok: true, username: 'Harshvardhan' })
+    expect(boundUsername()).toBe('Harshvardhan')
+  })
+
+  it('clears local hash and bind on Switch account', async () => {
+    await createAccount('Harshvardhan', 'loompass', 'loompass')
+    switchAccount()
+    expect(loadAccounts()).toEqual([])
+    expect(boundUsername()).toBeNull()
+    expect(isAuthenticated()).toBe(false)
+    expect(localStorage.getItem('fabriccost.device_bind')).toBeNull()
   })
 })

@@ -58,6 +58,10 @@ describe('studio chrome', () => {
     expect(results).toContain('onBack={onBackEdit}')
     expect(results).toContain('onLogout={onLogout}')
     expect(home).not.toContain('Switch account')
+    expect(bar).not.toContain('Switch account')
+    expect(login).toContain('Switch account')
+    expect(login).toContain('switchStudioAccount')
+    expect(login).toContain('boundUsername')
   })
 
   it('does not print SwadCost in the visitor UI', () => {
@@ -87,7 +91,29 @@ describe('studio chrome', () => {
     expect(login).toContain('Finish setup on this device')
     expect(login).toContain('FINISH_SETUP_HINT')
     expect(login).toContain('beginSignIn')
+    expect(login).toContain('CLOUD_NOT_CONFIGURED')
+    expect(login).toContain('CLOUD_UNAVAILABLE')
     expect(login).not.toContain('accountRememberedElsewhere')
+    const studioAuth = read('src/lib/studioAuth.ts')
+    expect(studioAuth).toContain("cloud.status === 'unavailable'")
+    expect(studioAuth).toContain("cloud.status === 'found'")
+    expect(studioAuth).toContain('deviceBoundBlock')
+    expect(studioAuth).toContain('switchStudioAccount')
+    expect(studioAuth).toContain('USERNAME_TAKEN_CLOUD')
+    expect(studioAuth).toContain('This username is already taken')
+    expect(login).toContain('rahul_loom / rahul2')
+  })
+
+  it('activates new PWA builds without requiring clear-data every visit', () => {
+    const vite = read('vite.config.ts')
+    const main = read('src/main.tsx')
+    const pwa = read('src/pwa.ts')
+    expect(vite).toContain("registerType: 'autoUpdate'")
+    expect(vite).toContain('skipWaiting: true')
+    expect(vite).toContain('clientsClaim: true')
+    expect(main).toContain("./pwa")
+    expect(pwa).toContain('virtual:pwa-register')
+    expect(pwa).toContain('immediate: true')
   })
 
   it('labels the job identifier as Dalal name / Broker name', () => {

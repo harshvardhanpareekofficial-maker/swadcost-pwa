@@ -54,9 +54,9 @@ See [`FORMULA_CROSSCHECK.md`](FORMULA_CROSSCHECK.md) for the live SwadCost demo 
 2. Create a **Static Site** on [Render](https://render.com) (or use `render.yaml`):
    - **Build command:** `npm ci && npm run build`
    - **Publish directory:** `dist`
-3. Optional env vars (baked in at build time):
-   - `VITE_OWNER_GATE`
-   - `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
+3. Env vars (baked in at **build** time — a Dashboard-only save without rebuild will not update the bundle):
+   - `VITE_OWNER_GATE` (optional)
+   - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (**required** for Finish setup / studio-list lookup). Set them on the Render static site, then rebuild. Do not commit the anon key. Without them, Sign in shows a connection/config error instead of pretending the username is new.
 4. Custom domain: add `harshvardhanpareek.com` in Render → Domains, then point DNS:
    - Apex: A/ALIAS to Render, or CNAME flattening per Render docs
    - `www` CNAME → your Render host
