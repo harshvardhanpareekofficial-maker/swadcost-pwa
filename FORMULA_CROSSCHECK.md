@@ -74,6 +74,18 @@ ReedSpace 65", Reed 120, WarpCount 61, L2L 102:
 
 Calculator forms start at **zeros / empty**. `SWADCOST_LIVE_SAMPLE` is documentation-only. **Load sample** is an explicit fill (notebook warp example plus labeled sample rates).
 
+## Industry constants vs the mill sheet
+
+**1693.33 (weft)** matches the cotton English-count (Ne) length of 1 kg of 1s yarn in metres:
+
+`840 yards/hank × 2.2046 lb/kg × 0.9144 m/yard ≈ 1693.34`
+
+So `(ReedSpace × Pick) / (1693.33 × WeftCount)` is the usual mill expression for weft kg per metre of cloth. The notebook uses that constant **without L2L on weft**, which we keep.
+
+**120 / 1825 (warp)** are the factors written on the mill sheet, not the textbook cotton-Ne kg/m formula. They stay as written. Do not replace them with 1693.33.
+
+Web textile references (tex = 590.5 / Ne, 840-yard hank) agree with 1693.33 for weft. They do not justify changing warp 1825/120 or restoring the old K-fit.
+
 ## Why the engines differ
 
 The demo ASP.NET app and the mill notebook are different costing models. This product follows the owner sheet (120 / 1825 / 1693.33). Owner vault and Supabase analytics are unchanged.

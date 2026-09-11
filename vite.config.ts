@@ -12,16 +12,16 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'robots.txt', 'sitemap.xml', 'icons/*.svg', 'icons/*.png'],
       manifest: {
         name: 'fabriccost STUDIO — Fabric Cost Calculator',
-        short_name: 'fabriccost',
+        short_name: 'fabriccost STUDIO',
         description:
-          'Indian powerloom grey fabric costing for single and multi warp/weft. Speak or type inputs, edit results, install as PWA.',
+          'Fabric cost calculator for Indian powerloom grey fabric: warp, weft, sizing and job rate. Speak or type mill-sheet inputs.',
         theme_color: '#3B1F4A',
         background_color: '#F7F1E8',
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/',
         scope: '/',
-        lang: 'en',
+        lang: 'en-IN',
         categories: ['business', 'productivity', 'utilities'],
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

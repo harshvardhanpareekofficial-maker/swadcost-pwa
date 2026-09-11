@@ -3,6 +3,7 @@ import {
   SAMPLE_MULTI,
   SAMPLE_SINGLE,
   SWADCOST_LIVE_SAMPLE,
+  WEFT_DENOMINATOR,
   applyWastagePct,
   calculateMulti,
   calculateSingle,
@@ -22,6 +23,11 @@ describe('helpers', () => {
     const w = warpWeight(65, 120, 61, 102)
     expect(w).toBeCloseTo(0.082, 3)
     expect(Number(w.toFixed(3))).toBe(0.082)
+  })
+
+  it('keeps weft 1693.33 as cotton Ne kg/m (840 × 2.2046 × 0.9144)', () => {
+    expect(WEFT_DENOMINATOR).toBe(1693.33)
+    expect(840 * 2.2046 * 0.9144).toBeCloseTo(1693.33, 1)
   })
 
   it('computes weft base without L2L or wastage', () => {

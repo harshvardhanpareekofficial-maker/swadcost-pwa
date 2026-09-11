@@ -11,6 +11,7 @@ import {
   lockOwner,
   unlockOwner,
 } from '../lib/owner'
+import { applyDocumentIndexing, PUBLIC_ROBOTS } from '../lib/seo'
 import {
   buildUsageReport,
   loadOwnerSnapshot,
@@ -57,6 +58,16 @@ export function OwnerVaultPage() {
   const [loading, setLoading] = useState(false)
 
   const report = useMemo(() => buildUsageReport(calcs), [calcs])
+
+  useEffect(() => {
+    const prevTitle = document.title
+    applyDocumentIndexing(window.location.pathname)
+    return () => {
+      const robots = document.querySelector('meta[name="robots"]')
+      robots?.setAttribute('content', PUBLIC_ROBOTS)
+      document.title = prevTitle
+    }
+  }, [])
 
   async function refresh() {
     setLoading(true)

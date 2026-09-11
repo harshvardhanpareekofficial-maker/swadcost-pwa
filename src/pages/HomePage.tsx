@@ -17,8 +17,8 @@ type Props = {
 export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: Props) {
   return (
     <Layout
-      title="New costing"
-      subtitle="Name the fabric, then choose how the yarns are arranged."
+      title="New grey fabric costing"
+      subtitle="Name the fabric, then choose single or multiple warp and weft yarns for powerloom textile costing."
       showLogout
       onLogout={onLogout}
     >

@@ -1,5 +1,11 @@
 User-agent: *
 Allow: /
 Disallow: /owner-vault-hvp-7k9m2xq4
+Disallow: /owner-vault-hvp-7k9m2xq4/
+
+User-agent: Googlebot
+Allow: /
+Disallow: /owner-vault-hvp-7k9m2xq4
+Disallow: /owner-vault-hvp-7k9m2xq4/
 
 Sitemap: https://harshvardhanpareek.com/sitemap.xml

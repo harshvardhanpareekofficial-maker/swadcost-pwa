@@ -180,11 +180,12 @@ export function LoginPage({ onSuccess }: Props) {
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-plum/60">
             The fabric costing workspace
           </p>
-          <h1 className="font-display mt-3 max-w-md text-[1.85rem] font-semibold leading-[1.08] tracking-[-0.03em] text-ink sm:text-5xl">
+          <p className="font-display mt-3 max-w-md text-[1.85rem] font-semibold leading-[1.08] tracking-[-0.03em] text-ink sm:text-5xl">
             Every thread. Every rupee. Clearly accounted for.
-          </h1>
+          </p>
           <p className="mt-4 max-w-md text-base leading-relaxed text-plum/75">
-            Bring your warp, weft and making charges together in one considered cost sheet.
+            Fabric cost calculator for Indian powerloom grey fabric — warp, weft, sizing and job rate,
+            including mills in Ichalkaranji.
           </p>
           <WeaveGraphic />
           <div className="mt-8 hidden lg:block">
@@ -195,13 +196,15 @@ export function LoginPage({ onSuccess }: Props) {
         <section className="flex flex-1 items-start justify-center px-4 py-5 sm:px-8 sm:py-8 lg:items-center lg:py-6">
           <StudioSheet className="w-full max-w-md">
             <Eyebrow>Your work, in one place</Eyebrow>
-            <h2 className="font-display mt-2 text-[1.65rem] font-semibold leading-[1.12] tracking-[-0.02em] text-ink sm:text-2xl">
-              {signingIn ? 'Sign in to the studio.' : 'Create your studio account.'}
-            </h2>
+            <h1 className="font-display mt-2 text-[1.65rem] font-semibold leading-[1.12] tracking-[-0.02em] text-ink sm:text-2xl">
+              {signingIn
+                ? 'Sign in to fabriccost STUDIO'
+                : 'Create your fabriccost STUDIO account'}
+            </h1>
             <p className="mt-1.5 text-sm leading-relaxed text-plum/70">
               {signingIn
-                ? 'Use your user ID and password. Accounts stay on this device.'
-                : 'Choose a name and password. They stay on this device.'}
+                ? 'Textile fabric cost calculator for powerloom grey fabric — warp, weft, sizing and job rate. Accounts stay on this device.'
+                : 'Choose a name and password. They stay on this device. Then cost grey fabric warp and weft on the mill sheet.'}
             </p>
 
             <form onSubmit={submit} className="mt-5 space-y-3.5 sm:mt-6 sm:space-y-4">

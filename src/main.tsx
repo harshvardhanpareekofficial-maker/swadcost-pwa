@@ -4,7 +4,10 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './index.css'
 import App from './App'
 import { OWNER_PATH } from './lib/owner'
+import { applyDocumentIndexing } from './lib/seo'
 import { OwnerVaultPage } from './pages/OwnerVaultPage'
+
+applyDocumentIndexing(window.location.pathname)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
