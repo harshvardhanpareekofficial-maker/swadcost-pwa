@@ -23,4 +23,7 @@ services:
         value: public, max-age=31536000, immutable
       - path: /sitemap.xml
         name: Content-Type
-        value: application/xml; charset=utf-8
+        value: text/xml; charset=utf-8
+      - path: /sitemap.xml
+        name: Cache-Control
+        value: public, max-age=300
