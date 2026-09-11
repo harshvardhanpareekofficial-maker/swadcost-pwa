@@ -7,16 +7,16 @@ interface StudioBarProps {
 
 export function StudioBar({ trailing }: StudioBarProps) {
   return (
-    <header className="flex items-center justify-between gap-3 border-b border-plum/10 px-5 py-3.5 sm:px-8">
-      <p className="font-display text-lg tracking-tight">
+    <header className="flex min-h-11 items-center justify-between gap-2 border-b border-plum/10 px-4 py-2.5 pt-[max(0.65rem,env(safe-area-inset-top))] sm:gap-3 sm:px-8 sm:py-3.5">
+      <p className="min-w-0 font-display text-base tracking-tight sm:text-lg">
         <span className="font-semibold text-ink">fabriccost</span>
-        <span className="ml-2 align-middle text-[11px] font-semibold uppercase tracking-[0.28em] text-plum/70">
+        <span className="ml-1.5 align-middle text-[10px] font-semibold uppercase tracking-[0.28em] text-plum/70 sm:ml-2 sm:text-[11px]">
           STUDIO
         </span>
       </p>
-      <div className="flex items-center gap-3">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         {trailing}
-        <p className="flex items-center gap-2 text-[11px] font-medium text-plum/70">
+        <p className="hidden items-center gap-2 text-[11px] font-medium text-plum/70 sm:flex">
           <span className="h-2 w-2 rounded-full bg-ready" />
           Workspace ready
         </p>
@@ -40,7 +40,7 @@ export function StudioBarAction({
       onClick={onClick}
       className={
         variant === 'plum'
-          ? 'shrink-0 rounded-[14px] bg-plum px-3 py-2 text-xs font-semibold text-ivory hover:bg-plum-deep'
+          ? 'inline-flex min-h-11 shrink-0 items-center rounded-[14px] bg-plum px-3 py-2 text-xs font-semibold text-ivory hover:bg-plum-deep'
           : studioQuietBtnClass
       }
     >

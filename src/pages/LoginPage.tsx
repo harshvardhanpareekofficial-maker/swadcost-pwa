@@ -70,7 +70,7 @@ function PasswordField({
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute inset-y-0 right-0 flex items-center px-3 text-plum/50 hover:text-plum"
+          className="absolute inset-y-0 right-0 flex min-h-11 min-w-11 items-center justify-center px-3 text-plum/50 hover:text-plum"
           aria-label={visible ? 'Hide password' : 'Show password'}
         >
           <EyeIcon open={visible} />
@@ -82,7 +82,7 @@ function PasswordField({
 
 function WeaveGraphic() {
   return (
-    <div className="relative mx-auto mt-8 max-w-md">
+    <div className="relative mx-auto mt-6 max-w-md sm:mt-8">
       <div className="absolute -left-1 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] font-semibold tracking-[0.28em] text-plum/45 sm:block">
         WARP / LENGTHWISE
       </div>
@@ -90,7 +90,7 @@ function WeaveGraphic() {
         <p className="mb-3 text-center text-[10px] font-semibold tracking-[0.28em] text-plum/45">
           WEFT / CROSSWISE
         </p>
-        <div className="relative h-40 overflow-hidden rounded-2xl bg-ivory">
+        <div className="relative h-28 overflow-hidden rounded-2xl bg-ivory sm:h-40">
           <div className="absolute inset-0 flex justify-between px-3">
             {Array.from({ length: 11 }, (_, i) => (
               <div
@@ -176,17 +176,17 @@ export function LoginPage({ onSuccess }: Props) {
   const signingIn = mode === 'signin'
 
   return (
-    <div className="flex min-h-dvh flex-col bg-ivory text-ink">
+    <div className="flex min-h-dvh min-w-0 flex-col overflow-x-hidden bg-ivory text-ink">
       <StudioBar />
 
-      <main className="mx-auto grid min-h-[calc(100dvh-7.25rem)] w-full max-w-6xl flex-1 lg:grid-cols-2">
-        <section className="relative overflow-hidden px-5 py-8 sm:px-10 sm:py-12">
+      <main className="mx-auto grid min-h-[calc(100dvh-7.25rem)] w-full min-w-0 max-w-6xl flex-1 lg:grid-cols-2">
+        <section className="relative overflow-hidden px-4 py-6 sm:px-10 sm:py-12">
           <div className="pointer-events-none absolute -left-16 top-10 h-48 w-48 rounded-full bg-saffron/20 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-plum/10 blur-3xl" />
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-plum/60">
             The fabric costing workspace
           </p>
-          <h1 className="font-display mt-4 max-w-md text-4xl font-semibold leading-[1.08] tracking-[-0.03em] text-ink sm:text-5xl">
+          <h1 className="font-display mt-3 max-w-md text-[1.85rem] font-semibold leading-[1.08] tracking-[-0.03em] text-ink sm:mt-4 sm:text-5xl">
             Every thread. Every rupee. Clearly accounted for.
           </h1>
           <p className="mt-4 max-w-md text-base leading-relaxed text-plum/75">
@@ -198,7 +198,7 @@ export function LoginPage({ onSuccess }: Props) {
           </div>
         </section>
 
-        <section className="flex items-center justify-center px-5 py-6 sm:px-8">
+        <section className="flex items-center justify-center px-4 py-5 sm:px-8 sm:py-6">
           <StudioSheet className="w-full max-w-md">
             <Eyebrow>Your work, in one place</Eyebrow>
             <h2 className="font-display mt-2 text-2xl font-semibold tracking-[-0.02em] text-ink">
@@ -305,7 +305,7 @@ export function LoginPage({ onSuccess }: Props) {
         </section>
       </main>
 
-      <Footer className="px-5 py-3 sm:px-8" />
+      <Footer className="px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8" />
     </div>
   )
 }

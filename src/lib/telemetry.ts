@@ -209,14 +209,14 @@ export function recordSuccessfulCalc(args: {
           weftCount: args.single.weftCount,
           weftReedspace: args.single.weftReedspace,
           wastagePct: args.single.wastagePct,
-          majuri: args.single.majuri,
+          pickRate: args.single.pickRate,
           warping: args.single.warping,
         }
       : {
           l2l: args.multi.l2l,
           weftReedspace: args.multi.weftReedspace,
           wastagePct: args.multi.wastagePct,
-          majuri: args.multi.majuri,
+          pickRate: args.multi.pickRate,
           warping: args.multi.warping,
           warpYarns: args.multi.warpYarns.map((y) => ({ pct: y.pct, count: y.count })),
           weftYarns: args.multi.weftYarns.map((y) => ({ pct: y.pct, count: y.count })),

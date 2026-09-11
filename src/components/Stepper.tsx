@@ -4,7 +4,7 @@ type Props = { step: 0 | 1 | 2 | 3 }
 
 export function Stepper({ step }: Props) {
   return (
-    <ol className="mb-7 flex items-start gap-2">
+    <ol className="mb-5 flex min-w-0 items-start gap-1 sm:mb-7 sm:gap-2">
       {STEPS.map((label, i) => {
         const active = i === step
         const done = i < step
@@ -18,7 +18,7 @@ export function Stepper({ step }: Props) {
             >
               {i + 1}
             </span>
-            <span className={`text-[11px] font-medium ${active ? 'text-ink' : 'text-plum/55'}`}>{label}</span>
+            <span className={`text-[10px] font-medium sm:text-[11px] ${active ? 'text-ink' : 'text-plum/55'}`}>{label}</span>
           </li>
         )
       })}

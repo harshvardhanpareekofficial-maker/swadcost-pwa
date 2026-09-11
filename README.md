@@ -30,15 +30,21 @@ npm run dev
 | Script | Purpose |
 |--------|---------|
 | `npm run dev` | Vite dev server |
-| `npm test` | Vitest (oracle formula fixtures + auth/telemetry) |
+| `npm test` | Vitest (notebook warp-weight 0.082 + costing / auth / telemetry) |
 | `npm run build` | Typecheck + production build → `dist/` |
 | `npm run preview` | Preview production build |
 
-## Formula calibration
+## Formula
 
-See [`../fabric-cost-notes/FORMULAS.md`](../fabric-cost-notes/FORMULAS.md).
+Mill-sheet notebook (owner handwritten):
 
-Single oracle Final Cost **1698.77** and multi yarn1-only **1482.17** are locked in vitest.
+- **Warp weight** = `(ReedSpace × Reed × 120) / (1825 × WarpCount × L2L)`
+  - Example: 65 × 120 × 120 / (1825 × 61 × 102) = **0.082**
+- **Weft weight** = `(ReedSpace × Pick) / (1693.33 × WeftCount)` × `(1 + wastage%/100)`
+- **Sizing** = warp weight × sizing rate
+- **Job rate** = Pick × pick rate
+
+Costs are weight × yarn rate; grand total adds sizing, job, and optional warping. Multi-yarn uses the same constants, split by yarn %. See comments in `src/lib/costing.ts` for labeled assumptions.
 
 ## Deploy on Render (static site)
 

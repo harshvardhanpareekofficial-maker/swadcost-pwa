@@ -88,9 +88,9 @@ export function OwnerVaultPage() {
 
   if (!unlocked) {
     return (
-      <div className="flex min-h-dvh flex-col bg-ivory text-ink">
+      <div className="flex min-h-dvh min-w-0 flex-col overflow-x-hidden bg-ivory text-ink">
         <StudioBar />
-        <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-5 py-10">
+        <main className="mx-auto flex w-full min-w-0 max-w-md flex-1 flex-col justify-center px-4 py-8 sm:px-5 sm:py-10">
           <StudioSheet>
             <Eyebrow>Private ledger</Eyebrow>
             <h1 className="font-display mt-2 text-3xl font-semibold tracking-[-0.03em] text-ink">Owner vault</h1>
@@ -119,7 +119,7 @@ export function OwnerVaultPage() {
             </form>
           </StudioSheet>
         </main>
-        <Footer className="px-5 py-3 sm:px-8" />
+        <Footer className="px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8" />
       </div>
     )
   }
@@ -128,7 +128,7 @@ export function OwnerVaultPage() {
     source === 'supabase' ? 'Live workspace' : source === 'mixed' ? 'Workspace + this device' : 'This device'
 
   return (
-    <div className="flex min-h-dvh flex-col bg-ivory text-ink">
+    <div className="flex min-h-dvh min-w-0 flex-col overflow-x-hidden bg-ivory text-ink">
       <StudioBar
         trailing={
           <>
@@ -148,7 +148,7 @@ export function OwnerVaultPage() {
         }
       />
 
-      <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-5 py-8 sm:px-8">
+      <main className="mx-auto w-full min-w-0 max-w-5xl flex-1 space-y-6 px-4 py-6 sm:px-8 sm:py-8">
         <div>
           <Eyebrow>Owner vault · {sourceLabel}</Eyebrow>
           <h1 className="font-display mt-2 text-[1.85rem] font-semibold tracking-[-0.03em] text-ink">
@@ -243,7 +243,7 @@ export function OwnerVaultPage() {
         </StudioSheet>
       </main>
 
-      <Footer className="px-5 py-4 sm:px-8" />
+      <Footer className="px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-8" />
     </div>
   )
 }

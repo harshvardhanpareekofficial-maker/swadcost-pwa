@@ -16,7 +16,7 @@ fabriccost STUDIO turns warp, weft, and making charges into a considered cost sh
 
 ## Positioning
 
-A textile-first costing studio, not a generic SaaS calculator. The mechanism is SwadCost-oracle-calibrated grey-fabric math (internal only — never shown as a product name) plus voice fill and an installable PWA at harshvardhanpareek.com.
+A textile-first costing studio, not a generic SaaS calculator. The mechanism is mill-sheet grey-fabric math from the owner notebook (warp 1825 / weft 1693.33) plus voice fill and an installable PWA at harshvardhanpareek.com.
 
 ## Operating Context
 
@@ -25,7 +25,7 @@ Static site on Render. Client-side accounts in localStorage. Optional Supabase a
 ## Capabilities and Constraints
 
 - Sign in / Create account (hashed passwords, demo seed `rohitbohara` / `rohitbohara`). Guest “explore first” is allowed.
-- Costing math is locked by vitest oracles (1698.77 single, 1482.17 multi). Do not change formulas for design work.
+- Costing math follows the owner mill notebook (warp weight example 0.082). Do not reintroduce the old K-constant SwadCost fit.
 - Secret owner vault (not `/admin`) gated by `VITE_OWNER_GATE`.
 - Analytics tables keep backend names `swadcost_accounts` / `swadcost_calcs`; never surface that brand in UI.
 - No backend auth. Filesystem is ephemeral.

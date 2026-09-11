@@ -7,7 +7,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 
 export function PrimaryButton({ children, variant = 'primary', className = '', ...rest }: Props) {
   const base =
-    'inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[14px] px-4 py-3 text-base font-semibold transition disabled:cursor-not-allowed disabled:opacity-40'
+    'inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-[14px] px-4 py-3 text-base font-semibold transition disabled:cursor-not-allowed disabled:opacity-40 sm:min-h-12'
   const styles =
     variant === 'primary'
       ? 'bg-plum text-ivory shadow-sheet hover:bg-plum-deep'
