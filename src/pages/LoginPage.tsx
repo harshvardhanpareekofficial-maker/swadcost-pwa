@@ -3,6 +3,7 @@ import { boundUsername, MIN_PASSWORD_LENGTH } from '../lib/auth'
 import { IconArrow } from '../components/Icons'
 import { CheckList } from '../components/CheckList'
 import { Footer, MakerNote } from '../components/Footer'
+import { StudioFaq } from '../components/StudioFaq'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { StudioBar } from '../components/StudioBar'
 import { WeaveGraphic } from '../components/WeaveGraphic'
@@ -216,20 +217,21 @@ export function LoginPage({ onSuccess }: Props) {
     <div className="studio-atmosphere flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">
       <StudioBar />
 
-      <main className="mx-auto grid w-full min-w-0 max-w-6xl flex-1 grid-cols-1 content-start gap-3 px-[max(1rem,env(safe-area-inset-left))] py-3 pr-[max(1rem,env(safe-area-inset-right))] sm:gap-4 sm:px-8 sm:py-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:gap-16 lg:py-8">
+      <main className="mx-auto grid w-full min-w-0 max-w-6xl flex-1 grid-cols-1 content-start gap-3 px-[max(1rem,env(safe-area-inset-left))] py-3 pr-[max(1rem,env(safe-area-inset-right))] sm:gap-4 sm:px-8 sm:py-5 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-16 lg:py-8">
         <section className="relative hidden lg:col-start-1 lg:row-start-1 lg:block">
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-plum/55">
-            The fabric costing workspace
+            Fabric cost calculator · Ichalkaranji
           </p>
           <p className="font-display mt-3 text-[2.15rem] font-semibold leading-[1.06] tracking-[-0.03em] text-ink sm:text-5xl lg:text-[3.25rem]">
             <span className="block">Every thread.</span>
             <span className="block">Every rupee.</span>
             <span className="block text-plum">Clearly accounted for.</span>
           </p>
-          <p className="mt-4 max-w-[38ch] text-base leading-relaxed text-plum/75">
-            Bring your warp, weft and making charges together in one considered cost sheet.
+          <p className="mt-4 max-w-[42ch] text-base leading-relaxed text-plum/75">
+            A fabric cost calculator for Ichalkaranji powerloom mills. Grey fabric costing —
+            warp, weft, reed, pick, sizing and job rate — on one mill sheet. Speak or type.
           </p>
-          <MakerNote className="mt-3 max-w-[42ch]" />
+          <MakerNote className="mt-3 max-w-[46ch]" />
           <WeaveGraphic className="mt-5 max-w-[18rem] sm:mt-7 sm:max-w-md" />
           <div className="mt-6 sm:mt-8">
             <CheckList
@@ -237,6 +239,7 @@ export function LoginPage({ onSuccess }: Props) {
               items={['Single & multiple yarns', 'Editable calculations', 'Voice entry']}
             />
           </div>
+          <StudioFaq id="about" className="mt-8 max-w-[46ch]" />
         </section>
 
         <section className="flex items-start justify-center lg:col-start-2 lg:row-start-1 lg:items-center">
@@ -352,11 +355,15 @@ export function LoginPage({ onSuccess }: Props) {
           <summary className="flex min-h-11 cursor-pointer list-none items-center text-sm font-semibold text-plum [&::-webkit-details-marker]:hidden">
             About the studio
           </summary>
-          <p className="pb-1 text-sm leading-relaxed text-plum/70">
-            Every thread. Every rupee. Clearly accounted for. Warp, weft and making charges on one mill
-            sheet — single or multiple yarns, with voice entry if you want it. Harshvardhan Pareek
-            built fabriccost STUDIO in Ichalkaranji, India.
-          </p>
+          <div className="space-y-3 pb-1">
+            <p className="text-sm leading-relaxed text-plum/70">
+              Every thread. Every rupee. Clearly accounted for. A fabric cost calculator for
+              Ichalkaranji powerloom grey fabric costing — warp, weft, reed, pick, sizing and job
+              rate on one mill sheet, single or multiple yarns, with voice entry if you want it.
+              Harshvardhan Pareek is the maker.
+            </p>
+            <StudioFaq />
+          </div>
         </details>
       </main>
 

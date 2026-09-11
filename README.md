@@ -10,7 +10,7 @@ Polished, installable Progressive Web App for single + multi warp/weft grey fabr
 
 - Client-side accounts in `localStorage` (Sign in + Create account). Fresh installs start empty — there is no baked-in demo user.
 - Home: fabric name + **Single Warp** / **Multiple Warp / Weft**
-- Speak (Chrome Web Speech, Hindi/English mill numbers) or Type; in-range values auto-advance; TTS via ElevenLabs or `speechSynthesis`
+- Speak (Chrome Web Speech, Hindi/English mill numbers) or Type; in-range values auto-advance; TTS via free `speechSynthesis` (Google/Microsoft/Apple voices when present). ElevenLabs only if `VITE_ELEVENLABS_API_KEY` is set — no key required.
 - Full cost breakdown with editable inputs + recalculate
 - Markup table (5%–16%)
 - SEO meta, OG tags, manifest, icons, `robots.txt`, `sitemap.xml`
@@ -57,7 +57,7 @@ See [`FORMULA_CROSSCHECK.md`](FORMULA_CROSSCHECK.md) for the live SwadCost demo 
 3. Env vars (baked in at **build** time — a Dashboard-only save without rebuild will not update the bundle):
    - `VITE_OWNER_GATE` (optional)
    - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (**required** for Finish setup / studio-list lookup). Set them on the Render static site, then rebuild. Do not commit the anon key. Without them, Sign in shows a connection/config error instead of pretending the username is new.
-   - `VITE_ELEVENLABS_API_KEY` / `VITE_ELEVENLABS_VOICE_ID` (optional Speak TTS prompts; omit to use `speechSynthesis`)
+   - `VITE_ELEVENLABS_API_KEY` / `VITE_ELEVENLABS_VOICE_ID` (optional paid Speak TTS; omit — the default — to use free `speechSynthesis`. No key is required for spoken prompts.)
 4. Custom domain: add `harshvardhanpareek.com` in Render → Domains, then point DNS:
    - Apex: A/ALIAS to Render, or CNAME flattening per Render docs
    - `www` CNAME → your Render host
@@ -92,6 +92,16 @@ That POSTs to `https://api.indexnow.org/indexnow` with:
 ```
 
 A `200` or `202` means the endpoint received the URL. Do not ping until the key file is deployed; search engines fetch `keyLocation` to prove ownership.
+
+## Search (honest timeline)
+
+On-page SEO is in the repo: title/description, canonical + hreflang, Open Graph, FAQ JSON-LD, `robots.txt` (vault disallowed), and `sitemap.xml` for the real public homepage only. That cannot guarantee overnight #1 for “fabric cost calculator Ichalkaranji” or any other query. Rankings still take days to weeks after Google recrawls.
+
+After each production deploy:
+
+1. Confirm `https://harshvardhanpareek.com/sitemap.xml` and `/robots.txt` are the real files (not the SPA shell).
+2. In Google Search Console: resubmit the sitemap and run **URL Inspection** on `https://harshvardhanpareek.com/`.
+3. Optionally `npm run indexnow` once the key file is live.
 
 ## Design
 
