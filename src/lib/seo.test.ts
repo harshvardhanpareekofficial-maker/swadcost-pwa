@@ -76,6 +76,14 @@ describe('on-page SEO', () => {
     expect(robots).toContain('Sitemap: https://harshvardhanpareek.com/sitemap.xml')
     expect(sitemap).toContain('https://harshvardhanpareek.com/')
     expect(sitemap).not.toContain(OWNER_PATH)
+
+    const render = readFileSync(join(root, 'render.yaml'), 'utf8')
+    const vite = readFileSync(join(root, 'vite.config.ts'), 'utf8')
+    expect(render.indexOf('source: /sitemap.xml')).toBeGreaterThan(-1)
+    expect(render.indexOf('source: /sitemap.xml')).toBeLessThan(render.indexOf('source: /*'))
+    expect(render).toContain('application/xml')
+    expect(vite).toMatch(/navigateFallbackDenylist/)
+    expect(vite).toMatch(/sitemap\\.xml/)
   })
 
   it('treats only the owner vault path as private', () => {

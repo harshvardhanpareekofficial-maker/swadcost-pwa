@@ -46,7 +46,7 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: '/index.html',
         // Keep IndexNow / robots / sitemap as real files, not the SPA shell.
-        navigateFallbackDenylist: [/\.txt$/, /\.xml$/],
+        navigateFallbackDenylist: [/\.txt$/, /\.xml$/, /\/sitemap\.xml$/],
       },
     }),
   ],

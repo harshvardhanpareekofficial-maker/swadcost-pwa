@@ -83,6 +83,13 @@ describe('studio chrome', () => {
     expect(read('src/components/Footer.tsx')).toContain('Harshvardhan Pareek')
   })
 
+  it('offers Finish setup copy instead of a dead-end missing-account message', () => {
+    expect(login).toContain('Finish setup on this device')
+    expect(login).toContain('FINISH_SETUP_HINT')
+    expect(login).toContain('beginSignIn')
+    expect(login).not.toContain('accountRememberedElsewhere')
+  })
+
   it('labels the job identifier as Dalal name / Broker name', () => {
     const labels = read('src/lib/labels.ts')
     expect(labels).toContain("export const DALAL_NAME_LABEL = 'Dalal name / Broker name'")

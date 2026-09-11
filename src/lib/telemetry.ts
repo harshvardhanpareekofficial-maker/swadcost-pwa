@@ -1,4 +1,5 @@
-import { normalizeUsername, touchAccountLastActive } from './auth'
+import { touchAccountLastActive } from './auth'
+import { usernameNorm } from './usernames'
 import type { CostBreakdown, MultiInputs, SingleInputs } from './costing'
 import { idleCutoffIso, isIdleTimestamp, parseIsoMillis } from './idle'
 import { ACCOUNT_META_KEY, CALC_EVENTS_KEY, migrateTelemetryStorage } from './storage'
@@ -137,17 +138,14 @@ export function buildUsageReport(calcs: CalcEvent[]): UsageReport {
 }
 
 function usernameKey(name: string): string {
-  return normalizeUsername(name)
+  return usernameNorm(name)
 }
-
-export const REMOTE_ACCOUNT_NEEDS_RECREATE =
-  'This name is on the studio list, but the password is not stored in this browser. Create the account again with the same name to sign in here.'
 
 /** True when local telemetry or Supabase remembers the name (no password is stored remotely). */
 export async function accountRememberedElsewhere(username: string): Promise<boolean> {
-  const key = normalizeUsername(username)
+  const key = usernameNorm(username)
   if (!key) return false
-  if (loadLocalAccounts().some((row) => normalizeUsername(row.username) === key)) return true
+  if (loadLocalAccounts().some((row) => usernameNorm(row.username) === key)) return true
 
   const client = getSupabase()
   if (!client) return false
@@ -181,7 +179,7 @@ async function syncLastActiveRemote(username: string, atIso: string): Promise<vo
 /** Record (or refresh) an account and stamp last_active_at. Never sends a password. */
 export async function markAccountActive(username: string, at = new Date()): Promise<void> {
   const name = username.trim()
-  if (!name || normalizeUsername(name) === 'guest') return
+  if (!name || usernameNorm(name) === 'guest') return
 
   touchAccountLastActive(name, at.getTime())
 
@@ -338,7 +336,7 @@ function laterIso(a: string, b: string): string {
   return a > b ? a : b
 }
 
-function mergeAccountsByUsername(remote: AccountMeta[], local: AccountMeta[]): AccountMeta[] {
+export function mergeAccountsByUsername(remote: AccountMeta[], local: AccountMeta[]): AccountMeta[] {
   const map = new Map<string, AccountMeta>()
   for (const row of [...local, ...remote]) {
     const key = usernameKey(row.username)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { buildUsageReport, qualityLabel, rankLabels, type CalcEvent } from './telemetry'
+import { buildUsageReport, mergeAccountsByUsername, qualityLabel, rankLabels, type AccountMeta, type CalcEvent } from './telemetry'
 
 describe('qualityLabel', () => {
   it('formats reed × pick as textile quality', () => {
@@ -58,5 +58,30 @@ describe('buildUsageReport', () => {
     expect(report.topFabrics[0]).toEqual({ label: 'Grey 40s', count: 2 })
     expect(report.topReedPick[0]).toEqual({ label: '80×50', count: 2 })
     expect(report.topQualities[0]).toEqual({ label: '80×50', count: 2 })
+  })
+})
+
+describe('mergeAccountsByUsername', () => {
+  it('keys vault accounts by username_norm so case variants are one row', () => {
+    const remote: AccountMeta[] = [
+      {
+        id: 'r1',
+        username: 'HARSHVARDHAN',
+        createdAt: '2026-09-10T00:00:00.000Z',
+        lastActiveAt: '2026-09-11T02:00:00.000Z',
+      },
+    ]
+    const local: AccountMeta[] = [
+      {
+        id: 'l1',
+        username: 'Harshvardhan',
+        createdAt: '2026-09-11T00:00:00.000Z',
+        lastActiveAt: '2026-09-11T01:00:00.000Z',
+      },
+    ]
+    const merged = mergeAccountsByUsername(remote, local)
+    expect(merged).toHaveLength(1)
+    expect(merged[0]?.username.toLowerCase()).toBe('harshvardhan')
+    expect(merged[0]?.lastActiveAt).toBe('2026-09-11T02:00:00.000Z')
   })
 })

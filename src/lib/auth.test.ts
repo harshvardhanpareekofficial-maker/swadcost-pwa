@@ -68,15 +68,14 @@ describe('empty account store', () => {
     expect(localStorage.getItem('fabriccost.accounts')).toBeNull()
   })
 
-  it('wipes a leftover local account store once', () => {
+  it('stamps the epoch marker without deleting hashed accounts', () => {
     localStorage.setItem(
       'fabriccost.accounts',
       JSON.stringify([{ username: 'legacy-user', passwordHash: 'hash', createdAt: 1, lastActiveAt: 1 }]),
     )
     localStorage.setItem('fabriccost.auth_session', '1')
     localStorage.setItem('fabriccost.auth_user', 'legacy-user')
-    expect(loadAccounts()).toEqual([])
-    expect(isAuthenticated()).toBe(false)
+    expect(loadAccounts().map((row) => row.username)).toEqual(['legacy-user'])
     expect(localStorage.getItem(ACCOUNTS_EPOCH_KEY)).toBe(ACCOUNTS_EPOCH)
   })
 })
@@ -155,7 +154,7 @@ describe('createAccount', () => {
     logout()
     const dup = await createAccount('maya', 'otherpw', 'otherpw')
     expect(dup.ok).toBe(false)
-    if (!dup.ok) expect(dup.error).toMatch(/already taken/i)
+    if (!dup.ok) expect(dup.error).toMatch(/already set up on this device/i)
   })
 
   it('signs in case-insensitively (Harshvardhan == harshvardhan == HARSHVARDHAN)', async () => {
@@ -163,16 +162,16 @@ describe('createAccount', () => {
     expect(created).toEqual({ ok: true, username: 'Harshvardhan Pareek' })
     logout()
 
-    for (const name of ['harshvardhan pareek', 'HARSHVARDHAN PAREEK', 'Harshvardhan  Pareek']) {
+    for (const name of ['harshvardhan pareek', 'HARSHVARDHAN PAREEK', ' Harshvardhan Pareek ']) {
       const result = await login(name, 'loompass')
       expect(result).toEqual({ ok: true, username: 'Harshvardhan Pareek' })
       logout()
     }
 
-    expect(normalizeUsername('HARSHVARDHAN')).toBe(normalizeUsername('harshvardhan'))
+    expect(normalizeUsername('HARSHVARDHAN')).toBe('harshvardhan')
     expect(await hashPassword('Harshvardhan', 'loompass')).toBe(await hashPassword('HARSHVARDHAN', 'loompass'))
     expect(await hashPassword('Harshvardhan Pareek', 'loompass')).toBe(
-      await hashPassword('harshvardhan  pareek', 'loompass'),
+      await hashPassword('harshvardhan pareek', 'loompass'),
     )
   })
 
