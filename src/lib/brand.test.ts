@@ -87,7 +87,24 @@ describe('studio chrome', () => {
     expect(login).toContain('Finish setup on this device')
     expect(login).toContain('FINISH_SETUP_HINT')
     expect(login).toContain('beginSignIn')
+    expect(login).toContain('CLOUD_NOT_CONFIGURED')
+    expect(login).toContain('CLOUD_UNAVAILABLE')
     expect(login).not.toContain('accountRememberedElsewhere')
+    const studioAuth = read('src/lib/studioAuth.ts')
+    expect(studioAuth).toContain("cloud.status === 'unavailable'")
+    expect(studioAuth).toContain("cloud.status === 'found'")
+  })
+
+  it('activates new PWA builds without requiring clear-data every visit', () => {
+    const vite = read('vite.config.ts')
+    const main = read('src/main.tsx')
+    const pwa = read('src/pwa.ts')
+    expect(vite).toContain("registerType: 'autoUpdate'")
+    expect(vite).toContain('skipWaiting: true')
+    expect(vite).toContain('clientsClaim: true')
+    expect(main).toContain("./pwa")
+    expect(pwa).toContain('virtual:pwa-register')
+    expect(pwa).toContain('immediate: true')
   })
 
   it('labels the job identifier as Dalal name / Broker name', () => {

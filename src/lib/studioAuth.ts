@@ -11,6 +11,8 @@ import { lookupCloudAccount, upsertCloudAccount } from './cloudAccounts'
 import { accountRememberedElsewhere } from './telemetry'
 import { displayUsername } from './usernames'
 
+export { CLOUD_NOT_CONFIGURED, CLOUD_UNAVAILABLE } from './cloudAccounts'
+
 export const CLOUD_SYNC_FAILED =
   'The password is saved on this device, but the studio list did not update. Tap Retry to finish.'
 
@@ -30,10 +32,11 @@ export async function beginSignIn(username: string, password: string): Promise<S
   }
 
   const cloud = await lookupCloudAccount(username)
-  if (cloud) return { status: 'finish-setup', username: cloud.username }
+  if (cloud.status === 'found') return { status: 'finish-setup', username: cloud.username }
   if (await accountRememberedElsewhere(username)) {
     return { status: 'finish-setup', username: displayUsername(username) }
   }
+  if (cloud.status === 'unavailable') return { status: 'error', error: cloud.error }
 
   if (!displayUsername(username)) return { status: 'error', error: 'Enter a username.' }
   if (!password) return { status: 'error', error: 'Enter a password.' }
@@ -51,7 +54,7 @@ export async function finishDeviceSetup(
   }
 
   const cloud = await lookupCloudAccount(username)
-  const display = cloud?.username ?? displayUsername(username)
+  const display = cloud.status === 'found' ? cloud.username : displayUsername(username)
 
   const registered = await registerLocalPassword(display, password, confirmPassword)
   if (!registered.ok) return registered

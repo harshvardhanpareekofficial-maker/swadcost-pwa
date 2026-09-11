@@ -3,10 +3,17 @@ import { displayUsername, usernameNorm } from './usernames'
 
 export type CloudName = { username: string; usernameNorm: string }
 
-export type CloudLookup = (norm: string) => Promise<CloudName | null>
+export type CloudLookupResult =
+  | { status: 'found'; username: string; usernameNorm: string }
+  | { status: 'missing' }
+  | { status: 'unavailable'; error: string }
+
+export type CloudLookup = (norm: string) => Promise<CloudLookupResult>
 export type CloudUpsert = (username: string) => Promise<{ ok: true } | { ok: false; error: string }>
 
-const CLOUD_UNAVAILABLE = 'Studio list is unreachable. Check the connection and retry.'
+export const CLOUD_UNAVAILABLE = 'Studio list is unreachable. Check the connection and retry.'
+export const CLOUD_NOT_CONFIGURED =
+  'The studio list is not available on this build. Refresh after an update and retry — we cannot tell if this username already exists.'
 
 let lookupImpl: CloudLookup = lookupCloudAccountDefault
 let upsertImpl: CloudUpsert = upsertCloudAccountDefault
@@ -19,9 +26,9 @@ export function __setCloudAccountAdaptersForTests(adapters?: {
   upsertImpl = adapters?.upsert ?? upsertCloudAccountDefault
 }
 
-export async function lookupCloudAccount(username: string): Promise<CloudName | null> {
+export async function lookupCloudAccount(username: string): Promise<CloudLookupResult> {
   const norm = usernameNorm(username)
-  if (!norm || norm === 'guest') return null
+  if (!norm || norm === 'guest') return { status: 'missing' }
   return lookupImpl(norm)
 }
 
@@ -38,23 +45,26 @@ function looksMissingColumn(message: string | undefined, column: string): boolea
   return message.toLowerCase().includes(column.toLowerCase())
 }
 
-async function lookupCloudAccountDefault(norm: string): Promise<CloudName | null> {
+async function lookupCloudAccountDefault(norm: string): Promise<CloudLookupResult> {
   const client = getSupabase()
-  if (!client) return null
+  if (!client) return { status: 'unavailable', error: CLOUD_NOT_CONFIGURED }
   try {
     const byNorm = await client.from('swadcost_accounts').select('username').eq('username_norm', norm).limit(1)
     if (!byNorm.error && Array.isArray(byNorm.data) && byNorm.data[0] && typeof byNorm.data[0].username === 'string') {
-      return { username: byNorm.data[0].username, usernameNorm: norm }
+      return { status: 'found', username: byNorm.data[0].username, usernameNorm: norm }
     }
-    if (byNorm.error && !looksMissingColumn(byNorm.error.message, 'username_norm')) return null
+    if (byNorm.error && !looksMissingColumn(byNorm.error.message, 'username_norm')) {
+      return { status: 'unavailable', error: CLOUD_UNAVAILABLE }
+    }
     const byName = await client.from('swadcost_accounts').select('username').ilike('username', norm).limit(1)
-    const row = !byName.error && Array.isArray(byName.data) ? byName.data[0] : null
+    if (byName.error) return { status: 'unavailable', error: CLOUD_UNAVAILABLE }
+    const row = Array.isArray(byName.data) ? byName.data[0] : null
     if (row && typeof row.username === 'string' && usernameNorm(row.username) === norm) {
-      return { username: row.username, usernameNorm: norm }
+      return { status: 'found', username: row.username, usernameNorm: norm }
     }
-    return null
+    return { status: 'missing' }
   } catch {
-    return null
+    return { status: 'unavailable', error: CLOUD_UNAVAILABLE }
   }
 }
 

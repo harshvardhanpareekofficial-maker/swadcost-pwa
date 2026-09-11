@@ -4,6 +4,14 @@ services:
     runtime: static
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
+    # Vite bakes VITE_* at build time. Without the anon key, Sign in cannot
+    # check swadcost_accounts and must show a connection/config error — never
+    # “No account found”. Set these on the Render service and rebuild.
+    envVars:
+      - key: VITE_SUPABASE_URL
+        value: https://stcjwprffdsojfeogfnx.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
     routes:
       - type: rewrite
         source: /sitemap.xml
@@ -27,3 +35,15 @@ services:
       - path: /sitemap.xml
         name: Cache-Control
         value: public, max-age=300
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+      - path: /sw.js
+        name: Cache-Control
+        value: no-cache
+      - path: /registerSW.js
+        name: Cache-Control
+        value: no-cache
+      - path: /manifest.webmanifest
+        name: Cache-Control
+        value: no-cache

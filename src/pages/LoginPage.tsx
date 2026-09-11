@@ -9,6 +9,8 @@ import { WeaveGraphic } from '../components/WeaveGraphic'
 import { studioFieldClass, studioLabelClass } from '../components/studio'
 import {
   beginSignIn,
+  CLOUD_NOT_CONFIGURED,
+  CLOUD_UNAVAILABLE,
   createStudioAccount,
   FINISH_SETUP_HINT,
   finishDeviceSetup,
@@ -172,14 +174,23 @@ export function LoginPage({ onSuccess }: Props) {
     : signingIn
       ? 'Sign in to keep your cost sheets together.'
       : 'Choose a name and password. They stay on this device.'
+  const cloudBlocked = error === CLOUD_UNAVAILABLE || error === CLOUD_NOT_CONFIGURED
   const actionLabel = pendingCloud
     ? 'Retry'
     : finishing
       ? 'Finish setup'
       : signingIn
-        ? 'Sign in'
+        ? cloudBlocked
+          ? 'Retry'
+          : 'Sign in'
         : 'Create account'
-  const busyLabel = pendingCloud ? 'Retrying…' : finishing ? 'Finishing setup…' : signingIn ? 'Signing in…' : 'Creating account…'
+  const busyLabel = pendingCloud || (signingIn && cloudBlocked)
+    ? 'Retrying…'
+    : finishing
+      ? 'Finishing setup…'
+      : signingIn
+        ? 'Signing in…'
+        : 'Creating account…'
 
   return (
     <div className="studio-atmosphere flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">

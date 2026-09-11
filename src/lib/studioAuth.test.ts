@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { webcrypto } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createAccount, findAccount, isAuthenticated, loadAccounts, login, logout } from './auth'
-import { __setCloudAccountAdaptersForTests } from './cloudAccounts'
+import { createAccount, findAccount, isAuthenticated, loadAccounts, login, logout, NO_LOCAL_ACCOUNT } from './auth'
+import { __setCloudAccountAdaptersForTests, CLOUD_NOT_CONFIGURED, CLOUD_UNAVAILABLE } from './cloudAccounts'
 import {
   beginSignIn,
   CLOUD_SYNC_FAILED,
@@ -36,7 +36,9 @@ describe('beginSignIn recovery', () => {
   it('offers Finish setup after a local wipe when the cloud row is present', async () => {
     __setCloudAccountAdaptersForTests({
       lookup: async (norm) =>
-        norm === 'harshvardhan' ? { username: 'Harshvardhan', usernameNorm: 'harshvardhan' } : null,
+        norm === 'harshvardhan'
+          ? { status: 'found', username: 'Harshvardhan', usernameNorm: 'harshvardhan' }
+          : { status: 'missing' },
       upsert: async () => ({ ok: true }),
     })
 
@@ -56,11 +58,45 @@ describe('beginSignIn recovery', () => {
 
   it('does not say the account was never created when only the cloud row exists', async () => {
     __setCloudAccountAdaptersForTests({
-      lookup: async () => ({ username: 'Harshvardhan', usernameNorm: 'harshvardhan' }),
+      lookup: async () => ({ status: 'found', username: 'Harshvardhan', usernameNorm: 'harshvardhan' }),
     })
     const started = await beginSignIn('harshvardhan', 'x')
     expect(started.status).toBe('finish-setup')
     expect(started.status === 'finish-setup' && started.username).toBe('Harshvardhan')
+  })
+
+  it('does not say no account when getSupabase() is null / the studio list cannot be checked', async () => {
+    __setCloudAccountAdaptersForTests({
+      lookup: async () => ({ status: 'unavailable', error: CLOUD_NOT_CONFIGURED }),
+    })
+    const started = await beginSignIn('Harshvardhan', 'loompass')
+    expect(started).toEqual({ status: 'error', error: CLOUD_NOT_CONFIGURED })
+    expect(started.status === 'error' && started.error).not.toBe(NO_LOCAL_ACCOUNT)
+    expect(started.status === 'error' && started.error).not.toMatch(/create an account if you are new/i)
+  })
+
+  it('does not say no account when lookup errors', async () => {
+    __setCloudAccountAdaptersForTests({
+      lookup: async () => ({ status: 'unavailable', error: CLOUD_UNAVAILABLE }),
+    })
+    const started = await beginSignIn('HARSHVARDHAN', 'loompass')
+    expect(started).toEqual({ status: 'error', error: CLOUD_UNAVAILABLE })
+    expect(started.status === 'error' && started.error).not.toBe(NO_LOCAL_ACCOUNT)
+  })
+
+  it('offers Finish setup for Harshvardhan case variants when the cloud row exists', async () => {
+    __setCloudAccountAdaptersForTests({
+      lookup: async (norm) =>
+        norm === 'harshvardhan'
+          ? { status: 'found', username: 'Harshvardhan', usernameNorm: norm }
+          : { status: 'missing' },
+    })
+    for (const name of ['Harshvardhan', 'harshvardhan', 'HARSHVARDHAN', ' Harshvardhan ']) {
+      await expect(beginSignIn(name, 'x')).resolves.toEqual({
+        status: 'finish-setup',
+        username: 'Harshvardhan',
+      })
+    }
   })
 })
 
@@ -75,7 +111,9 @@ describe('createStudioAccount', () => {
   it('treats Create as Finish setup when cloud has the name and local is empty', async () => {
     __setCloudAccountAdaptersForTests({
       lookup: async (norm) =>
-        norm === 'harshvardhan' ? { username: 'Harshvardhan', usernameNorm: norm } : null,
+        norm === 'harshvardhan'
+          ? { status: 'found', username: 'Harshvardhan', usernameNorm: norm }
+          : { status: 'missing' },
       upsert: async () => ({ ok: true }),
     })
     const created = await createStudioAccount('harshvardhan', 'loompass', 'loompass')
@@ -85,7 +123,7 @@ describe('createStudioAccount', () => {
 
   it('does not claim success when the cloud upsert fails', async () => {
     __setCloudAccountAdaptersForTests({
-      lookup: async () => null,
+      lookup: async () => ({ status: 'missing' }),
       upsert: async () => ({ ok: false, error: 'down' }),
     })
     const created = await createStudioAccount('Maya', 'loompass', 'loompass')
@@ -99,7 +137,7 @@ describe('createStudioAccount', () => {
     expect(findAccount('maya')?.username).toBe('Maya')
 
     __setCloudAccountAdaptersForTests({
-      lookup: async () => null,
+      lookup: async () => ({ status: 'missing' }),
       upsert: async () => ({ ok: true }),
     })
     const retried = await retryCloudLink('MAYA')
@@ -112,7 +150,9 @@ describe('local wipe simulation', () => {
   it('keeps a post-epoch hashed account and still recovers via cloud if hashes are cleared', async () => {
     __setCloudAccountAdaptersForTests({
       lookup: async (norm) =>
-        norm === 'harshvardhan' ? { username: 'Harshvardhan', usernameNorm: norm } : null,
+        norm === 'harshvardhan'
+          ? { status: 'found', username: 'Harshvardhan', usernameNorm: norm }
+          : { status: 'missing' },
       upsert: async () => ({ ok: true }),
     })
     await createAccount('Harshvardhan', 'loompass', 'loompass')
