@@ -21,7 +21,7 @@ export const NumberField = forwardRef<HTMLInputElement, Props>(function NumberFi
     <label
       className={[
         'block min-w-0 rounded-[14px] border px-3.5 py-3 transition',
-        active ? 'border-saffron bg-paper shadow-[0_0_0_3px_rgba(232,168,56,0.22)]' : 'border-plum/12 bg-paper',
+        active ? 'border-saffron bg-paper/90 shadow-[0_2px_8px_rgba(59,31,74,0.06),0_0_0_3px_rgba(232,168,56,0.22)]' : 'border-plum/12 bg-paper/70',
       ].join(' ')}
     >
       <div className="mb-1 flex min-w-0 items-baseline justify-between gap-2">

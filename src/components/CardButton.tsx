@@ -12,10 +12,10 @@ export function CardButton({ title, description, icon, onClick }: Props) {
     <button
       type="button"
       onClick={onClick}
-      className="group flex min-h-14 w-full min-w-0 items-start gap-3.5 rounded-3xl border border-plum/10 bg-paper px-4 py-4 text-left shadow-sheet transition hover:border-plum/25 active:bg-ivory sm:gap-4 sm:px-5 sm:py-5"
+      className="studio-sheet group flex min-h-14 w-full min-w-0 items-start gap-3.5 rounded-3xl px-4 py-4 text-left transition hover:border-plum/20 active:translate-y-px sm:gap-4 sm:px-5 sm:py-5"
     >
       {icon ? (
-        <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-ivory text-plum">
+        <span className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-plum/8 text-plum">
           {icon}
         </span>
       ) : null}

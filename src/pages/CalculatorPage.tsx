@@ -30,6 +30,7 @@ type Props = {
   onChangeMulti: (m: MultiInputs) => void
   onCalculate: () => void
   onBack: () => void
+  onLogout: () => void
 }
 
 function n(v: Num): number {
@@ -46,6 +47,7 @@ export function CalculatorPage({
   onChangeMulti,
   onCalculate,
   onBack,
+  onLogout,
 }: Props) {
   const [focusIdx, setFocusIdx] = useState(0)
   const fieldRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -163,6 +165,30 @@ export function CalculatorPage({
     <Layout
       title={mode === 'single' ? 'Single Warp' : 'Multiple Warp / Weft'}
       subtitle={`${fabricName || 'Untitled'} · ${inputMethod === 'speak' ? 'Speak' : 'Type'}`}
+      onBack={onBack}
+      onLogout={onLogout}
+      stickyFooter={
+        <div className="studio-sticky z-20 shrink-0 px-[max(1rem,env(safe-area-inset-left))] py-3 pr-[max(1rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8">
+          <div className="mx-auto max-w-lg sm:max-w-xl">
+            <PrimaryButton onClick={onCalculate}>Calculate</PrimaryButton>
+            <button
+              type="button"
+              onClick={() => {
+                if (mode === 'single') onChangeSingle({ ...SAMPLE_SINGLE })
+                else
+                  onChangeMulti({
+                    ...SAMPLE_MULTI,
+                    warpYarns: SAMPLE_MULTI.warpYarns.map((y) => ({ ...y })),
+                    weftYarns: SAMPLE_MULTI.weftYarns.map((y) => ({ ...y })),
+                  })
+              }}
+              className="mt-2 inline-flex min-h-11 w-full items-center justify-center text-sm font-semibold text-plum/70 hover:text-plum"
+            >
+              Load sample
+            </button>
+          </div>
+        </div>
+      }
     >
       <Stepper step={2} />
 
@@ -201,7 +227,7 @@ export function CalculatorPage({
         </StudioSheet>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-3 pb-28">
+      <div className="grid grid-cols-1 gap-3 pb-4">
         {mode === 'single' ? (
           <>
             <SectionLabel>Warp</SectionLabel>
@@ -251,27 +277,6 @@ export function CalculatorPage({
         )}
       </div>
 
-      <div className="sticky bottom-0 z-20 -ml-[max(1rem,env(safe-area-inset-left))] -mr-[max(1rem,env(safe-area-inset-right))] mt-2 border-t border-plum/10 bg-ivory/95 px-[max(1rem,env(safe-area-inset-left))] py-3 pr-[max(1rem,env(safe-area-inset-right))] backdrop-blur-sm pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
-        <PrimaryButton onClick={onCalculate}>Calculate</PrimaryButton>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          <PrimaryButton
-            variant="secondary"
-            onClick={() => {
-              if (mode === 'single') onChangeSingle({ ...SAMPLE_SINGLE })
-              else onChangeMulti({
-                ...SAMPLE_MULTI,
-                warpYarns: SAMPLE_MULTI.warpYarns.map((y) => ({ ...y })),
-                weftYarns: SAMPLE_MULTI.weftYarns.map((y) => ({ ...y })),
-              })
-            }}
-          >
-            Load sample
-          </PrimaryButton>
-          <PrimaryButton variant="secondary" onClick={onBack}>
-            Back
-          </PrimaryButton>
-        </div>
-      </div>
     </Layout>
   )
 }

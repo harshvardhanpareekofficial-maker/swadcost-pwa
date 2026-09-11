@@ -1,7 +1,6 @@
 import { Layout } from '../components/Layout'
 import { CardButton } from '../components/CardButton'
 import { Stepper } from '../components/Stepper'
-import { PrimaryButton } from '../components/PrimaryButton'
 import { IconWarp, IconWeave } from '../components/Icons'
 import { SectionLabel } from '../components/SectionLabel'
 import { studioFieldClass, studioLabelClass } from '../components/studio'
@@ -19,7 +18,6 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
     <Layout
       title="New grey fabric costing"
       subtitle="Name the fabric, then choose single or multiple warp and weft yarns for powerloom textile costing."
-      showLogout
       onLogout={onLogout}
     >
       <Stepper step={0} />
@@ -31,6 +29,11 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
           placeholder="e.g. Grey 40s 72×68"
           className={studioFieldClass}
         />
+        {!fabricName.trim() ? (
+          <p className="mt-2 text-xs leading-relaxed text-plum/55">
+            Optional — leave blank to cost as Untitled, or name the quality before you begin.
+          </p>
+        ) : null}
       </label>
       <div className="space-y-3">
         <SectionLabel>Costing mode</SectionLabel>
@@ -46,11 +49,6 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
           icon={<IconWeave />}
           onClick={() => onChooseMode('multi')}
         />
-      </div>
-      <div className="mt-8">
-        <PrimaryButton variant="ghost" onClick={onLogout}>
-          Switch account
-        </PrimaryButton>
       </div>
     </Layout>
   )

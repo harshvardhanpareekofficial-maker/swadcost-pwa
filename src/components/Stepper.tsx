@@ -4,7 +4,7 @@ type Props = { step: 0 | 1 | 2 | 3 }
 
 export function Stepper({ step }: Props) {
   return (
-    <ol className="mb-5 flex min-w-0 items-start sm:mb-7">
+    <ol className="mb-6 flex min-w-0 items-start sm:mb-8">
       {STEPS.map((label, i) => {
         const active = i === step
         const done = i < step

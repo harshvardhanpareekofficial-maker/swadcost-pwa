@@ -99,7 +99,7 @@ export function OwnerVaultPage() {
 
   if (!unlocked) {
     return (
-      <div className="flex min-h-dvh min-w-0 flex-col overflow-x-hidden bg-ivory text-ink">
+      <div className="studio-atmosphere flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">
         <StudioBar />
         <main className="mx-auto flex w-full min-w-0 max-w-md flex-1 flex-col justify-center px-4 py-8 sm:px-5 sm:py-10">
           <StudioSheet>
@@ -139,7 +139,7 @@ export function OwnerVaultPage() {
     source === 'supabase' ? 'Live workspace' : source === 'mixed' ? 'Workspace + this device' : 'This device'
 
   return (
-    <div className="flex min-h-dvh min-w-0 flex-col overflow-x-hidden bg-ivory text-ink">
+    <div className="studio-atmosphere flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">
       <StudioBar
         trailing={
           <>

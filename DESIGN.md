@@ -72,9 +72,10 @@ fabriccost STUDIO is a mill-office on warm paper: ivory canvas, plum ink, saffro
 
 ## Colors
 
-- **Ivory** is the page. **Paper** is an elevated sheet (white-warm, not gray).
-- **Plum** owns identity and the primary action. Never a purple-to-blue gradient.
-- **Saffron** is rare: wordmark qualifier, focus, one active step, one status thread.
+- **Ivory / cream** is one continuous wash, not two hard panels. Saffron blooms from the upper left and plum from the upper right so cream, paper, and plum mix in the middle.
+- **Paper** is a warm lifted sheet that picks up the wash (cream-to-ivory gradient), never a flat white paste.
+- **Plum** owns identity, the last headline line, and the primary action. Never a purple-to-blue gradient. Never teal.
+- **Saffron** is rare: STUDIO qualifier, focus ring, current stepper disc, weave threads.
 - Neutrals are plum-tinted. No cool gray body text.
 - Errors are rose on a warm wash. Ready-status is a small green dot only.
 
@@ -87,24 +88,27 @@ fabriccost STUDIO is a mill-office on warm paper: ivory canvas, plum ink, saffro
 
 ## Layout
 
-- Login: top bar / split main / left footer. Mobile stacks brand above the card.
+- Login: StudioBar / split main on one wash / footer. Below `lg`, the sign-in card is first so User ID, Password, and Sign in sit above the fold; brand story is a collapsed “About the studio” under the card (no weave). Desktop (`lg+`) keeps the split brand + card.
+- **Back** and **Log out** live on the StudioBar, same row as the wordmark, on Home / Speak-Type / Calculator / Results.
 - App: max 36rem column, generous vertical rhythm, proximity over extra wrappers.
-- One primary CTA per view. Secondary actions are quieter text or outline sheets.
+- One primary CTA per view. Calculator keeps Calculate sticky at the thumb. Secondary actions are quieter text.
 
 ## Elevation & Depth
 
-- One lifted sheet: white-warm card, offset shadow `0 18px 40px rgba(26,20,35,0.10)`.
-- No nested cards. No glassmorphism. No halo-only shadows.
+- One lifted sheet: warm paper with a layered offset shadow (inset highlight + near + far), never a halo-only drop.
+- Weave sits in the wash with faded edges — not a boxed sticker.
+- No nested cards. No glassmorphism.
 
 ## Shapes
 
 - Fields 14px radius. Sheets 24px. Pills only for the stepper disc.
-- Weave graphic is orthogonal bars (warp/weft), never a stock hero illustration.
+- Weave graphic is a true warp/weft basket, never a stock hero illustration.
 
 ## Components
 
-- **Primary button:** full-width plum, ivory type, trailing arrow on auth only.
-- **Field:** labeled, paper fill, plum border at 15% opacity; focus = saffron ring.
+- **StudioBar:** weave mark + stacked `fabriccost` / `STUDIO`, then Back, Log out, ready dot.
+- **Primary button:** full-width plum, ivory type, trailing arrow on auth only. Touch ≥44px.
+- **Field:** labeled, paper fill, plum border; focus = saffron ring.
 - **Choice row:** paper sheet, drawn SVG mark, title + one-line help. Not icon-tile cards.
 - **Stepper:** four named stages; saffron disc on the current step.
 
