@@ -60,6 +60,8 @@ function browserSession(): Storage | undefined {
 export const AUTH_ACCOUNTS_KEY = 'fabriccost.accounts'
 export const AUTH_SESSION_KEY = 'fabriccost.auth_session'
 export const AUTH_USER_KEY = 'fabriccost.auth_user'
+/** Last studio handle this browser finished setup for. Survives logout; Switch account clears it. */
+export const DEVICE_BIND_KEY = 'fabriccost.device_bind'
 export const ACCOUNT_META_KEY = 'fabriccost.account_meta'
 export const CALC_EVENTS_KEY = 'fabriccost.calc_events'
 export const OWNER_SESSION_KEY = 'fabriccost.owner_ok'

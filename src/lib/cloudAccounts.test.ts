@@ -68,6 +68,30 @@ describe('lookupCloudAccount default', () => {
     })
   })
 
+  it('upserts the same username_norm row (onConflict), never a second person', async () => {
+    const calls: { payload: unknown; options: unknown }[] = []
+    vi.doMock('./supabase', () => ({
+      getSupabase: () => ({
+        from: () => ({
+          upsert: async (payload: unknown, options: unknown) => {
+            calls.push({ payload, options })
+            return { data: null, error: null }
+          },
+        }),
+      }),
+    }))
+    const { upsertCloudAccount } = await import('./cloudAccounts')
+    await expect(upsertCloudAccount('Harshvardhan')).resolves.toEqual({ ok: true })
+    await expect(upsertCloudAccount('harshvardhan')).resolves.toEqual({ ok: true })
+    expect(calls).toHaveLength(2)
+    expect(calls[0]?.options).toEqual({ onConflict: 'username_norm' })
+    expect(calls[1]?.options).toEqual({ onConflict: 'username_norm' })
+    expect(calls.map((call) => call.payload)).toEqual([
+      expect.objectContaining({ username: 'Harshvardhan' }),
+      expect.objectContaining({ username: 'harshvardhan' }),
+    ])
+  })
+
   it('returns missing only after a successful empty lookup', async () => {
     vi.doMock('./supabase', () => ({
       getSupabase: () => ({

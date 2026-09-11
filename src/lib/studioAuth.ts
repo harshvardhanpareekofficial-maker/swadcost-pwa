@@ -1,9 +1,13 @@
 import {
+  boundUsername,
+  deviceBoundBlock,
+  deviceBoundError,
   establishSession,
   findAccount,
   login,
   NO_LOCAL_ACCOUNT,
   registerLocalPassword,
+  switchAccount,
   USERNAME_TAKEN,
   type AuthResult,
 } from './auth'
@@ -25,6 +29,9 @@ export type SignInStart =
   | { status: 'error'; error: string }
 
 export async function beginSignIn(username: string, password: string): Promise<SignInStart> {
+  const bound = deviceBoundBlock(username)
+  if (bound) return { status: 'error', error: bound }
+
   if (findAccount(username)) {
     const result = await login(username, password)
     if (result.ok) return { status: 'ok', username: result.username }
@@ -48,6 +55,9 @@ export async function finishDeviceSetup(
   password: string,
   confirmPassword: string,
 ): Promise<AuthResult> {
+  const blocked = deviceBoundError(username)
+  if (blocked) return blocked
+
   const existing = findAccount(username)
   if (existing) {
     return { ok: false, error: USERNAME_TAKEN, code: 'TAKEN', username: existing.username }
@@ -79,11 +89,21 @@ export async function createStudioAccount(
   password: string,
   confirmPassword: string,
 ): Promise<AuthResult> {
+  const blocked = deviceBoundError(username)
+  if (blocked) return blocked
+
   const existing = findAccount(username)
   if (existing) {
     return { ok: false, error: USERNAME_TAKEN, code: 'TAKEN', username: existing.username }
   }
   return finishDeviceSetup(username, password, confirmPassword)
+}
+
+/** Clears local bind + local hash only. No-op unless the user confirmed. Cloud rows stay. */
+export function switchStudioAccount(confirmed: boolean): { switched: boolean; bound: string | null } {
+  if (!confirmed) return { switched: false, bound: boundUsername() }
+  switchAccount()
+  return { switched: true, bound: null }
 }
 
 export async function retryCloudLink(username: string): Promise<AuthResult> {

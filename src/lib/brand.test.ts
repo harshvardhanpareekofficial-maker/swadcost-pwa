@@ -58,6 +58,10 @@ describe('studio chrome', () => {
     expect(results).toContain('onBack={onBackEdit}')
     expect(results).toContain('onLogout={onLogout}')
     expect(home).not.toContain('Switch account')
+    expect(bar).not.toContain('Switch account')
+    expect(login).toContain('Switch account')
+    expect(login).toContain('switchStudioAccount')
+    expect(login).toContain('boundUsername')
   })
 
   it('does not print SwadCost in the visitor UI', () => {
@@ -93,6 +97,8 @@ describe('studio chrome', () => {
     const studioAuth = read('src/lib/studioAuth.ts')
     expect(studioAuth).toContain("cloud.status === 'unavailable'")
     expect(studioAuth).toContain("cloud.status === 'found'")
+    expect(studioAuth).toContain('deviceBoundBlock')
+    expect(studioAuth).toContain('switchStudioAccount')
   })
 
   it('activates new PWA builds without requiring clear-data every visit', () => {

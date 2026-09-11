@@ -1,7 +1,16 @@
 // @vitest-environment jsdom
 import { webcrypto } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createAccount, findAccount, isAuthenticated, loadAccounts, login, logout, NO_LOCAL_ACCOUNT } from './auth'
+import {
+  boundUsername,
+  createAccount,
+  findAccount,
+  isAuthenticated,
+  loadAccounts,
+  login,
+  logout,
+  NO_LOCAL_ACCOUNT,
+} from './auth'
 import { __setCloudAccountAdaptersForTests, CLOUD_NOT_CONFIGURED, CLOUD_UNAVAILABLE } from './cloudAccounts'
 import {
   beginSignIn,
@@ -9,6 +18,7 @@ import {
   createStudioAccount,
   finishDeviceSetup,
   retryCloudLink,
+  switchStudioAccount,
 } from './studioAuth'
 import { usernameNorm } from './usernames'
 
@@ -143,6 +153,114 @@ describe('createStudioAccount', () => {
     const retried = await retryCloudLink('MAYA')
     expect(retried).toEqual({ ok: true, username: 'Maya' })
     expect(isAuthenticated()).toBe(true)
+  })
+})
+
+describe('device bind + switch', () => {
+  function cloudHarshvardhan() {
+    const upserts: string[] = []
+    __setCloudAccountAdaptersForTests({
+      lookup: async (norm) =>
+        norm === 'harshvardhan'
+          ? { status: 'found', username: 'Harshvardhan', usernameNorm: norm }
+          : { status: 'missing' },
+      upsert: async (username) => {
+        upserts.push(username)
+        return { ok: true }
+      },
+    })
+    return upserts
+  }
+
+  it('binds after Sign in, Finish setup, and Create', async () => {
+    const upserts = cloudHarshvardhan()
+    const created = await createStudioAccount('Harshvardhan', 'loompass', 'loompass')
+    expect(created).toEqual({ ok: true, username: 'Harshvardhan' })
+    expect(boundUsername()).toBe('Harshvardhan')
+    expect(localStorage.getItem('fabriccost.device_bind')).toBe('Harshvardhan')
+    expect(upserts).toEqual(['Harshvardhan'])
+
+    logout()
+    expect(boundUsername()).toBe('Harshvardhan')
+    const started = await beginSignIn('HARSHVARDHAN', 'loompass')
+    expect(started).toEqual({ status: 'ok', username: 'Harshvardhan' })
+    expect(boundUsername()).toBe('Harshvardhan')
+
+    switchStudioAccount(true)
+    expect(boundUsername()).toBeNull()
+
+    const recovered = await beginSignIn('harshvardhan', 'x')
+    expect(recovered).toEqual({ status: 'finish-setup', username: 'Harshvardhan' })
+    const finished = await finishDeviceSetup('HARSHVARDHAN', 'newpass', 'newpass')
+    expect(finished).toEqual({ ok: true, username: 'Harshvardhan' })
+    expect(boundUsername()).toBe('Harshvardhan')
+    expect(upserts).toEqual(['Harshvardhan', 'Harshvardhan'])
+  })
+
+  it('blocks Create / Sign-in for a different username and does not upsert a second cloud person', async () => {
+    const upserts = cloudHarshvardhan()
+    await createStudioAccount('Harshvardhan', 'loompass', 'loompass')
+    logout()
+
+    const created = await createStudioAccount('Maya', 'otherpw', 'otherpw')
+    expect(created).toMatchObject({ ok: false, code: 'BOUND', username: 'Harshvardhan' })
+    expect(created.ok === false && created.error).toMatch(/set up for Harshvardhan/)
+    expect(created.ok === false && created.error).toMatch(/Switch account/)
+    expect(findAccount('Maya')).toBeUndefined()
+    expect(loadAccounts().map((row) => row.username)).toEqual(['Harshvardhan'])
+
+    const started = await beginSignIn('Maya', 'otherpw')
+    expect(started.status).toBe('error')
+    expect(started.status === 'error' && started.error).toMatch(/set up for Harshvardhan/)
+
+    const finished = await finishDeviceSetup('Maya', 'otherpw', 'otherpw')
+    expect(finished).toMatchObject({ ok: false, code: 'BOUND' })
+    expect(upserts).toEqual(['Harshvardhan'])
+  })
+
+  it('Create of an existing cloud username_norm Finish-setups the same row, never a case-variant duplicate', async () => {
+    const upserts = cloudHarshvardhan()
+    const created = await createStudioAccount('harshvardhan', 'loompass', 'loompass')
+    expect(created).toEqual({ ok: true, username: 'Harshvardhan' })
+    expect(findAccount('HARSHVARDHAN')?.username).toBe('Harshvardhan')
+    expect(upserts).toEqual(['Harshvardhan'])
+  })
+
+  it('Switch account is a no-op without confirm and clears bind + hash only after confirm', async () => {
+    cloudHarshvardhan()
+    await createStudioAccount('Harshvardhan', 'loompass', 'loompass')
+    logout()
+
+    const declined = switchStudioAccount(false)
+    expect(declined).toEqual({ switched: false, bound: 'Harshvardhan' })
+    expect(boundUsername()).toBe('Harshvardhan')
+    expect(findAccount('Harshvardhan')?.username).toBe('Harshvardhan')
+
+    const accepted = switchStudioAccount(true)
+    expect(accepted).toEqual({ switched: true, bound: null })
+    expect(boundUsername()).toBeNull()
+    expect(loadAccounts()).toEqual([])
+    expect(localStorage.getItem('fabriccost.device_bind')).toBeNull()
+
+    const created = await createStudioAccount('Maya', 'loompass', 'loompass')
+    expect(created).toEqual({ ok: true, username: 'Maya' })
+    expect(boundUsername()).toBe('Maya')
+  })
+
+  it('blocks a second username when only the bind stamp remains (local hash wiped)', async () => {
+    const upserts = cloudHarshvardhan()
+    await createStudioAccount('Harshvardhan', 'loompass', 'loompass')
+    logout()
+    localStorage.removeItem('fabriccost.accounts')
+    expect(loadAccounts()).toEqual([])
+    expect(boundUsername()).toBe('Harshvardhan')
+
+    const created = await createStudioAccount('Maya', 'loompass', 'loompass')
+    expect(created).toMatchObject({ ok: false, code: 'BOUND' })
+    expect(upserts).toEqual(['Harshvardhan'])
+
+    const recovered = await beginSignIn('Harshvardhan', 'x')
+    expect(recovered).toEqual({ status: 'finish-setup', username: 'Harshvardhan' })
   })
 })
 

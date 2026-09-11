@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { MIN_PASSWORD_LENGTH } from '../lib/auth'
+import { boundUsername, MIN_PASSWORD_LENGTH } from '../lib/auth'
 import { IconArrow } from '../components/Icons'
 import { CheckList } from '../components/CheckList'
 import { Footer, MakerNote } from '../components/Footer'
@@ -15,6 +15,7 @@ import {
   FINISH_SETUP_HINT,
   finishDeviceSetup,
   retryCloudLink,
+  switchStudioAccount,
 } from '../lib/studioAuth'
 import { markAccountActive } from '../lib/telemetry'
 
@@ -90,6 +91,7 @@ export function LoginPage({ onSuccess }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [pendingCloud, setPendingCloud] = useState<string | null>(null)
+  const [bound, setBound] = useState<string | null>(() => boundUsername())
 
   function switchMode(next: Mode) {
     setMode(next)
@@ -106,9 +108,27 @@ export function LoginPage({ onSuccess }: Props) {
     }
   }
 
+  function confirmSwitchAccount() {
+    const name = boundUsername()
+    if (!name) return
+    const confirmed = window.confirm(
+      `This device is set up for ${name}. Switch account clears the saved password and device bind on this browser only — not the cloud. Continue?`,
+    )
+    const result = switchStudioAccount(confirmed)
+    if (!result.switched) return
+    setBound(null)
+    setUsername('')
+    setPassword('')
+    setConfirmPassword('')
+    setError(null)
+    setPendingCloud(null)
+    setMode('signin')
+  }
+
   async function completeOk(name: string) {
     await markAccountActive(name)
     setPendingCloud(null)
+    setBound(name)
     onSuccess()
   }
 
@@ -230,6 +250,23 @@ export function LoginPage({ onSuccess }: Props) {
             <p className="mt-1 text-sm leading-snug text-plum/70 lg:mt-2 lg:leading-relaxed">
               {blurb}
             </p>
+
+            {bound ? (
+              <div className="mt-3 rounded-[14px] border border-plum/15 bg-ivory/80 px-3.5 py-2.5 text-sm leading-relaxed text-plum">
+                <p>
+                  This device is set up for <span className="font-semibold">{bound}</span>. Sign in as{' '}
+                  {bound}, or{' '}
+                  <button
+                    type="button"
+                    onClick={confirmSwitchAccount}
+                    className="min-h-11 font-semibold text-plum underline-offset-4 hover:underline"
+                  >
+                    Switch account
+                  </button>
+                  .
+                </p>
+              </div>
+            ) : null}
 
             <form onSubmit={submit} className="mt-4 space-y-3 lg:mt-6 lg:space-y-4">
               <label className="block">

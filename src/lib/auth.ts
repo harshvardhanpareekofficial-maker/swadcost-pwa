@@ -3,6 +3,7 @@ import {
   AUTH_ACCOUNTS_KEY,
   AUTH_SESSION_KEY,
   AUTH_USER_KEY,
+  DEVICE_BIND_KEY,
   migrateAuthStorage,
   safeGet,
   safeRemove,
@@ -43,7 +44,7 @@ export type Account = {
 
 export type AuthResult =
   | { ok: true; username: string }
-  | { ok: false; error: string; code?: 'NO_LOCAL' | 'CLOUD_SYNC' | 'TAKEN' | 'INVALID'; username?: string }
+  | { ok: false; error: string; code?: 'NO_LOCAL' | 'CLOUD_SYNC' | 'TAKEN' | 'INVALID' | 'BOUND'; username?: string }
 
 function readStorage(key: string): string | null {
   migrateAuthStorage()
@@ -138,6 +139,53 @@ export async function hashPassword(username: string, password: string): Promise<
 export function establishSession(username: string): void {
   writeStorage(AUTH_SESSION_KEY, '1')
   writeStorage(AUTH_USER_KEY, username)
+  stampDeviceBind(username)
+}
+
+export function deviceBoundMessage(bound: string): string {
+  return `This device is set up for ${bound}. Sign in as ${bound}, or use Switch account.`
+}
+
+/** Prefer the local hashed account; fall back to the bind stamp after logout or a hash wipe. */
+export function boundUsername(): string | null {
+  const accounts = loadAccounts()
+  if (accounts[0]?.username) return accounts[0].username
+  const stamp = readStorage(DEVICE_BIND_KEY)
+  const name = stamp ? displayUsername(stamp) : ''
+  return name || null
+}
+
+export function stampDeviceBind(username: string): void {
+  const name = displayUsername(username)
+  if (!name || usernameNorm(name) === 'guest') return
+  writeStorage(DEVICE_BIND_KEY, name)
+}
+
+/** Block Create / Sign-in / Finish setup for a different username than this device is bound to. */
+export function deviceBoundBlock(username: string): string | null {
+  if (findAccount(username)) return null
+  const bound = boundUsername()
+  if (!bound) return null
+  if (usernameNorm(bound) === usernameNorm(username)) return null
+  return deviceBoundMessage(bound)
+}
+
+export function deviceBoundError(username: string): Extract<AuthResult, { ok: false }> | null {
+  const error = deviceBoundBlock(username)
+  if (!error) return null
+  return { ok: false, error, code: 'BOUND', username: boundUsername() ?? undefined }
+}
+
+/** Clears local hashed accounts + bind stamp. Does not touch the cloud. */
+export function clearLocalDevice(): void {
+  persistAccounts([])
+  logout()
+  removeStorage(DEVICE_BIND_KEY)
+}
+
+/** Switch account — same as clearLocalDevice. Call only after the user confirms. */
+export function switchAccount(): void {
+  clearLocalDevice()
 }
 
 export function isAuthenticated(): boolean {
@@ -283,5 +331,6 @@ export async function registerLocalPassword(
   if (!persistAccounts(accounts) || !findAccount(name)) {
     return loginFailure(ACCOUNT_SAVE_FAILED)
   }
+  stampDeviceBind(name)
   return { ok: true, username: name }
 }
