@@ -100,7 +100,6 @@ describe('studio chrome', () => {
     expect(studioAuth).toContain('deviceBoundBlock')
     expect(studioAuth).toContain('switchStudioAccount')
     expect(studioAuth).toContain('USERNAME_TAKEN_CLOUD')
-    expect(studioAuth).toContain('Name taken — pick another')
     expect(studioAuth).toContain('This username is already taken')
     expect(login).toContain('rahul_loom / rahul2')
   })

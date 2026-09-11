@@ -119,7 +119,7 @@ describe('createStudioAccount', () => {
     expect(dup).toMatchObject({ ok: false, code: 'TAKEN' })
   })
 
-  it('rejects Create when the cloud already has the username_norm — Sign-in is the Finish setup path', async () => {
+  it('Create of a cloud username_norm shows “This username is already taken”; Sign-in still Finish-setups', async () => {
     const upserts: string[] = []
     __setCloudAccountAdaptersForTests({
       lookup: async (norm) =>
@@ -138,8 +138,8 @@ describe('createStudioAccount', () => {
       code: 'TAKEN',
       username: 'Harshvardhan',
     })
-    expect(created.ok === false && created.error).toMatch(/name taken/i)
-    expect(created.ok === false && created.error).toMatch(/already taken/i)
+    expect(created.ok === false && created.error).toContain('This username is already taken')
+    expect(created.ok === false && created.error).toMatch(/pick another/i)
     expect(created.ok === false && created.error).toMatch(/mill initials/i)
     expect(findAccount('harshvardhan')).toBeUndefined()
     expect(upserts).toEqual([])
