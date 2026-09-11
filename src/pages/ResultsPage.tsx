@@ -70,40 +70,44 @@ export function ResultsPage({
   }
 
   return (
-    <Layout eyebrow="Final account" title="Cost breakdown" subtitle={fabricName || 'Untitled fabric'}>
+    <Layout title="Cost breakdown" subtitle={fabricName || 'Untitled fabric'}>
       <Stepper step={3} />
 
-      <StudioSheet className="mb-8">
-        <p className="font-display text-4xl font-semibold tabular-nums tracking-[-0.03em] text-ink">
+      <StudioSheet className="mb-6 overflow-hidden sm:mb-8">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/55">Final cost</p>
+        <p className="font-display mt-1 break-words text-[2rem] font-semibold tabular-nums tracking-[-0.03em] text-ink sm:text-4xl">
           {formatInr(result.grandTotal)}
         </p>
-        <p className="mt-2 text-sm text-plum/70">
-          Final cost · {formatInr(result.costPerUnitLength)} per length unit
-        </p>
+        {result.length > 0 ? (
+          <p className="mt-2 text-xs text-plum/55">
+            {formatInr(result.costPerUnitLength)} ÷ L2L (derived, not on the mill sheet)
+          </p>
+        ) : null}
       </StudioSheet>
 
       <section className="mb-6 space-y-2">
         <SectionLabel>Summary</SectionLabel>
         <Row label="Total ends (Reed × RS)" value={String(result.totalEnds)} />
-        <Row label="Warp yarn cost (raw)" value={formatInr(result.warpCostRaw)} />
-        <Row label="Weft yarn cost (raw)" value={formatInr(result.weftCostRaw)} />
-        <Row label="Yarns after wastage" value={formatInr(result.yarnCostAfterWastage)} />
+        <Row label="Warp weight" value={String(result.warpWeight)} />
+        <Row label="Weft weight (base)" value={String(result.weftWeightBase)} />
+        <Row label="Weft weight (after wastage)" value={String(result.weftWeight)} />
+        <Row label="Warp cost" value={formatInr(result.warpCostRaw)} />
+        <Row label="Weft cost" value={formatInr(result.weftCostRaw)} />
         <Row label="Sizing" value={formatInr(result.sizingCost)} />
-        <Row label="Majuri" value={formatInr(result.majuri)} />
+        <Row label="Job (pick × pick rate)" value={formatInr(result.jobCost)} />
         <Row label="Warping" value={formatInr(result.warping)} />
-        <Row label="K constant" value={result.k.toFixed(4)} muted />
       </section>
 
       <section className="mb-6 space-y-2">
         <SectionLabel>Warp yarns</SectionLabel>
         {result.warpLines.map((l) => (
           <div key={l.label} className="border-t border-plum/10 py-2 text-sm">
-            <div className="flex justify-between gap-2">
-              <span className="text-ink">{l.label}</span>
-              <span className="tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
+            <div className="flex min-w-0 justify-between gap-2">
+              <span className="min-w-0 break-words text-ink">{l.label}</span>
+              <span className="shrink-0 tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
             </div>
             <p className="text-xs text-plum/60">
-              {l.pct}% · Ne {l.count} · rate {l.rate}
+              {l.pct}% · Ne {l.count} · wt {l.weight} · rate {l.rate}
               {l.sizingCost != null ? ` · sizing ${formatInr(l.sizingCost)}` : ''}
             </p>
           </div>
@@ -114,12 +118,12 @@ export function ResultsPage({
         <SectionLabel>Weft yarns</SectionLabel>
         {result.weftLines.map((l) => (
           <div key={l.label} className="border-t border-plum/10 py-2 text-sm">
-            <div className="flex justify-between gap-2">
-              <span className="text-ink">{l.label}</span>
-              <span className="tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
+            <div className="flex min-w-0 justify-between gap-2">
+              <span className="min-w-0 break-words text-ink">{l.label}</span>
+              <span className="shrink-0 tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
             </div>
             <p className="text-xs text-plum/60">
-              {l.pct}% · Ne {l.count} · rate {l.rate}
+              {l.pct}% · Ne {l.count} · wt {l.weight} · rate {l.rate}
             </p>
           </div>
         ))}
@@ -127,11 +131,11 @@ export function ResultsPage({
 
       <section className="mb-6 space-y-2">
         <SectionLabel>Markups on final</SectionLabel>
-        <div className="grid grid-cols-3 gap-x-3 gap-y-3">
+        <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3">
           {result.markups.map((m) => (
-            <div key={m.pct} className="text-center">
+            <div key={m.pct} className="min-w-0 text-center">
               <p className="text-[11px] text-plum/55">+{m.pct}%</p>
-              <p className="text-xs font-semibold tabular-nums text-ink">{formatInr(m.amount)}</p>
+              <p className="break-words text-xs font-semibold tabular-nums text-ink">{formatInr(m.amount)}</p>
             </div>
           ))}
         </div>
@@ -141,7 +145,7 @@ export function ResultsPage({
         <section className="mb-5 space-y-3">
           <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink">Edit inputs & recalculate</h3>
           {mode === 'single' ? (
-            <>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {(
                 [
                   ['reed', 'Reed', single.reed],
@@ -155,7 +159,7 @@ export function ResultsPage({
                   ['weftCount', 'Weft Count', single.weftCount],
                   ['weftRate', 'Weft Rate', single.weftRate],
                   ['wastagePct', 'Wastage %', single.wastagePct],
-                  ['majuri', 'Majuri', single.majuri],
+                  ['pickRate', 'Pick rate / Job rate', single.pickRate],
                   ['warping', 'Warping', single.warping],
                 ] as const
               ).map(([key, label, val]) => (
@@ -168,7 +172,7 @@ export function ResultsPage({
                   }
                 />
               ))}
-            </>
+            </div>
           ) : (
             <p className="text-sm text-plum/70">
               For multi-yarn edits, go back to the fields step for full yarn % / count / rate controls, or tweak
@@ -176,7 +180,7 @@ export function ResultsPage({
             </p>
           )}
           {mode === 'multi' ? (
-            <>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {(
                 [
                   ['reed', 'Reed', multi.reed],
@@ -185,7 +189,7 @@ export function ResultsPage({
                   ['pick', 'Pick', multi.pick],
                   ['weftReedspace', 'Weft RS', multi.weftReedspace],
                   ['wastagePct', 'Wastage %', multi.wastagePct],
-                  ['majuri', 'Majuri', multi.majuri],
+                  ['pickRate', 'Pick rate / Job rate', multi.pickRate],
                   ['warping', 'Warping', multi.warping],
                 ] as const
               ).map(([key, label, val]) => (
@@ -198,7 +202,7 @@ export function ResultsPage({
                   }
                 />
               ))}
-            </>
+            </div>
           ) : null}
           {error ? (
             <p className="rounded-[14px] border border-rose/30 bg-rose/10 px-3.5 py-2.5 text-sm text-rose">{error}</p>
@@ -227,9 +231,11 @@ export function ResultsPage({
 
 function Row({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
   return (
-    <div className="flex items-baseline justify-between gap-3 text-sm">
-      <span className={muted ? 'text-plum/50' : 'text-plum/70'}>{label}</span>
-      <span className={`tabular-nums ${muted ? 'text-plum/50' : 'font-semibold text-ink'}`}>{value}</span>
+    <div className="flex min-w-0 items-baseline justify-between gap-3 text-sm">
+      <span className={`min-w-0 break-words ${muted ? 'text-plum/50' : 'text-plum/70'}`}>{label}</span>
+      <span className={`max-w-[48%] shrink-0 text-right tabular-nums ${muted ? 'text-plum/50' : 'font-semibold text-ink'}`}>
+        {value}
+      </span>
     </div>
   )
 }

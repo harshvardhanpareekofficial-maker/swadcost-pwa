@@ -209,21 +209,21 @@ export function recordSuccessfulCalc(args: {
           weftCount: args.single.weftCount,
           weftReedspace: args.single.weftReedspace,
           wastagePct: args.single.wastagePct,
-          majuri: args.single.majuri,
+          pickRate: args.single.pickRate,
           warping: args.single.warping,
         }
       : {
           l2l: args.multi.l2l,
           weftReedspace: args.multi.weftReedspace,
           wastagePct: args.multi.wastagePct,
-          majuri: args.multi.majuri,
+          pickRate: args.multi.pickRate,
           warping: args.multi.warping,
           warpYarns: args.multi.warpYarns.map((y) => ({ pct: y.pct, count: y.count })),
           weftYarns: args.multi.weftYarns.map((y) => ({ pct: y.pct, count: y.count })),
         }
 
   void recordCalc({
-    username: args.username?.trim() || 'Guest',
+    username: args.username?.trim() || 'unknown',
     fabricName: args.fabricName.trim() || 'Untitled fabric',
     mode: args.mode,
     reed,
@@ -250,7 +250,7 @@ function mapRemoteCalc(row: Record<string, unknown>): CalcEvent | null {
   if (!mode) return null
   return {
     id: typeof row.id === 'string' ? row.id : newId(),
-    username: typeof row.username === 'string' ? row.username : 'Guest',
+    username: typeof row.username === 'string' ? row.username : 'unknown',
     fabricName: typeof row.fabric_name === 'string' ? row.fabric_name : '',
     mode,
     reed: Number(row.reed) || 0,

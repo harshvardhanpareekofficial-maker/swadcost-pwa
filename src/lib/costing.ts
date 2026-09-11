@@ -1,35 +1,48 @@
 /**
- * SwadCost-calibrated Indian powerloom grey fabric costing.
+ * Owner mill-sheet grey fabric costing (handwritten notebook).
  *
- * Empirically fitted to SwadCost (pareektech) ASP.NET oracles — see
- * /workspace/fabric-cost-notes/FORMULA_FIT.md and FORMULAS.md.
+ * Replaces the old empirically fitted SwadCost ASP.NET K constants
+ * (K_SINGLE ≈ 71.59 / K_MULTI ≈ 82.12 targeting Final Cost 1698.77 / 1482.17).
+ * Those oracles did not match the mill measures; this file follows the sheet.
  *
- * Units (UI labels):
- * - Reed: dents/inch → ends = Reed × Warp Reedspace (inches)
- * - Reedspace: inches
- * - L2L: length (same unit as SwadCost demo; treat as metres in UI copy)
- * - Pick: picks per inch
- * - Count: English cotton Ne
- * - Rate / Sizing: ₹ (cost scale of original app)
- * - Majuri / Warping: flat ₹
+ * Spelling on the sheet: Read = Reed, Picke = Pick/PPI, Weft = weft count.
  *
- * Single constant K_SINGLE ≈ 71.59056591483743 hits Final Cost 1698.77
- * Multi constant K_MULTI ≈ 82.12366778293267 hits Final Cost 1482.17
- * (yarn1-only same inputs — multi path uses a different scale in the source app)
+ * 1) Warp weight =
+ *      (ReedSpace × Reed × 120) / (1825 × WarpCount × L2L)
+ *    Worked example: ReedSpace=65", Reed=120, WarpCount=61, L2L=102
+ *      (65 × 120 × 120) / (1825 × 61 × 102) = 0.082429… → 0.082
  *
- * Model (yarn costs × wastage; sizing without wastage):
- *   ends = Reed * WarpRS
- *   warpCost = ends * L2L * WarpRate / (WarpCount * K)
- *   weftCost = Pick * WeftRS * L2L * WeftRate / (WeftCount * K)
- *   sizing   = ends * L2L * Sizing / (WarpCount * K)
- *   total    = (warpCost + weftCost) * (1 + Wastage/100) + sizing + Majuri + Warping
+ * 2) Weft weight:
+ *      base = (ReedSpace × Pick) / (1693.33 × WeftCount)
+ *      weftWeight = base × (1 + wastagePct/100)
+ *    Wastage is “some % of” that weft base only (arrow on the sheet).
+ *    The weft line has no L2L — do not invent one.
+ *
+ * 3) Sizing = Warp weight × Sizing Rate
+ *
+ * 4) Job rate = Pick × Pick rate  (maps to the old flat majuri field)
+ *
+ * Cost assembly (matches mill listing of weights × rates; see FORMULA_CROSSCHECK.md):
+ *   warpCost    = warpWeight × warpRate
+ *   weftCost    = weftWeight × weftRate
+ *   sizingCost  = warpWeight × sizingRate
+ *   jobCost     = pick × pickRate
+ *   grandTotal  = warpCost + weftCost + sizingCost + jobCost + warping
+ *
+ * Further assumptions (not on the sheet — labeled):
+ * - One “Read Space” on the notebook; the UI already has warp + weft reedspace,
+ *   so warp reedspace feeds warp weight and weft reedspace feeds weft weight.
+ * - Warping stays an optional flat ₹ add-on because it is still in the UI.
+ * - Multi-yarn: each slot takes (pct/100) of the same weight formula using that
+ *   slot’s count / rate / sizing. Job and warping are not split by yarn %.
+ * - Markup table 5–16% remains on grandTotal (existing UI; not on the sheet).
+ * - costPerUnitLength = grandTotal / L2L is a derived display only. L2L already
+ *   divides warp weight, so this is not a second mill formula.
  */
 
-export const K_SINGLE = 71.59056591483743
-export const K_MULTI = 82.12366778293267
-
-/** @deprecated historical cotton-Ne kg constant — not used for SwadCost fit */
-export const COTTON_NE_KG = 1693.6
+export const WARP_NUMERATOR = 120
+export const WARP_DENOMINATOR = 1825
+export const WEFT_DENOMINATOR = 1693.33
 
 export const MARKUP_PCTS = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] as const
 
@@ -46,7 +59,8 @@ export type SingleInputs = {
   weftCount: number
   weftRate: number
   wastagePct: number
-  majuri: number
+  /** ₹ per pick — jobCost = pick × pickRate (notebook “Job rate”). */
+  pickRate: number
   warping: number
 }
 
@@ -67,7 +81,7 @@ export type MultiInputs = {
   weftReedspace: number
   wastagePct: number
   weftYarns: YarnSlot[]
-  majuri: number
+  pickRate: number
   warping: number
 }
 
@@ -75,7 +89,7 @@ export type YarnLine = {
   label: string
   pct: number
   count: number
-  /** Pre-wastage yarn cost share (₹) */
+  weight: number
   yarnCostRaw: number
   rate: number
   sizingRate?: number
@@ -84,14 +98,15 @@ export type YarnLine = {
 
 export type CostBreakdown = {
   mode: 'single' | 'multi'
-  k: number
   totalEnds: number
   length: number
+  warpWeight: number
+  weftWeightBase: number
+  weftWeight: number
   warpCostRaw: number
   weftCostRaw: number
-  yarnCostAfterWastage: number
   sizingCost: number
-  majuri: number
+  jobCost: number
   warping: number
   grandTotal: number
   costPerUnitLength: number
@@ -117,13 +132,21 @@ export function totalEnds(reed: number, reedspace: number): number {
   return reed * reedspace
 }
 
-export function yarnCost(factor: number, length: number, rate: number, count: number, k: number): number {
-  if (count <= 0 || k <= 0) return 0
-  return (factor * length * rate) / (count * k)
+/** (ReedSpace × Reed × 120) / (1825 × WarpCount × L2L) */
+export function warpWeight(reedSpace: number, reed: number, warpCount: number, l2l: number): number {
+  if (warpCount <= 0 || l2l <= 0) return 0
+  return (reedSpace * reed * WARP_NUMERATOR) / (WARP_DENOMINATOR * warpCount * l2l)
 }
 
-export function applyWastageToYarnCosts(warpCost: number, weftCost: number, wastagePct: number): number {
-  return (warpCost + weftCost) * (1 + Math.max(0, wastagePct) / 100)
+/** (ReedSpace × Pick) / (1693.33 × WeftCount) — wastage not applied. */
+export function weftWeightBase(reedSpace: number, pick: number, weftCount: number): number {
+  if (weftCount <= 0) return 0
+  return (reedSpace * pick) / (WEFT_DENOMINATOR * weftCount)
+}
+
+/** weftWeight = base × (1 + wastagePct/100) */
+export function applyWastagePct(base: number, wastagePct: number): number {
+  return base * (1 + Math.max(0, wastagePct) / 100)
 }
 
 function withMarkups(grandTotal: number): { pct: number; amount: number }[] {
@@ -135,7 +158,7 @@ export function calculateSingle(input: SingleInputs): CostBreakdown {
     [
       input.reed, input.warpReedspace, input.l2l, input.warpCount, input.warpRate,
       input.sizingRate, input.pick, input.weftReedspace, input.weftCount, input.weftRate,
-      input.wastagePct, input.majuri, input.warping,
+      input.wastagePct, input.pickRate, input.warping,
     ],
     'single costing',
   )
@@ -152,24 +175,27 @@ export function calculateSingle(input: SingleInputs): CostBreakdown {
     throw new Error('Pick and weft reedspace must be > 0 when weft is expected')
   }
 
-  const k = K_SINGLE
   const ends = totalEnds(input.reed, input.warpReedspace)
-  const warpCostRaw = yarnCost(ends, input.l2l, input.warpRate, input.warpCount, k)
-  const weftCostRaw = yarnCost(input.pick * input.weftReedspace, input.l2l, input.weftRate, input.weftCount, k)
-  const sizingCost = yarnCost(ends, input.l2l, input.sizingRate, input.warpCount, k)
-  const yarnCostAfterWastage = applyWastageToYarnCosts(warpCostRaw, weftCostRaw, input.wastagePct)
-  const grandTotal = yarnCostAfterWastage + sizingCost + input.majuri + input.warping
+  const warpWt = warpWeight(input.warpReedspace, input.reed, input.warpCount, input.l2l)
+  const weftBase = weftWeightBase(input.weftReedspace, input.pick, input.weftCount)
+  const weftWt = applyWastagePct(weftBase, input.wastagePct)
+  const warpCostRaw = warpWt * input.warpRate
+  const weftCostRaw = weftWt * input.weftRate
+  const sizingCost = warpWt * input.sizingRate
+  const jobCost = input.pick * input.pickRate
+  const grandTotal = warpCostRaw + weftCostRaw + sizingCost + jobCost + input.warping
 
   return {
     mode: 'single',
-    k,
     totalEnds: ends,
     length: input.l2l,
+    warpWeight: round(warpWt, 6),
+    weftWeightBase: round(weftBase, 6),
+    weftWeight: round(weftWt, 6),
     warpCostRaw: round(warpCostRaw, 4),
     weftCostRaw: round(weftCostRaw, 4),
-    yarnCostAfterWastage: round(yarnCostAfterWastage, 4),
     sizingCost: round(sizingCost, 4),
-    majuri: round(input.majuri),
+    jobCost: round(jobCost, 4),
     warping: round(input.warping),
     grandTotal: round(grandTotal),
     costPerUnitLength: input.l2l > 0 ? round(grandTotal / input.l2l) : 0,
@@ -179,6 +205,7 @@ export function calculateSingle(input: SingleInputs): CostBreakdown {
         label: 'Warp',
         pct: 100,
         count: input.warpCount,
+        weight: round(warpWt, 6),
         yarnCostRaw: round(warpCostRaw, 4),
         rate: input.warpRate,
         sizingRate: input.sizingRate,
@@ -190,6 +217,7 @@ export function calculateSingle(input: SingleInputs): CostBreakdown {
         label: 'Weft',
         pct: 100,
         count: input.weftCount,
+        weight: round(weftWt, 6),
         yarnCostRaw: round(weftCostRaw, 4),
         rate: input.weftRate,
       },
@@ -205,7 +233,7 @@ function activeYarns(yarns: YarnSlot[]): YarnSlot[] {
 
 export function calculateMulti(input: MultiInputs): CostBreakdown {
   assertNonNeg(
-    [input.reed, input.warpReedspace, input.l2l, input.pick, input.weftReedspace, input.wastagePct, input.majuri, input.warping],
+    [input.reed, input.warpReedspace, input.l2l, input.pick, input.weftReedspace, input.wastagePct, input.pickRate, input.warping],
     'multi costing',
   )
   if (input.reed <= 0 || input.warpReedspace <= 0) {
@@ -220,19 +248,19 @@ export function calculateMulti(input: MultiInputs): CostBreakdown {
   const warpYarns = activeYarns(input.warpYarns)
   const weftYarns = activeYarns(input.weftYarns)
 
-  const k = K_MULTI
   const ends = totalEnds(input.reed, input.warpReedspace)
-  const weftFactor = input.pick * input.weftReedspace
 
   const warpLines: YarnLine[] = warpYarns.map((y, i) => {
-    const factor = ends * (y.pct / 100)
-    const cost = yarnCost(factor, input.l2l, y.rate, y.count, k)
+    const share = y.pct / 100
+    const weight = warpWeight(input.warpReedspace, input.reed, y.count, input.l2l) * share
+    const cost = weight * y.rate
     const sizingRate = y.sizingRate ?? 0
-    const sizing = yarnCost(factor, input.l2l, sizingRate, y.count, k)
+    const sizing = weight * sizingRate
     return {
       label: `Warp yarn ${i + 1}`,
       pct: y.pct,
       count: y.count,
+      weight: round(weight, 6),
       yarnCostRaw: round(cost, 4),
       rate: y.rate,
       sizingRate,
@@ -241,33 +269,42 @@ export function calculateMulti(input: MultiInputs): CostBreakdown {
   })
 
   const weftLines: YarnLine[] = weftYarns.map((y, i) => {
-    const factor = weftFactor * (y.pct / 100)
-    const cost = yarnCost(factor, input.l2l, y.rate, y.count, k)
+    const share = y.pct / 100
+    const base = weftWeightBase(input.weftReedspace, input.pick, y.count) * share
+    const weight = applyWastagePct(base, input.wastagePct)
+    const cost = weight * y.rate
     return {
       label: `Weft yarn ${i + 1}`,
       pct: y.pct,
       count: y.count,
+      weight: round(weight, 6),
       yarnCostRaw: round(cost, 4),
       rate: y.rate,
     }
   })
 
+  const warpWeightTotal = warpLines.reduce((s, l) => s + l.weight, 0)
+  const weftWeightTotal = weftLines.reduce((s, l) => s + l.weight, 0)
+  const weftBaseTotal = weftYarns.reduce((s, y) => {
+    return s + weftWeightBase(input.weftReedspace, input.pick, y.count) * (y.pct / 100)
+  }, 0)
   const warpCostRaw = warpLines.reduce((s, l) => s + l.yarnCostRaw, 0)
   const weftCostRaw = weftLines.reduce((s, l) => s + l.yarnCostRaw, 0)
   const sizingCost = warpLines.reduce((s, l) => s + (l.sizingCost ?? 0), 0)
-  const yarnCostAfterWastage = applyWastageToYarnCosts(warpCostRaw, weftCostRaw, input.wastagePct)
-  const grandTotal = yarnCostAfterWastage + sizingCost + input.majuri + input.warping
+  const jobCost = input.pick * input.pickRate
+  const grandTotal = warpCostRaw + weftCostRaw + sizingCost + jobCost + input.warping
 
   return {
     mode: 'multi',
-    k,
     totalEnds: ends,
     length: input.l2l,
+    warpWeight: round(warpWeightTotal, 6),
+    weftWeightBase: round(weftBaseTotal, 6),
+    weftWeight: round(weftWeightTotal, 6),
     warpCostRaw: round(warpCostRaw, 4),
     weftCostRaw: round(weftCostRaw, 4),
-    yarnCostAfterWastage: round(yarnCostAfterWastage, 4),
     sizingCost: round(sizingCost, 4),
-    majuri: round(input.majuri),
+    jobCost: round(jobCost, 4),
     warping: round(input.warping),
     grandTotal: round(grandTotal),
     costPerUnitLength: input.l2l > 0 ? round(grandTotal / input.l2l) : 0,
@@ -285,8 +322,32 @@ export function formatInr(n: number): string {
   }).format(n)
 }
 
-/** Demo fixture matching SwadCost Costing.aspx */
-export const DEMO_SINGLE: SingleInputs = {
+/**
+ * Optional “Load sample” fixture. Warp numbers are the notebook example;
+ * weft / rates / pick-rate are labeled sample values so Calculate has a full sheet.
+ */
+export const SAMPLE_SINGLE: SingleInputs = {
+  reed: 120,
+  warpReedspace: 65,
+  l2l: 102,
+  warpCount: 61,
+  warpRate: 200,
+  sizingRate: 10,
+  pick: 68,
+  weftReedspace: 65,
+  weftCount: 61,
+  weftRate: 180,
+  wastagePct: 5,
+  pickRate: 0.5,
+  warping: 0,
+}
+
+/**
+ * Live Costing.aspx sample posted 2026-09-11 → Final Cost 1698.77.
+ * Majuri on that form is a rupee box; mapping it to pickRate is a labeled trial
+ * in FORMULA_CROSSCHECK.md — not a form prefill.
+ */
+export const SWADCOST_LIVE_SAMPLE: SingleInputs = {
   reed: 80,
   warpReedspace: 60,
   l2l: 2,
@@ -298,20 +359,27 @@ export const DEMO_SINGLE: SingleInputs = {
   weftCount: 40,
   weftRate: 280,
   wastagePct: 5,
-  majuri: 10,
+  pickRate: 10,
   warping: 0,
 }
 
-/** Demo fixture matching MultiCosting.aspx yarn1-only */
-export const DEMO_MULTI: MultiInputs = {
-  reed: 80,
-  warpReedspace: 60,
-  l2l: 2,
-  warpYarns: [{ pct: 100, count: 40, rate: 300, sizingRate: 5 }],
-  pick: 50,
-  weftReedspace: 60,
-  wastagePct: 5,
-  weftYarns: [{ pct: 100, count: 40, rate: 280 }],
-  majuri: 10,
-  warping: 0,
+export const SAMPLE_MULTI: MultiInputs = {
+  reed: SAMPLE_SINGLE.reed,
+  warpReedspace: SAMPLE_SINGLE.warpReedspace,
+  l2l: SAMPLE_SINGLE.l2l,
+  warpYarns: [
+    { pct: 100, count: SAMPLE_SINGLE.warpCount, rate: SAMPLE_SINGLE.warpRate, sizingRate: SAMPLE_SINGLE.sizingRate },
+    { pct: 0, count: 0, rate: 0, sizingRate: 0 },
+    { pct: 0, count: 0, rate: 0, sizingRate: 0 },
+  ],
+  pick: SAMPLE_SINGLE.pick,
+  weftReedspace: SAMPLE_SINGLE.weftReedspace,
+  wastagePct: SAMPLE_SINGLE.wastagePct,
+  weftYarns: [
+    { pct: 100, count: SAMPLE_SINGLE.weftCount, rate: SAMPLE_SINGLE.weftRate },
+    { pct: 0, count: 0, rate: 0 },
+    { pct: 0, count: 0, rate: 0 },
+  ],
+  pickRate: SAMPLE_SINGLE.pickRate,
+  warping: SAMPLE_SINGLE.warping,
 }

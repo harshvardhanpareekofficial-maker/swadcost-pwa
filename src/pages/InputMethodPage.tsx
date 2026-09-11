@@ -16,7 +16,6 @@ type Props = {
 export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack }: Props) {
   return (
     <Layout
-      eyebrow="Entry method"
       title="How will you enter values?"
       subtitle={`${fabricName || 'Untitled'} · ${modeLabel}`}
     >
@@ -25,13 +24,13 @@ export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack }: Pro
         <SectionLabel>Speak or type</SectionLabel>
         <CardButton
           title="Speak"
-          description="Use the microphone. When a number is heard, the current field fills and advances."
+          description="Chrome Web Speech API. Say one mill number per field. You can still type to correct."
           icon={<IconMic />}
           onClick={() => onChoose('speak')}
         />
         <CardButton
           title="Type"
-          description="Tap fields and enter numbers on the keypad. Best for precise edits."
+          description="Tap fields and enter numbers on the keypad. Microphone stays off."
           icon={<IconKeys />}
           onClick={() => onChoose('type')}
         />

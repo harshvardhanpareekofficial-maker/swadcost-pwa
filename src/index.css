@@ -27,6 +27,14 @@ html,
 body,
 #root {
   min-height: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-x: none;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-bottom: 7rem;
 }
 
 body {
@@ -36,9 +44,14 @@ body {
   background-image:
     radial-gradient(ellipse at 12% -10%, rgba(232, 168, 56, 0.16), transparent 42%),
     radial-gradient(ellipse at 110% 0%, rgba(59, 31, 74, 0.08), transparent 36%);
-  background-attachment: fixed;
   color: #1a1423;
   -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 1024px) {
+  body {
+    background-attachment: fixed;
+  }
 }
 
 .font-display {
@@ -68,4 +81,17 @@ input[type="number"] {
 :focus-visible {
   outline: 2px solid #e8a838;
   outline-offset: 2px;
+}
+
+button,
+a,
+input {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@supports (scrollbar-color: auto) {
+  * {
+    scrollbar-color: rgba(59, 31, 74, 0.35) transparent;
+  }
 }

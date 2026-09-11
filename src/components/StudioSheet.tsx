@@ -11,7 +11,7 @@ export function StudioSheet({
   padded?: boolean
 }) {
   return (
-    <div className={`${studioSheetClass} ${padded ? 'p-5 sm:p-7' : ''} ${className}`}>
+    <div className={`${studioSheetClass} min-w-0 ${padded ? 'p-4 sm:p-7' : ''} ${className}`}>
       {children}
     </div>
   )

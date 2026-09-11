@@ -24,8 +24,8 @@ export default function App() {
   const [fabricName, setFabricName] = useState('')
   const [mode, setMode] = useState<CostMode | null>(null)
   const [inputMethod, setInputMethod] = useState<InputMethod | null>(null)
-  const [single, setSingle] = useState(emptySingle)
-  const [multi, setMulti] = useState(emptyMulti)
+  const [single, setSingle] = useState(() => emptySingle())
+  const [multi, setMulti] = useState(() => emptyMulti())
   const [result, setResult] = useState<CostBreakdown | null>(null)
   const [calcError, setCalcError] = useState<string | null>(null)
 
@@ -129,7 +129,7 @@ export default function App() {
           }}
         />
         {calcError ? (
-          <p className="fixed bottom-20 left-1/2 z-50 w-[min(92%,24rem)] -translate-x-1/2 rounded-[14px] border border-rose/30 bg-paper px-4 py-3 text-center text-sm text-rose shadow-sheet">
+          <p className="fixed bottom-[max(5rem,calc(env(safe-area-inset-bottom)+4.5rem))] left-1/2 z-50 w-[min(92%,24rem)] -translate-x-1/2 rounded-[14px] border border-rose/30 bg-paper px-4 py-3 text-center text-sm text-rose shadow-sheet">
             {calcError}
           </p>
         ) : null}
