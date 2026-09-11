@@ -1,4 +1,5 @@
 import { touchAccountLastActive } from './auth'
+import { usernameNorm } from './usernames'
 import type { CostBreakdown, MultiInputs, SingleInputs } from './costing'
 import { idleCutoffIso, isIdleTimestamp, parseIsoMillis } from './idle'
 import { ACCOUNT_META_KEY, CALC_EVENTS_KEY, migrateTelemetryStorage } from './storage'
@@ -137,7 +138,26 @@ export function buildUsageReport(calcs: CalcEvent[]): UsageReport {
 }
 
 function usernameKey(name: string): string {
-  return name.trim().toLowerCase()
+  return usernameNorm(name)
+}
+
+/** True when local telemetry or Supabase remembers the name (no password is stored remotely). */
+export async function accountRememberedElsewhere(username: string): Promise<boolean> {
+  const key = usernameNorm(username)
+  if (!key) return false
+  if (loadLocalAccounts().some((row) => usernameNorm(row.username) === key)) return true
+
+  const client = getSupabase()
+  if (!client) return false
+  try {
+    const byNorm = await client.from('swadcost_accounts').select('username').eq('username_norm', key).limit(1)
+    if (!byNorm.error && Array.isArray(byNorm.data) && byNorm.data.length > 0) return true
+    if (byNorm.error && !looksMissingColumn(byNorm.error.message, 'username_norm')) return false
+    const byName = await client.from('swadcost_accounts').select('username').ilike('username', key).limit(1)
+    return !byName.error && Array.isArray(byName.data) && byName.data.length > 0
+  } catch {
+    return false
+  }
 }
 
 async function syncLastActiveRemote(username: string, atIso: string): Promise<void> {
@@ -159,7 +179,7 @@ async function syncLastActiveRemote(username: string, atIso: string): Promise<vo
 /** Record (or refresh) an account and stamp last_active_at. Never sends a password. */
 export async function markAccountActive(username: string, at = new Date()): Promise<void> {
   const name = username.trim()
-  if (!name || name.toLowerCase() === 'guest') return
+  if (!name || usernameNorm(name) === 'guest') return
 
   touchAccountLastActive(name, at.getTime())
 
@@ -316,7 +336,7 @@ function laterIso(a: string, b: string): string {
   return a > b ? a : b
 }
 
-function mergeAccountsByUsername(remote: AccountMeta[], local: AccountMeta[]): AccountMeta[] {
+export function mergeAccountsByUsername(remote: AccountMeta[], local: AccountMeta[]): AccountMeta[] {
   const map = new Map<string, AccountMeta>()
   for (const row of [...local, ...remote]) {
     const key = usernameKey(row.username)

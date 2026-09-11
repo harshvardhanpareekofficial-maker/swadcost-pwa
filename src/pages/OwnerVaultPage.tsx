@@ -20,6 +20,7 @@ import {
   type AccountMeta,
   type CalcEvent,
 } from '../lib/telemetry'
+import { usernameNorm } from '../lib/usernames'
 
 function formatWhen(iso: string): string {
   const date = new Date(iso)
@@ -229,7 +230,7 @@ export function OwnerVaultPage() {
               <ul className="mt-3 space-y-2 md:hidden">
                 {accounts.map((account) => (
                   <li
-                    key={account.id}
+                    key={usernameNorm(account.username)}
                     className="rounded-[14px] border border-plum/10 bg-paper/50 px-3.5 py-3"
                   >
                     <p className="font-medium text-ink">{account.username}</p>
@@ -251,7 +252,7 @@ export function OwnerVaultPage() {
                   </thead>
                   <tbody>
                     {accounts.map((account) => (
-                      <tr key={account.id} className="border-t border-plum/10">
+                      <tr key={usernameNorm(account.username)} className="border-t border-plum/10">
                         <td className="py-2.5 font-medium text-ink">{account.username}</td>
                         <td className="py-2.5 text-plum/70" title={formatWhen(account.lastActiveAt)}>
                           {formatRelative(account.lastActiveAt)}

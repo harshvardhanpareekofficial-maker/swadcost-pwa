@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { createAccount, login, MIN_PASSWORD_LENGTH } from '../lib/auth'
+import { MIN_PASSWORD_LENGTH } from '../lib/auth'
 import { IconArrow } from '../components/Icons'
 import { CheckList } from '../components/CheckList'
 import { Footer, MakerNote } from '../components/Footer'
@@ -7,10 +7,17 @@ import { PrimaryButton } from '../components/PrimaryButton'
 import { StudioBar } from '../components/StudioBar'
 import { WeaveGraphic } from '../components/WeaveGraphic'
 import { studioFieldClass, studioLabelClass } from '../components/studio'
+import {
+  beginSignIn,
+  createStudioAccount,
+  FINISH_SETUP_HINT,
+  finishDeviceSetup,
+  retryCloudLink,
+} from '../lib/studioAuth'
 import { markAccountActive } from '../lib/telemetry'
 
 type Props = { onSuccess: () => void }
-type Mode = 'signin' | 'signup'
+type Mode = 'signin' | 'signup' | 'finish-setup'
 
 function EyeIcon({ open }: { open: boolean }) {
   if (open) {
@@ -80,10 +87,12 @@ export function LoginPage({ onSuccess }: Props) {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [pendingCloud, setPendingCloud] = useState<string | null>(null)
 
   function switchMode(next: Mode) {
     setMode(next)
     setError(null)
+    setPendingCloud(null)
     setPassword('')
     setConfirmPassword('')
   }
@@ -95,21 +104,55 @@ export function LoginPage({ onSuccess }: Props) {
     }
   }
 
+  async function completeOk(name: string) {
+    await markAccountActive(name)
+    setPendingCloud(null)
+    onSuccess()
+  }
+
+  async function applyAuthResult(result: Awaited<ReturnType<typeof createStudioAccount>>) {
+    if (result.ok) {
+      await completeOk(result.username)
+      return
+    }
+    if (result.code === 'CLOUD_SYNC' && result.username) {
+      setPendingCloud(result.username)
+      setError(result.error)
+      return
+    }
+    setError(result.error)
+  }
+
   async function submit(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
     setError(null)
     try {
-      const result =
-        mode === 'signin'
-          ? await login(username, password)
-          : await createAccount(username, password, confirmPassword)
-      if (result.ok) {
-        await markAccountActive(result.username)
-        onSuccess()
+      if (pendingCloud) {
+        await applyAuthResult(await retryCloudLink(pendingCloud))
         return
       }
-      setError(result.error)
+      if (mode === 'signin') {
+        const started = await beginSignIn(username, password)
+        if (started.status === 'ok') {
+          await completeOk(started.username)
+          return
+        }
+        if (started.status === 'finish-setup') {
+          setUsername(started.username)
+          setMode('finish-setup')
+          setConfirmPassword('')
+          setError(null)
+          return
+        }
+        setError(started.error)
+        return
+      }
+      const result =
+        mode === 'finish-setup'
+          ? await finishDeviceSetup(username, password, confirmPassword)
+          : await createStudioAccount(username, password, confirmPassword)
+      await applyAuthResult(result)
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {
@@ -118,6 +161,25 @@ export function LoginPage({ onSuccess }: Props) {
   }
 
   const signingIn = mode === 'signin'
+  const finishing = mode === 'finish-setup'
+  const heading = finishing
+    ? 'Finish setup on this device'
+    : signingIn
+      ? 'Welcome to the studio.'
+      : 'Create your studio account.'
+  const blurb = finishing
+    ? FINISH_SETUP_HINT
+    : signingIn
+      ? 'Sign in to keep your cost sheets together.'
+      : 'Choose a name and password. They stay on this device.'
+  const actionLabel = pendingCloud
+    ? 'Retry'
+    : finishing
+      ? 'Finish setup'
+      : signingIn
+        ? 'Sign in'
+        : 'Create account'
+  const busyLabel = pendingCloud ? 'Retrying…' : finishing ? 'Finishing setup…' : signingIn ? 'Signing in…' : 'Creating account…'
 
   return (
     <div className="studio-atmosphere flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">
@@ -152,12 +214,10 @@ export function LoginPage({ onSuccess }: Props) {
               Your work, in one place
             </p>
             <h1 className="font-display mt-1.5 text-[1.5rem] font-semibold leading-[1.12] tracking-[-0.03em] text-ink lg:mt-2 lg:text-[1.85rem]">
-              {signingIn ? 'Welcome to the studio.' : 'Create your studio account.'}
+              {heading}
             </h1>
             <p className="mt-1 text-sm leading-snug text-plum/70 lg:mt-2 lg:leading-relaxed">
-              {signingIn
-                ? 'Sign in to keep your cost sheets together.'
-                : 'Choose a name and password. They stay on this device.'}
+              {blurb}
             </p>
 
             <form onSubmit={submit} className="mt-4 space-y-3 lg:mt-6 lg:space-y-4">
@@ -175,6 +235,7 @@ export function LoginPage({ onSuccess }: Props) {
                   placeholder={signingIn ? 'Your user ID' : 'Display name or username'}
                   className={studioFieldClass}
                   required
+                  readOnly={finishing}
                 />
               </label>
 
@@ -182,11 +243,11 @@ export function LoginPage({ onSuccess }: Props) {
                 label="Password"
                 value={password}
                 onChange={updateField(setPassword)}
-                autoComplete={signingIn ? 'current-password' : 'new-password'}
-                placeholder={signingIn ? 'Your password' : `At least ${MIN_PASSWORD_LENGTH} characters`}
+                autoComplete={signingIn && !finishing ? 'current-password' : 'new-password'}
+                placeholder={signingIn && !finishing ? 'Your password' : `At least ${MIN_PASSWORD_LENGTH} characters`}
               />
 
-              {!signingIn ? (
+              {!signingIn || finishing ? (
                 <PasswordField
                   label="Confirm password"
                   value={confirmPassword}
@@ -206,13 +267,7 @@ export function LoginPage({ onSuccess }: Props) {
               ) : null}
 
               <PrimaryButton type="submit" disabled={busy}>
-                {busy
-                  ? signingIn
-                    ? 'Signing in…'
-                    : 'Creating account…'
-                  : signingIn
-                    ? 'Sign in'
-                    : 'Create account'}
+                {busy ? busyLabel : actionLabel}
                 <IconArrow />
               </PrimaryButton>
             </form>
@@ -231,7 +286,7 @@ export function LoginPage({ onSuccess }: Props) {
                 </>
               ) : (
                 <>
-                  Already have an account?{' '}
+                  Already have an account on this device?{' '}
                   <button
                     type="button"
                     onClick={() => switchMode('signin')}

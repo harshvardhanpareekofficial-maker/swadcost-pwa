@@ -2,6 +2,7 @@
 import { webcrypto } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
+  ACCOUNT_SAVE_FAILED,
   createAccount,
   currentUser,
   findAccount,
@@ -11,6 +12,8 @@ import {
   login,
   logout,
   MIN_PASSWORD_LENGTH,
+  NO_LOCAL_ACCOUNT,
+  normalizeUsername,
   purgeIdleLocalAccounts,
   touchAccountLastActive,
   validateNewAccount,
@@ -65,15 +68,14 @@ describe('empty account store', () => {
     expect(localStorage.getItem('fabriccost.accounts')).toBeNull()
   })
 
-  it('wipes a leftover local account store once', () => {
+  it('stamps the epoch marker without deleting hashed accounts', () => {
     localStorage.setItem(
       'fabriccost.accounts',
       JSON.stringify([{ username: 'legacy-user', passwordHash: 'hash', createdAt: 1, lastActiveAt: 1 }]),
     )
     localStorage.setItem('fabriccost.auth_session', '1')
     localStorage.setItem('fabriccost.auth_user', 'legacy-user')
-    expect(loadAccounts()).toEqual([])
-    expect(isAuthenticated()).toBe(false)
+    expect(loadAccounts().map((row) => row.username)).toEqual(['legacy-user'])
     expect(localStorage.getItem(ACCOUNTS_EPOCH_KEY)).toBe(ACCOUNTS_EPOCH)
   })
 })
@@ -112,6 +114,9 @@ describe('login errors', () => {
 
   it('explains an unknown username', async () => {
     await expectFail(await login('nobody-yet', 'abcdef'), /no account/i)
+    const missing = await login('nobody-yet', 'abcdef')
+    expect(missing.ok).toBe(false)
+    if (!missing.ok) expect(missing.error).toBe(NO_LOCAL_ACCOUNT)
   })
 
   it('explains an incorrect password without a cryptic fail', async () => {
@@ -149,7 +154,51 @@ describe('createAccount', () => {
     logout()
     const dup = await createAccount('maya', 'otherpw', 'otherpw')
     expect(dup.ok).toBe(false)
-    if (!dup.ok) expect(dup.error).toMatch(/already taken/i)
+    if (!dup.ok) expect(dup.error).toMatch(/already set up on this device/i)
+  })
+
+  it('signs in case-insensitively (Harshvardhan == harshvardhan == HARSHVARDHAN)', async () => {
+    const created = await createAccount('Harshvardhan Pareek', 'loompass', 'loompass')
+    expect(created).toEqual({ ok: true, username: 'Harshvardhan Pareek' })
+    logout()
+
+    for (const name of ['harshvardhan pareek', 'HARSHVARDHAN PAREEK', ' Harshvardhan Pareek ']) {
+      const result = await login(name, 'loompass')
+      expect(result).toEqual({ ok: true, username: 'Harshvardhan Pareek' })
+      logout()
+    }
+
+    expect(normalizeUsername('HARSHVARDHAN')).toBe('harshvardhan')
+    expect(await hashPassword('Harshvardhan', 'loompass')).toBe(await hashPassword('HARSHVARDHAN', 'loompass'))
+    expect(await hashPassword('Harshvardhan Pareek', 'loompass')).toBe(
+      await hashPassword('harshvardhan pareek', 'loompass'),
+    )
+  })
+
+  it('keeps a brand-new account if the epoch marker is missing', async () => {
+    await createAccount('Harshvardhan Pareek', 'loompass', 'loompass')
+    logout()
+    localStorage.removeItem(ACCOUNTS_EPOCH_KEY)
+    expect(findAccount('HARSHVARDHAN PAREEK')?.username).toBe('Harshvardhan Pareek')
+    expect(localStorage.getItem(ACCOUNTS_EPOCH_KEY)).toBe(ACCOUNTS_EPOCH)
+    const again = await login('harshvardhan pareek', 'loompass')
+    expect(again).toEqual({ ok: true, username: 'Harshvardhan Pareek' })
+  })
+
+  it('does not claim Create succeeded when the account cannot be stored', async () => {
+    const proto = Object.getPrototypeOf(localStorage) as Storage
+    const original = proto.setItem
+    proto.setItem = function (this: Storage, key: string, value: string) {
+      if (key === 'fabriccost.accounts') throw new Error('quota')
+      return original.call(this, key, value)
+    }
+    try {
+      const result = await createAccount('Maya', 'loompass', 'loompass')
+      expect(result).toEqual({ ok: false, error: ACCOUNT_SAVE_FAILED })
+      expect(findAccount('Maya')).toBeUndefined()
+    } finally {
+      proto.setItem = original
+    }
   })
 
   it('rejects creating a Guest account', async () => {

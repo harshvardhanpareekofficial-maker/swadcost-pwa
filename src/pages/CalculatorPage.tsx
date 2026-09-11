@@ -7,6 +7,7 @@ import { SectionLabel } from '../components/SectionLabel'
 import { StudioSheet } from '../components/StudioSheet'
 import { useSpeechFill } from '../hooks/useSpeechFill'
 import { SAMPLE_MULTI, SAMPLE_SINGLE, type MultiInputs, type SingleInputs } from '../lib/costing'
+import { DALAL_SECTION_LABEL, PICK_RATE_HINT, PICK_RATE_LABEL } from '../lib/labels'
 import type { CostMode, InputMethod } from '../lib/types'
 
 type Num = number | ''
@@ -68,7 +69,7 @@ export function CalculatorPage({
         { key: 'weftCount', label: 'Weft Count', unit: 'Ne', get: () => s.weftCount || '', set: (v) => set({ weftCount: n(v) }) },
         { key: 'weftRate', label: 'Weft Rate', unit: '₹ / weight', get: () => s.weftRate || '', set: (v) => set({ weftRate: n(v) }) },
         { key: 'wastagePct', label: 'Wastage', unit: '% of weft', hint: 'Added only to weft weight: base × (1 + %/100)', get: () => s.wastagePct || '', set: (v) => set({ wastagePct: n(v) }) },
-        { key: 'pickRate', label: 'Pick rate / Job rate', unit: '₹ per pick', hint: 'Job rate = Pick × this rate', get: () => s.pickRate || '', set: (v) => set({ pickRate: n(v) }) },
+        { key: 'pickRate', label: PICK_RATE_LABEL, unit: '₹ per pick', hint: PICK_RATE_HINT, get: () => s.pickRate || '', set: (v) => set({ pickRate: n(v) }) },
         { key: 'warping', label: 'Warping', unit: '₹', hint: 'Optional flat add-on — not on the mill sheet', get: () => s.warping || '', set: (v) => set({ warping: n(v) }) },
       ]
     }
@@ -111,7 +112,7 @@ export function CalculatorPage({
       )
     }
     list.push(
-      { key: 'pickRate', label: 'Pick rate / Job rate', unit: '₹ per pick', hint: 'Job rate = Pick × this rate', get: () => m.pickRate || '', set: (v) => setM({ pickRate: n(v) }) },
+      { key: 'pickRate', label: PICK_RATE_LABEL, unit: '₹ per pick', hint: PICK_RATE_HINT, get: () => m.pickRate || '', set: (v) => setM({ pickRate: n(v) }) },
       { key: 'warping', label: 'Warping', unit: '₹', get: () => m.warping || '', set: (v) => setM({ warping: n(v) }) },
     )
     return list
@@ -248,7 +249,7 @@ export function CalculatorPage({
             {pair(6, 7)}
             {pair(8, 9)}
             {renderField(10)}
-            <SectionLabel className="pt-1.5 sm:pt-2">Job & other</SectionLabel>
+            <SectionLabel className="pt-1.5 sm:pt-2">{DALAL_SECTION_LABEL}</SectionLabel>
             {pair(11, 12)}
           </>
         ) : (
@@ -280,7 +281,7 @@ export function CalculatorPage({
                 </div>
               )
             })}
-            <SectionLabel className="pt-1.5 sm:pt-2">Job & other</SectionLabel>
+            <SectionLabel className="pt-1.5 sm:pt-2">{DALAL_SECTION_LABEL}</SectionLabel>
             {pair(fields.length - 2, fields.length - 1)}
           </>
         )}

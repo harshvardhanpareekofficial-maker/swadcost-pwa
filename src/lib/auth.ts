@@ -8,6 +8,7 @@ import {
   safeRemove,
   safeSet,
 } from './storage'
+import { displayUsername, usernameNorm } from './usernames'
 
 migrateAuthStorage()
 
@@ -22,6 +23,17 @@ function localStore(): Storage | undefined {
 export const MIN_PASSWORD_LENGTH = 6
 export { IDLE_TTL_DAYS }
 
+export const NO_LOCAL_ACCOUNT =
+  'No account found for that username on this device. Create an account if you are new.'
+
+export const ACCOUNT_SAVE_FAILED =
+  'Could not save the account in this browser. Allow site data / localStorage and try Create account again.'
+
+export const USERNAME_TAKEN =
+  'That username is already set up on this device. Sign in instead.'
+
+export { usernameNorm }
+
 export type Account = {
   username: string
   passwordHash: string
@@ -29,7 +41,9 @@ export type Account = {
   lastActiveAt: number
 }
 
-export type AuthResult = { ok: true; username: string } | { ok: false; error: string }
+export type AuthResult =
+  | { ok: true; username: string }
+  | { ok: false; error: string; code?: 'NO_LOCAL' | 'CLOUD_SYNC' | 'TAKEN' | 'INVALID'; username?: string }
 
 function readStorage(key: string): string | null {
   migrateAuthStorage()
@@ -68,8 +82,9 @@ function toAccount(value: unknown): Account | null {
   }
 }
 
+/** @deprecated Use usernameNorm — kept as the same trim + lower key. */
 export function normalizeUsername(username: string): string {
-  return username.trim().toLowerCase()
+  return usernameNorm(username)
 }
 
 export function loadAccounts(): Account[] {
@@ -84,14 +99,23 @@ export function loadAccounts(): Account[] {
   }
 }
 
-function saveAccounts(accounts: Account[]): void {
-  writeStorage(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts))
+function persistAccounts(accounts: Account[]): boolean {
+  const payload = JSON.stringify(accounts)
+  writeStorage(AUTH_ACCOUNTS_KEY, payload)
+  const raw = safeGet(localStore(), AUTH_ACCOUNTS_KEY)
+  if (!raw) return false
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    return Array.isArray(parsed) && parsed.length === accounts.length
+  } catch {
+    return false
+  }
 }
 
 export function findAccount(username: string, accounts = loadAccounts()): Account | undefined {
-  const key = normalizeUsername(username)
+  const key = usernameNorm(username)
   if (!key) return undefined
-  return accounts.find((account) => normalizeUsername(account.username) === key)
+  return accounts.find((account) => usernameNorm(account.username) === key)
 }
 
 async function sha256Hex(value: string): Promise<string> {
@@ -108,10 +132,10 @@ async function sha256Hex(value: string): Promise<string> {
 
 /** Username-bound SHA-256 so identical passwords do not share a hash. */
 export async function hashPassword(username: string, password: string): Promise<string> {
-  return sha256Hex(`${normalizeUsername(username)}\0${password}`)
+  return sha256Hex(`${usernameNorm(username)}\0${password}`)
 }
 
-function setSession(username: string): void {
+export function establishSession(username: string): void {
   writeStorage(AUTH_SESSION_KEY, '1')
   writeStorage(AUTH_USER_KEY, username)
 }
@@ -120,7 +144,7 @@ export function isAuthenticated(): boolean {
   if (readStorage(AUTH_SESSION_KEY) !== '1') return false
   const user = readStorage(AUTH_USER_KEY)
   // Legacy “explore first” guest sessions are no longer valid.
-  if (!user || normalizeUsername(user) === 'guest') {
+  if (!user || usernameNorm(user) === 'guest') {
     logout()
     return false
   }
@@ -144,15 +168,15 @@ function loginFailure(error: string): AuthResult {
 /** Stamp last_active_at on a local hashed account. No-op if the user is not in the store. */
 export function touchAccountLastActive(username: string, at = Date.now()): Account | undefined {
   const accounts = loadAccounts()
-  const key = normalizeUsername(username)
+  const key = usernameNorm(username)
   if (!key) return undefined
   let found: Account | undefined
   const next = accounts.map((account) => {
-    if (normalizeUsername(account.username) !== key) return account
+    if (usernameNorm(account.username) !== key) return account
     found = { ...account, lastActiveAt: at }
     return found
   })
-  if (found) saveAccounts(next)
+  if (found) persistAccounts(next)
   return found
 }
 
@@ -165,10 +189,10 @@ export function purgeIdleLocalAccounts(now = Date.now()): string[] {
     if (isIdleTimestamp(account.lastActiveAt, now)) removed.push(account.username)
     else kept.push(account)
   }
-  if (removed.length > 0) saveAccounts(kept)
+  if (removed.length > 0) persistAccounts(kept)
 
   const user = readStorage(AUTH_USER_KEY)
-  if (user && removed.some((name) => normalizeUsername(name) === normalizeUsername(user))) {
+  if (user && removed.some((name) => usernameNorm(name) === usernameNorm(user))) {
     logout()
   }
   return removed
@@ -181,7 +205,7 @@ export async function login(username: string, password: string): Promise<AuthRes
 
   const account = findAccount(name)
   if (!account) {
-    return loginFailure('No account found for that username. Create an account if you are new.')
+    return { ok: false, error: NO_LOCAL_ACCOUNT, code: 'NO_LOCAL' }
   }
 
   let hash: string
@@ -196,7 +220,7 @@ export async function login(username: string, password: string): Promise<AuthRes
   }
 
   touchAccountLastActive(account.username)
-  setSession(account.username)
+  establishSession(account.username)
   return { ok: true, username: account.username }
 }
 
@@ -205,9 +229,9 @@ export function validateNewAccount(
   password: string,
   confirmPassword: string,
 ): string | null {
-  const name = username.trim()
+  const name = displayUsername(username)
   if (!name) return 'Enter a name to use as your username.'
-  if (normalizeUsername(name) === 'guest') return 'That username is reserved. Choose another name.'
+  if (usernameNorm(name) === 'guest') return 'That username is reserved. Choose another name.'
   if (!password) return 'Enter a password.'
   if (password.length < MIN_PASSWORD_LENGTH) {
     return `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`
@@ -221,13 +245,25 @@ export async function createAccount(
   password: string,
   confirmPassword: string,
 ): Promise<AuthResult> {
-  const validationError = validateNewAccount(username, password, confirmPassword)
-  if (validationError) return loginFailure(validationError)
+  const registered = await registerLocalPassword(username, password, confirmPassword)
+  if (!registered.ok) return registered
+  establishSession(registered.username)
+  return registered
+}
 
-  const name = username.trim()
+/** Persist a local hash without opening a session. Used by Finish setup / atomic create. */
+export async function registerLocalPassword(
+  username: string,
+  password: string,
+  confirmPassword: string,
+): Promise<AuthResult> {
+  const validationError = validateNewAccount(username, password, confirmPassword)
+  if (validationError) return { ok: false, error: validationError, code: 'INVALID' }
+
+  const name = displayUsername(username)
   const accounts = loadAccounts()
   if (findAccount(name, accounts)) {
-    return loginFailure('That username is already taken. Try another name or sign in.')
+    return { ok: false, error: USERNAME_TAKEN, code: 'TAKEN', username: findAccount(name, accounts)?.username }
   }
 
   let passwordHash: string
@@ -244,7 +280,8 @@ export async function createAccount(
     createdAt: now,
     lastActiveAt: now,
   })
-  saveAccounts(accounts)
-  setSession(name)
+  if (!persistAccounts(accounts) || !findAccount(name)) {
+    return loginFailure(ACCOUNT_SAVE_FAILED)
+  }
   return { ok: true, username: name }
 }
