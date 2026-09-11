@@ -8,7 +8,7 @@ Polished, installable Progressive Web App mirroring SwadCost (pareektech) single
 
 ## Features
 
-- Client-side login gate (`rohitbohara` / `rohitbohara`, overridable via env)
+- Client-side accounts in `localStorage` (Sign in + Create account). Demo `rohitbohara` / `rohitbohara` is seeded; optional `VITE_AUTH_USER` / `VITE_AUTH_PASS` (or `VITE_AUTH_*NAME` / `VITE_AUTH_*PASSWORD`) add another seed.
 - Home: fabric name + **Single Warp** / **Multiple Warp / Weft**
 - Speak (Web Speech API) or Type input; mic fills current field and advances
 - Full cost breakdown with editable inputs + recalculate
@@ -46,7 +46,7 @@ Single oracle Final Cost **1698.77** and multi yarn1-only **1482.17** are locked
 2. Create a **Static Site** on [Render](https://render.com) (or use `render.yaml`):
    - **Build command:** `npm ci && npm run build`
    - **Publish directory:** `dist`
-3. Optional env vars: `VITE_AUTH_USERNAME`, `VITE_AUTH_PASSWORD` (baked in at build time).
+3. Optional env vars: `VITE_AUTH_USER` / `VITE_AUTH_PASS` or `VITE_AUTH_USERNAME` / `VITE_AUTH_PASSWORD` (baked in at build time as an extra seed).
 4. Custom domain: add `harshvardhanpareek.com` in Render → Domains, then point DNS:
    - Apex: A/ALIAS to Render, or CNAME flattening per Render docs
    - `www` CNAME → your Render host
@@ -55,7 +55,7 @@ SPA fallback is configured in `render.yaml` (`/*` → `/index.html`).
 
 ## Auth note
 
-Auth is a **simple client-side gate** for convenience — not server security. Anyone can inspect the bundle. Replace with real auth before exposing sensitive business data.
+Auth is a **simple client-side gate** for convenience — not server security. Accounts (SHA-256 hashes) live in `localStorage` (`swadcost.accounts`). Anyone can inspect the bundle. Replace with real auth before exposing sensitive business data.
 
 ## Remaining blockers
 
