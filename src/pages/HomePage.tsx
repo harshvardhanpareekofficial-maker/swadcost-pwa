@@ -1,8 +1,11 @@
 import { Layout } from '../components/Layout'
 import { CardButton } from '../components/CardButton'
+import { CheckList } from '../components/CheckList'
 import { Stepper } from '../components/Stepper'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { IconWarp, IconWeave } from '../components/Icons'
+import { SectionLabel } from '../components/SectionLabel'
+import { studioFieldClass, studioLabelClass } from '../components/studio'
 import type { CostMode } from '../lib/types'
 
 type Props = {
@@ -15,25 +18,27 @@ type Props = {
 export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: Props) {
   return (
     <Layout
+      eyebrow="The fabric costing workspace"
       title="New costing"
       subtitle="Name the fabric, then choose how the yarns are arranged."
       showLogout
       onLogout={onLogout}
     >
       <Stepper step={0} />
+      <div className="mb-7">
+        <CheckList items={['Single & multiple yarns', 'Editable calculations', 'Voice entry']} />
+      </div>
       <label className="mb-7 block">
-        <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">
-          Fabric / job name
-        </span>
+        <span className={`mb-1.5 block ${studioLabelClass}`}>Fabric / job name</span>
         <input
           value={fabricName}
           onChange={(e) => onFabricName(e.target.value)}
           placeholder="e.g. Grey 40s 72×68"
-          className="w-full rounded-[14px] border border-plum/12 bg-paper px-3.5 py-3.5 text-ink placeholder:text-plum/35"
+          className={studioFieldClass}
         />
       </label>
       <div className="space-y-3">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Costing mode</h2>
+        <SectionLabel>Costing mode</SectionLabel>
         <CardButton
           title="Single Warp"
           description="One warp yarn and one weft yarn — the classic mill sheet."

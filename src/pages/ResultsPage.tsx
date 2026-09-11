@@ -3,6 +3,8 @@ import { Layout } from '../components/Layout'
 import { Stepper } from '../components/Stepper'
 import { NumberField } from '../components/NumberField'
 import { PrimaryButton } from '../components/PrimaryButton'
+import { SectionLabel } from '../components/SectionLabel'
+import { StudioSheet } from '../components/StudioSheet'
 import {
   calculateMulti,
   calculateSingle,
@@ -68,20 +70,20 @@ export function ResultsPage({
   }
 
   return (
-    <Layout title="Cost breakdown" subtitle={fabricName || 'Untitled fabric'}>
+    <Layout eyebrow="Final account" title="Cost breakdown" subtitle={fabricName || 'Untitled fabric'}>
       <Stepper step={3} />
 
-      <div className="mb-8 border-b border-plum/10 pb-6">
+      <StudioSheet className="mb-8">
         <p className="font-display text-4xl font-semibold tabular-nums tracking-[-0.03em] text-ink">
           {formatInr(result.grandTotal)}
         </p>
         <p className="mt-2 text-sm text-plum/70">
           Final cost · {formatInr(result.costPerUnitLength)} per length unit
         </p>
-      </div>
+      </StudioSheet>
 
       <section className="mb-6 space-y-2">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Summary</h3>
+        <SectionLabel>Summary</SectionLabel>
         <Row label="Total ends (Reed × RS)" value={String(result.totalEnds)} />
         <Row label="Warp yarn cost (raw)" value={formatInr(result.warpCostRaw)} />
         <Row label="Weft yarn cost (raw)" value={formatInr(result.weftCostRaw)} />
@@ -93,7 +95,7 @@ export function ResultsPage({
       </section>
 
       <section className="mb-6 space-y-2">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Warp yarns</h3>
+        <SectionLabel>Warp yarns</SectionLabel>
         {result.warpLines.map((l) => (
           <div key={l.label} className="border-t border-plum/10 py-2 text-sm">
             <div className="flex justify-between gap-2">
@@ -109,7 +111,7 @@ export function ResultsPage({
       </section>
 
       <section className="mb-6 space-y-2">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Weft yarns</h3>
+        <SectionLabel>Weft yarns</SectionLabel>
         {result.weftLines.map((l) => (
           <div key={l.label} className="border-t border-plum/10 py-2 text-sm">
             <div className="flex justify-between gap-2">
@@ -124,7 +126,7 @@ export function ResultsPage({
       </section>
 
       <section className="mb-6 space-y-2">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Markups on final</h3>
+        <SectionLabel>Markups on final</SectionLabel>
         <div className="grid grid-cols-3 gap-x-3 gap-y-3">
           {result.markups.map((m) => (
             <div key={m.pct} className="text-center">
@@ -137,7 +139,7 @@ export function ResultsPage({
 
       {editing ? (
         <section className="mb-5 space-y-3">
-          <h3 className="font-display text-lg font-semibold text-ink">Edit inputs & recalculate</h3>
+          <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink">Edit inputs & recalculate</h3>
           {mode === 'single' ? (
             <>
               {(
@@ -198,7 +200,9 @@ export function ResultsPage({
               ))}
             </>
           ) : null}
-          {error ? <p className="text-sm text-rose">{error}</p> : null}
+          {error ? (
+            <p className="rounded-[14px] border border-rose/30 bg-rose/10 px-3.5 py-2.5 text-sm text-rose">{error}</p>
+          ) : null}
           <PrimaryButton onClick={recalculate}>Recalculate</PrimaryButton>
           <PrimaryButton variant="secondary" onClick={() => setEditing(false)}>
             Cancel

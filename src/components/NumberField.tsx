@@ -1,4 +1,5 @@
 import { forwardRef } from 'react'
+import { studioLabelClass } from './studio'
 
 type Props = {
   label: string
@@ -24,7 +25,7 @@ export const NumberField = forwardRef<HTMLInputElement, Props>(function NumberFi
       ].join(' ')}
     >
       <div className="mb-1 flex items-baseline justify-between gap-2">
-        <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">{label}</span>
+        <span className={studioLabelClass}>{label}</span>
         {unit ? <span className="text-[11px] text-plum/50">{unit}</span> : null}
       </div>
       <input

@@ -6,7 +6,14 @@ import {
   login,
   MIN_PASSWORD_LENGTH,
 } from '../lib/auth'
-import { IconArrow, IconCheck } from '../components/Icons'
+import { IconArrow } from '../components/Icons'
+import { CheckList } from '../components/CheckList'
+import { Footer } from '../components/Footer'
+import { PrimaryButton } from '../components/PrimaryButton'
+import { Eyebrow } from '../components/SectionLabel'
+import { StudioBar } from '../components/StudioBar'
+import { StudioSheet } from '../components/StudioSheet'
+import { studioFieldClass, studioLabelClass } from '../components/studio'
 import { recordAccount } from '../lib/telemetry'
 
 type Props = { onSuccess: () => void }
@@ -49,9 +56,7 @@ function PasswordField({
   const [visible, setVisible] = useState(false)
   return (
     <label className="block">
-      <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">
-        {label}
-      </span>
+      <span className={`mb-1.5 block ${studioLabelClass}`}>{label}</span>
       <div className="relative">
         <input
           type={visible ? 'text' : 'password'}
@@ -59,7 +64,7 @@ function PasswordField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-plum/15 bg-ivory/80 px-3 py-3 pr-12 text-ink placeholder:text-plum/35"
+          className={`${studioFieldClass} pr-12`}
           required
         />
         <button
@@ -81,7 +86,7 @@ function WeaveGraphic() {
       <div className="absolute -left-1 top-1/2 hidden -translate-y-1/2 -rotate-90 text-[10px] font-semibold tracking-[0.28em] text-plum/45 sm:block">
         WARP / LENGTHWISE
       </div>
-      <div className="rounded-3xl border border-plum/10 bg-white/55 p-5 shadow-inner">
+      <div className="rounded-3xl border border-plum/10 bg-paper/80 p-5 shadow-inner">
         <p className="mb-3 text-center text-[10px] font-semibold tracking-[0.28em] text-plum/45">
           WEFT / CROSSWISE
         </p>
@@ -171,52 +176,32 @@ export function LoginPage({ onSuccess }: Props) {
   const signingIn = mode === 'signin'
 
   return (
-    <div className="min-h-dvh bg-ivory text-ink">
-      <header className="flex items-center justify-between gap-3 border-b border-plum/10 px-4 py-3 sm:px-6">
-        <p className="font-display text-lg tracking-tight">
-          <span className="font-bold text-ink">fabriccost</span>
-          <span className="ml-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-plum/70">
-            STUDIO
-          </span>
-        </p>
-        <p className="flex items-center gap-2 text-[11px] font-medium text-plum/70">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_3px_rgba(16,185,129,0.18)]" />
-          Workspace ready
-        </p>
-      </header>
+    <div className="flex min-h-dvh flex-col bg-ivory text-ink">
+      <StudioBar />
 
-      <main className="mx-auto grid min-h-[calc(100dvh-7.25rem)] w-full max-w-6xl lg:grid-cols-2">
+      <main className="mx-auto grid min-h-[calc(100dvh-7.25rem)] w-full max-w-6xl flex-1 lg:grid-cols-2">
         <section className="relative overflow-hidden px-5 py-8 sm:px-10 sm:py-12">
           <div className="pointer-events-none absolute -left-16 top-10 h-48 w-48 rounded-full bg-saffron/20 blur-3xl" />
           <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-plum/10 blur-3xl" />
           <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-plum/60">
             The fabric costing workspace
           </p>
-          <h1 className="font-display mt-4 max-w-md text-4xl font-bold leading-[1.08] text-ink sm:text-5xl">
+          <h1 className="font-display mt-4 max-w-md text-4xl font-semibold leading-[1.08] tracking-[-0.03em] text-ink sm:text-5xl">
             Every thread. Every rupee. Clearly accounted for.
           </h1>
           <p className="mt-4 max-w-md text-base leading-relaxed text-plum/75">
             Bring your warp, weft and making charges together in one considered cost sheet.
           </p>
           <WeaveGraphic />
-          <ul className="mt-8 space-y-2.5 text-sm text-ink">
-            {['Single & multiple yarns', 'Editable calculations', 'Voice entry'].map((item) => (
-              <li key={item} className="flex items-center gap-2.5">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-plum text-ivory">
-                  <IconCheck />
-                </span>
-                {item}
-              </li>
-            ))}
-          </ul>
+          <div className="mt-8">
+            <CheckList items={['Single & multiple yarns', 'Editable calculations', 'Voice entry']} />
+          </div>
         </section>
 
-        <section className="flex items-center justify-center px-4 py-6 sm:px-8">
-          <div className="w-full max-w-md rounded-3xl border border-plum/10 bg-white p-6 shadow-[0_24px_60px_rgba(59,31,74,0.12)] sm:p-8">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-saffron">
-              Your work, in one place
-            </p>
-            <h2 className="font-display mt-2 text-2xl font-bold text-ink">
+        <section className="flex items-center justify-center px-5 py-6 sm:px-8">
+          <StudioSheet className="w-full max-w-md">
+            <Eyebrow>Your work, in one place</Eyebrow>
+            <h2 className="font-display mt-2 text-2xl font-semibold tracking-[-0.02em] text-ink">
               {signingIn ? 'Welcome to the studio.' : 'Create your studio account.'}
             </h2>
             <p className="mt-1 text-sm text-plum/70">
@@ -227,7 +212,7 @@ export function LoginPage({ onSuccess }: Props) {
 
             <form onSubmit={submit} className="mt-6 space-y-4">
               <label className="block">
-                <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">
+                <span className={`mb-1.5 block ${studioLabelClass}`}>
                   {signingIn ? 'User ID' : 'Name'}
                 </span>
                 <input
@@ -238,7 +223,7 @@ export function LoginPage({ onSuccess }: Props) {
                   value={username}
                   onChange={(e) => updateField(setUsername)(e.target.value)}
                   placeholder={signingIn ? 'Your user ID' : 'Display name or username'}
-                  className="w-full rounded-xl border border-plum/15 bg-ivory/80 px-3 py-3 text-ink placeholder:text-plum/35"
+                  className={studioFieldClass}
                   required
                 />
               </label>
@@ -264,17 +249,13 @@ export function LoginPage({ onSuccess }: Props) {
               {error ? (
                 <p
                   role="alert"
-                  className="rounded-xl border border-rose-300/70 bg-rose-50 px-3 py-2.5 text-sm leading-relaxed text-rose-800"
+                  className="rounded-[14px] border border-rose/30 bg-rose/10 px-3.5 py-2.5 text-sm leading-relaxed text-rose"
                 >
                   {error}
                 </p>
               ) : null}
 
-              <button
-                type="submit"
-                disabled={busy}
-                className="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-plum px-4 py-3 text-base font-semibold text-ivory shadow-lg shadow-plum/25 transition hover:bg-plum-deep disabled:cursor-not-allowed disabled:opacity-40"
-              >
+              <PrimaryButton type="submit" disabled={busy}>
                 {busy
                   ? signingIn
                     ? 'Signing in…'
@@ -283,7 +264,7 @@ export function LoginPage({ onSuccess }: Props) {
                     ? 'Sign in'
                     : 'Create account'}
                 <IconArrow />
-              </button>
+              </PrimaryButton>
             </form>
 
             <p className="mt-5 text-center text-sm text-plum/70">
@@ -320,13 +301,11 @@ export function LoginPage({ onSuccess }: Props) {
                 or explore first
               </button>
             </p>
-          </div>
+          </StudioSheet>
         </section>
       </main>
 
-      <footer className="border-t border-plum/10 px-4 py-3 text-left text-sm text-plum/70 sm:px-6">
-        Made by <span className="font-semibold text-plum">Harshvardhan Pareek</span>
-      </footer>
+      <Footer className="px-5 py-3 sm:px-8" />
     </div>
   )
 }

@@ -12,7 +12,7 @@ export function CardButton({ title, description, icon, onClick }: Props) {
     <button
       type="button"
       onClick={onClick}
-      className="group w-full rounded-3xl border border-plum/10 bg-paper px-5 py-5 text-left shadow-[0_18px_40px_rgba(26,20,35,0.08)] transition hover:border-plum/25"
+      className="group w-full rounded-3xl border border-plum/10 bg-paper px-5 py-5 text-left shadow-sheet transition hover:border-plum/25"
     >
       {icon ? <div className="mb-3 text-plum">{icon}</div> : null}
       <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink">{title}</h2>

@@ -1,4 +1,10 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
+import { Footer } from '../components/Footer'
+import { PrimaryButton } from '../components/PrimaryButton'
+import { Eyebrow, SectionLabel } from '../components/SectionLabel'
+import { StudioBar, StudioBarAction } from '../components/StudioBar'
+import { StudioSheet } from '../components/StudioSheet'
+import { studioFieldClass, studioLabelClass } from '../components/studio'
 import {
   checkOwnerPin,
   isOwnerUnlocked,
@@ -20,8 +26,8 @@ function formatWhen(iso: string): string {
 
 function RankList({ title, items }: { title: string; items: { label: string; count: number }[] }) {
   return (
-    <section className="rounded-2xl border border-plum/10 bg-white p-4 shadow-sm">
-      <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-plum/60">{title}</h3>
+    <StudioSheet>
+      <SectionLabel>{title}</SectionLabel>
       {items.length === 0 ? (
         <p className="mt-3 text-sm text-plum/55">No calculate events yet.</p>
       ) : (
@@ -37,7 +43,7 @@ function RankList({ title, items }: { title: string; items: { label: string; cou
           ))}
         </ol>
       )}
-    </section>
+    </StudioSheet>
   )
 }
 
@@ -83,47 +89,37 @@ export function OwnerVaultPage() {
   if (!unlocked) {
     return (
       <div className="flex min-h-dvh flex-col bg-ivory text-ink">
-        <header className="border-b border-plum/10 px-5 py-4">
-          <p className="font-display text-lg">
-            <span className="font-bold">fabriccost</span>
-            <span className="ml-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-plum/70">
-              STUDIO
-            </span>
-          </p>
-        </header>
+        <StudioBar />
         <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-5 py-10">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-saffron">Private ledger</p>
-          <h1 className="font-display mt-2 text-3xl font-bold">Owner vault</h1>
-          <p className="mt-2 text-sm text-plum/70">Enter the studio gate to read account and quality reports.</p>
-          <form onSubmit={submitPin} className="mt-6 space-y-4">
-            <label className="block">
-              <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">
-                Gate
-              </span>
-              <input
-                type="password"
-                value={pin}
-                onChange={(e) => {
-                  setError(null)
-                  setPin(e.target.value)
-                }}
-                className="w-full rounded-xl border border-plum/15 bg-white px-3 py-3"
-                autoComplete="current-password"
-                required
-              />
-            </label>
-            {error ? <p className="text-sm text-rose-700">{error}</p> : null}
-            <button
-              type="submit"
-              className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-plum font-semibold text-ivory"
-            >
-              Unlock
-            </button>
-          </form>
+          <StudioSheet>
+            <Eyebrow>Private ledger</Eyebrow>
+            <h1 className="font-display mt-2 text-3xl font-semibold tracking-[-0.03em] text-ink">Owner vault</h1>
+            <p className="mt-2 text-sm text-plum/70">Enter the studio gate to read account and quality reports.</p>
+            <form onSubmit={submitPin} className="mt-6 space-y-4">
+              <label className="block">
+                <span className={`mb-1.5 block ${studioLabelClass}`}>Gate</span>
+                <input
+                  type="password"
+                  value={pin}
+                  onChange={(e) => {
+                    setError(null)
+                    setPin(e.target.value)
+                  }}
+                  className={studioFieldClass}
+                  autoComplete="current-password"
+                  required
+                />
+              </label>
+              {error ? (
+                <p className="rounded-[14px] border border-rose/30 bg-rose/10 px-3.5 py-2.5 text-sm text-rose">
+                  {error}
+                </p>
+              ) : null}
+              <PrimaryButton type="submit">Unlock</PrimaryButton>
+            </form>
+          </StudioSheet>
         </main>
-        <footer className="px-5 py-3 text-sm text-plum/70">
-          Made by <span className="font-semibold text-plum">Harshvardhan Pareek</span>
-        </footer>
+        <Footer className="px-5 py-3 sm:px-8" />
       </div>
     )
   }
@@ -132,54 +128,52 @@ export function OwnerVaultPage() {
     source === 'supabase' ? 'Live workspace' : source === 'mixed' ? 'Workspace + this device' : 'This device'
 
   return (
-    <div className="min-h-dvh bg-ivory text-ink">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-plum/10 px-5 py-4">
-        <div>
-          <p className="font-display text-lg">
-            <span className="font-bold">fabriccost</span>
-            <span className="ml-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-plum/70">
-              STUDIO
-            </span>
-          </p>
-          <p className="text-xs text-plum/60">Owner vault · {sourceLabel}</p>
-        </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => void refresh()}
-            className="rounded-xl border border-plum/15 bg-white px-3 py-2 text-xs font-semibold text-plum"
-          >
-            {loading ? 'Refreshing…' : 'Refresh'}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              lockOwner()
-              setUnlocked(false)
-            }}
-            className="rounded-xl bg-plum px-3 py-2 text-xs font-semibold text-ivory"
-          >
-            Lock
-          </button>
-        </div>
-      </header>
+    <div className="flex min-h-dvh flex-col bg-ivory text-ink">
+      <StudioBar
+        trailing={
+          <>
+            <StudioBarAction onClick={() => void refresh()}>
+              {loading ? 'Refreshing…' : 'Refresh'}
+            </StudioBarAction>
+            <StudioBarAction
+              variant="plum"
+              onClick={() => {
+                lockOwner()
+                setUnlocked(false)
+              }}
+            >
+              Lock
+            </StudioBarAction>
+          </>
+        }
+      />
 
-      <main className="mx-auto max-w-5xl space-y-6 px-5 py-6">
+      <main className="mx-auto w-full max-w-5xl flex-1 space-y-6 px-5 py-8 sm:px-8">
+        <div>
+          <Eyebrow>Owner vault · {sourceLabel}</Eyebrow>
+          <h1 className="font-display mt-2 text-[1.85rem] font-semibold tracking-[-0.03em] text-ink">
+            Usage ledger
+          </h1>
+          <p className="mt-1.5 max-w-[42ch] text-[0.95rem] leading-relaxed text-plum/75">
+            Accounts and quality reports from this workspace. Passwords never appear here.
+          </p>
+        </div>
+
         <section className="grid gap-3 sm:grid-cols-3">
-          <div className="rounded-2xl bg-plum px-4 py-5 text-ivory">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-ivory/70">Accounts</p>
-            <p className="mt-1 font-display text-3xl font-bold tabular-nums">{accounts.length}</p>
+          <div className="rounded-3xl bg-plum px-5 py-5 text-ivory shadow-sheet">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-ivory/70">Accounts</p>
+            <p className="mt-1 font-display text-3xl font-semibold tabular-nums">{accounts.length}</p>
           </div>
-          <div className="rounded-2xl bg-white px-4 py-5 shadow-sm ring-1 ring-plum/10">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-plum/60">Calculations</p>
-            <p className="mt-1 font-display text-3xl font-bold tabular-nums">{calcs.length}</p>
-          </div>
-          <div className="rounded-2xl bg-white px-4 py-5 shadow-sm ring-1 ring-plum/10">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-plum/60">Single / Multi</p>
-            <p className="mt-1 font-display text-3xl font-bold tabular-nums">
+          <StudioSheet>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Calculations</p>
+            <p className="mt-1 font-display text-3xl font-semibold tabular-nums text-ink">{calcs.length}</p>
+          </StudioSheet>
+          <StudioSheet>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Single / Multi</p>
+            <p className="mt-1 font-display text-3xl font-semibold tabular-nums text-ink">
               {report.modeCounts.single} / {report.modeCounts.multi}
             </p>
-          </div>
+          </StudioSheet>
         </section>
 
         <div className="grid gap-4 lg:grid-cols-3">
@@ -188,14 +182,14 @@ export function OwnerVaultPage() {
           <RankList title="Top quality labels" items={report.topQualities} />
         </div>
 
-        <section className="rounded-2xl border border-plum/10 bg-white p-4 shadow-sm">
-          <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-plum/60">Accounts</h3>
+        <StudioSheet>
+          <SectionLabel>Accounts</SectionLabel>
           {accounts.length === 0 ? (
             <p className="mt-3 text-sm text-plum/55">No accounts recorded yet.</p>
           ) : (
             <div className="mt-3 overflow-x-auto">
               <table className="w-full min-w-[28rem] text-left text-sm">
-                <thead className="text-[11px] uppercase tracking-[0.14em] text-plum/50">
+                <thead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-plum/50">
                   <tr>
                     <th className="pb-2 font-semibold">User ID</th>
                     <th className="pb-2 font-semibold">Created</th>
@@ -203,25 +197,25 @@ export function OwnerVaultPage() {
                 </thead>
                 <tbody>
                   {accounts.map((account) => (
-                    <tr key={account.id} className="border-t border-plum/8">
-                      <td className="py-2 font-medium">{account.username}</td>
-                      <td className="py-2 text-plum/70">{formatWhen(account.createdAt)}</td>
+                    <tr key={account.id} className="border-t border-plum/10">
+                      <td className="py-2.5 font-medium text-ink">{account.username}</td>
+                      <td className="py-2.5 text-plum/70">{formatWhen(account.createdAt)}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-        </section>
+        </StudioSheet>
 
-        <section className="rounded-2xl border border-plum/10 bg-white p-4 shadow-sm">
-          <h3 className="text-[11px] font-semibold uppercase tracking-[0.2em] text-plum/60">Recent calculations</h3>
+        <StudioSheet>
+          <SectionLabel>Recent calculations</SectionLabel>
           {calcs.length === 0 ? (
             <p className="mt-3 text-sm text-plum/55">No calculate events yet.</p>
           ) : (
             <div className="mt-3 overflow-x-auto">
               <table className="w-full min-w-[40rem] text-left text-sm">
-                <thead className="text-[11px] uppercase tracking-[0.14em] text-plum/50">
+                <thead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-plum/50">
                   <tr>
                     <th className="pb-2 font-semibold">When</th>
                     <th className="pb-2 font-semibold">User</th>
@@ -233,25 +227,23 @@ export function OwnerVaultPage() {
                 </thead>
                 <tbody>
                   {calcs.slice(0, 40).map((row) => (
-                    <tr key={row.id} className="border-t border-plum/8">
-                      <td className="py-2 text-plum/70">{formatWhen(row.createdAt)}</td>
-                      <td className="py-2">{row.username}</td>
-                      <td className="py-2">{row.fabricName || '—'}</td>
-                      <td className="py-2 capitalize">{row.mode}</td>
-                      <td className="py-2">{row.qualityLabel || '—'}</td>
-                      <td className="py-2 tabular-nums">{row.finalCost}</td>
+                    <tr key={row.id} className="border-t border-plum/10">
+                      <td className="py-2.5 text-plum/70">{formatWhen(row.createdAt)}</td>
+                      <td className="py-2.5 text-ink">{row.username}</td>
+                      <td className="py-2.5 text-ink">{row.fabricName || '—'}</td>
+                      <td className="py-2.5 capitalize text-ink">{row.mode}</td>
+                      <td className="py-2.5 text-ink">{row.qualityLabel || '—'}</td>
+                      <td className="py-2.5 tabular-nums font-semibold text-plum">{row.finalCost}</td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
-        </section>
+        </StudioSheet>
       </main>
 
-      <footer className="px-5 py-4 text-sm text-plum/70">
-        Made by <span className="font-semibold text-plum">Harshvardhan Pareek</span>
-      </footer>
+      <Footer className="px-5 py-4 sm:px-8" />
     </div>
   )
 }

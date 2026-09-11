@@ -129,7 +129,7 @@ export default function App() {
           }}
         />
         {calcError ? (
-          <p className="fixed bottom-20 left-1/2 z-50 w-[min(92%,24rem)] -translate-x-1/2 rounded-xl border border-rose/30 bg-paper px-4 py-3 text-center text-sm text-rose shadow-[0_18px_40px_rgba(26,20,35,0.12)]">
+          <p className="fixed bottom-20 left-1/2 z-50 w-[min(92%,24rem)] -translate-x-1/2 rounded-[14px] border border-rose/30 bg-paper px-4 py-3 text-center text-sm text-rose shadow-sheet">
             {calcError}
           </p>
         ) : null}

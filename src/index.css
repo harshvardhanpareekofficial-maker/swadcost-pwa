@@ -18,6 +18,9 @@
   --color-indigo-mid: #5a2f6e;
   --font-sans: "IBM Plex Sans", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Fraunces", "Iowan Old Style", Palatino, Georgia, serif;
+  --shadow-sheet: 0 18px 40px rgba(26, 20, 35, 0.10);
+  --radius-sheet: 1.5rem;
+  --radius-field: 0.875rem;
 }
 
 html,

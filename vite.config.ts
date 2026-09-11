@@ -16,7 +16,7 @@ export default defineConfig({
         description:
           'Indian powerloom grey fabric costing for single and multi warp/weft. Speak or type inputs, edit results, install as PWA.',
         theme_color: '#3B1F4A',
-        background_color: '#1A1423',
+        background_color: '#F7F1E8',
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/',

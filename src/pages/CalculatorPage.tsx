@@ -3,6 +3,8 @@ import { Layout } from '../components/Layout'
 import { Stepper } from '../components/Stepper'
 import { NumberField } from '../components/NumberField'
 import { PrimaryButton } from '../components/PrimaryButton'
+import { SectionLabel } from '../components/SectionLabel'
+import { StudioSheet } from '../components/StudioSheet'
 import { useSpeechFill } from '../hooks/useSpeechFill'
 import { DEMO_SINGLE, type MultiInputs, type SingleInputs } from '../lib/costing'
 import { emptyMulti, type CostMode, type InputMethod } from '../lib/types'
@@ -137,13 +139,14 @@ export function CalculatorPage({
 
   return (
     <Layout
+      eyebrow="Cost sheet"
       title={mode === 'single' ? 'Single Warp' : 'Multiple Warp / Weft'}
       subtitle={`${fabricName || 'Untitled'} · ${inputMethod === 'speak' ? 'Speak' : 'Type'}`}
     >
       <Stepper step={2} />
 
       {inputMethod === 'speak' ? (
-        <div className="mb-4 rounded-[14px] border border-saffron/40 bg-paper p-4">
+        <StudioSheet className="mb-4 border-saffron/40">
           <p className="text-sm text-ink">
             Active field: <strong>{fields[focusIdx]?.label}</strong>
           </p>
@@ -160,13 +163,13 @@ export function CalculatorPage({
             )}
           </div>
           {speech.error ? <p className="mt-2 text-xs text-rose">{speech.error}</p> : null}
-        </div>
+        </StudioSheet>
       ) : null}
 
       <div className="space-y-3">
         {mode === 'single' ? (
           <>
-            <h3 className="pt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Warp</h3>
+            <SectionLabel>Warp</SectionLabel>
             {fields.slice(0, 6).map((f, i) => (
               <NumberField
                 key={f.key}
@@ -180,7 +183,7 @@ export function CalculatorPage({
                 id={f.key}
               />
             ))}
-            <h3 className="pt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Weft</h3>
+            <SectionLabel className="pt-2">Weft</SectionLabel>
             {fields.slice(6, 11).map((f, i) => {
               const idx = i + 6
               return (
@@ -196,7 +199,7 @@ export function CalculatorPage({
                 />
               )
             })}
-            <h3 className="pt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Other</h3>
+            <SectionLabel className="pt-2">Other</SectionLabel>
             {fields.slice(11).map((f, i) => {
               const idx = i + 11
               return (

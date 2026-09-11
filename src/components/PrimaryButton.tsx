@@ -10,7 +10,7 @@ export function PrimaryButton({ children, variant = 'primary', className = '', .
     'inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-[14px] px-4 py-3 text-base font-semibold transition disabled:cursor-not-allowed disabled:opacity-40'
   const styles =
     variant === 'primary'
-      ? 'bg-plum text-ivory shadow-[0_14px_28px_rgba(26,20,35,0.14)] hover:bg-plum-deep'
+      ? 'bg-plum text-ivory shadow-sheet hover:bg-plum-deep'
       : variant === 'secondary'
         ? 'border border-plum/15 bg-paper text-plum hover:border-plum/35'
         : 'text-plum/70 hover:text-plum'
