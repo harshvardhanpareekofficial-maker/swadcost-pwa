@@ -7,7 +7,7 @@ import {
 } from '../lib/auth'
 import { IconArrow } from '../components/Icons'
 import { CheckList } from '../components/CheckList'
-import { Footer } from '../components/Footer'
+import { Footer, MakerNote } from '../components/Footer'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { StudioBar } from '../components/StudioBar'
 import { WeaveGraphic } from '../components/WeaveGraphic'
@@ -145,6 +145,7 @@ export function LoginPage({ onSuccess }: Props) {
           <p className="mt-4 max-w-[38ch] text-base leading-relaxed text-plum/75">
             Bring your warp, weft and making charges together in one considered cost sheet.
           </p>
+          <MakerNote className="mt-3 max-w-[42ch]" />
           <WeaveGraphic className="mt-5 max-w-[18rem] sm:mt-7 sm:max-w-md" />
           <div className="mt-6 sm:mt-8">
             <CheckList
@@ -259,7 +260,8 @@ export function LoginPage({ onSuccess }: Props) {
           </summary>
           <p className="pb-1 text-sm leading-relaxed text-plum/70">
             Every thread. Every rupee. Clearly accounted for. Warp, weft and making charges on one mill
-            sheet — single or multiple yarns, with voice entry if you want it.
+            sheet — single or multiple yarns, with voice entry if you want it. Harshvardhan Pareek
+            built fabriccost STUDIO in Ichalkaranji, India.
           </p>
         </details>
       </main>

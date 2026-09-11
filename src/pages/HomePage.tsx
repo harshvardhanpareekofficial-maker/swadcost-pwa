@@ -1,5 +1,6 @@
 import { Layout } from '../components/Layout'
 import { CardButton } from '../components/CardButton'
+import { MakerNote } from '../components/Footer'
 import { Stepper } from '../components/Stepper'
 import { IconWarp, IconWeave } from '../components/Icons'
 import { SectionLabel } from '../components/SectionLabel'
@@ -50,6 +51,7 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
           onClick={() => onChooseMode('multi')}
         />
       </div>
+      <MakerNote className="mt-8" />
     </Layout>
   )
 }
