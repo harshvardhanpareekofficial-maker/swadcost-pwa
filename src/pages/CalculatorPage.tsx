@@ -55,7 +55,7 @@ export function CalculatorPage({
       return [
         { key: 'reed', label: 'Reed', unit: 'dents/inch', hint: 'Ends ≈ Reed × Warp RS', get: () => s.reed || '', set: (v) => set({ reed: n(v) }) },
         { key: 'warpReedspace', label: 'Warp Reedspace', unit: 'inches', get: () => s.warpReedspace || '', set: (v) => set({ warpReedspace: n(v) }) },
-        { key: 'l2l', label: 'L2L (length)', unit: 'length units', hint: 'Same length unit as SwadCost L2L / tape length', get: () => s.l2l || '', set: (v) => set({ l2l: n(v) }) },
+        { key: 'l2l', label: 'L2L (length)', unit: 'length units', hint: 'Same length unit as L2L / tape length', get: () => s.l2l || '', set: (v) => set({ l2l: n(v) }) },
         { key: 'warpCount', label: 'Warp Count', unit: 'Ne', get: () => s.warpCount || '', set: (v) => set({ warpCount: n(v) }) },
         { key: 'warpRate', label: 'Warp Rate', unit: '₹', get: () => s.warpRate || '', set: (v) => set({ warpRate: n(v) }) },
         { key: 'sizingRate', label: 'Sizing rate', unit: '₹', get: () => s.sizingRate || '', set: (v) => set({ sizingRate: n(v) }) },
@@ -143,11 +143,11 @@ export function CalculatorPage({
       <Stepper step={2} />
 
       {inputMethod === 'speak' ? (
-        <div className="mb-4 rounded-2xl border border-accent/30 bg-accent/10 p-4">
-          <p className="text-sm text-cream">
+        <div className="mb-4 rounded-[14px] border border-saffron/40 bg-paper p-4">
+          <p className="text-sm text-ink">
             Active field: <strong>{fields[focusIdx]?.label}</strong>
           </p>
-          <p className="mt-1 text-xs text-muted">Say a number — it fills this field and moves to the next.</p>
+          <p className="mt-1 text-xs text-plum/70">Say a number — it fills this field and moves to the next.</p>
           <div className="mt-3 flex gap-2">
             {speech.listening ? (
               <PrimaryButton variant="secondary" onClick={speech.stop}>
@@ -159,14 +159,14 @@ export function CalculatorPage({
               </PrimaryButton>
             )}
           </div>
-          {speech.error ? <p className="mt-2 text-xs text-red-300">{speech.error}</p> : null}
+          {speech.error ? <p className="mt-2 text-xs text-rose">{speech.error}</p> : null}
         </div>
       ) : null}
 
       <div className="space-y-3">
         {mode === 'single' ? (
           <>
-            <h3 className="pt-1 text-xs font-semibold uppercase tracking-widest text-accent">Warp</h3>
+            <h3 className="pt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Warp</h3>
             {fields.slice(0, 6).map((f, i) => (
               <NumberField
                 key={f.key}
@@ -180,7 +180,7 @@ export function CalculatorPage({
                 id={f.key}
               />
             ))}
-            <h3 className="pt-2 text-xs font-semibold uppercase tracking-widest text-accent">Weft</h3>
+            <h3 className="pt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Weft</h3>
             {fields.slice(6, 11).map((f, i) => {
               const idx = i + 6
               return (
@@ -196,7 +196,7 @@ export function CalculatorPage({
                 />
               )
             })}
-            <h3 className="pt-2 text-xs font-semibold uppercase tracking-widest text-accent">Other</h3>
+            <h3 className="pt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Other</h3>
             {fields.slice(11).map((f, i) => {
               const idx = i + 11
               return (

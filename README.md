@@ -1,6 +1,6 @@
-# SwadCost PWA — Textile Fabric Cost Calculator
+# fabriccost STUDIO — Textile Fabric Cost Calculator
 
-Polished, installable Progressive Web App mirroring SwadCost (pareektech) single + multi warp/weft grey fabric costing.
+Polished, installable Progressive Web App for single + multi warp/weft grey fabric costing.
 
 **Author:** Harshvardhan Pareek  
 **Stack:** Vite + React + TypeScript + Tailwind CSS + vite-plugin-pwa  
@@ -30,7 +30,7 @@ npm run dev
 | Script | Purpose |
 |--------|---------|
 | `npm run dev` | Vite dev server |
-| `npm test` | Vitest (oracle formula fixtures) |
+| `npm test` | Vitest (oracle formula fixtures + auth/telemetry) |
 | `npm run build` | Typecheck + production build → `dist/` |
 | `npm run preview` | Preview production build |
 
@@ -46,16 +46,23 @@ Single oracle Final Cost **1698.77** and multi yarn1-only **1482.17** are locked
 2. Create a **Static Site** on [Render](https://render.com) (or use `render.yaml`):
    - **Build command:** `npm ci && npm run build`
    - **Publish directory:** `dist`
-3. Optional env vars: `VITE_AUTH_USER` / `VITE_AUTH_PASS` or `VITE_AUTH_USERNAME` / `VITE_AUTH_PASSWORD` (baked in at build time as an extra seed).
+3. Optional env vars (baked in at build time):
+   - `VITE_AUTH_USER` / `VITE_AUTH_PASS` or `VITE_AUTH_USERNAME` / `VITE_AUTH_PASSWORD`
+   - `VITE_OWNER_GATE`
+   - `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
 4. Custom domain: add `harshvardhanpareek.com` in Render → Domains, then point DNS:
    - Apex: A/ALIAS to Render, or CNAME flattening per Render docs
    - `www` CNAME → your Render host
 
 SPA fallback is configured in `render.yaml` (`/*` → `/index.html`).
 
+## Design
+
+Impeccable design context lives in `PRODUCT.md` and `DESIGN.md`. Install the skill with `npx impeccable@latest install --providers=cursor --scope=project` if a teammate needs the command set locally.
+
 ## Auth note
 
-Auth is a **simple client-side gate** for convenience — not server security. Accounts (SHA-256 hashes) live in `localStorage` (`swadcost.accounts`). Anyone can inspect the bundle. Replace with real auth before exposing sensitive business data.
+Auth is a **simple client-side gate** for convenience — not server security. Account hashes live in `localStorage` (`fabriccost.accounts`). Anyone can inspect the bundle. Replace with real auth before exposing sensitive business data.
 
 ## Remaining blockers
 

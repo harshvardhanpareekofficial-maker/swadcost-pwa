@@ -11,6 +11,8 @@ import {
   type MultiInputs,
   type SingleInputs,
 } from '../lib/costing'
+import { currentUser } from '../lib/auth'
+import { recordSuccessfulCalc } from '../lib/telemetry'
 import { validateMultiInputs, validateSingleInputs, type CostMode } from '../lib/types'
 
 type Props = {
@@ -50,6 +52,14 @@ export function ResultsPage({
         return
       }
       const r = mode === 'single' ? calculateSingle(single) : calculateMulti(multi)
+      recordSuccessfulCalc({
+        username: currentUser(),
+        fabricName,
+        mode,
+        single,
+        multi,
+        result: r,
+      })
       onResult(r)
       setEditing(false)
     } catch (e) {
@@ -61,16 +71,17 @@ export function ResultsPage({
     <Layout title="Cost breakdown" subtitle={fabricName || 'Untitled fabric'}>
       <Stepper step={3} />
 
-      <div className="mb-5 rounded-3xl border border-accent/40 bg-gradient-to-br from-accent/20 to-indigo-deep/60 p-5 text-center shadow-xl">
-        <p className="text-xs uppercase tracking-widest text-accent-soft">Final cost</p>
-        <p className="mt-1 text-4xl font-bold tabular-nums text-cream">{formatInr(result.grandTotal)}</p>
-        <p className="mt-2 text-sm text-muted">
-          Per length unit: <span className="text-cream">{formatInr(result.costPerUnitLength)}</span>
+      <div className="mb-8 border-b border-plum/10 pb-6">
+        <p className="font-display text-4xl font-semibold tabular-nums tracking-[-0.03em] text-ink">
+          {formatInr(result.grandTotal)}
+        </p>
+        <p className="mt-2 text-sm text-plum/70">
+          Final cost · {formatInr(result.costPerUnitLength)} per length unit
         </p>
       </div>
 
-      <section className="mb-4 space-y-2 rounded-2xl border border-white/10 bg-card/70 p-4">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-accent">Summary</h3>
+      <section className="mb-6 space-y-2">
+        <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Summary</h3>
         <Row label="Total ends (Reed × RS)" value={String(result.totalEnds)} />
         <Row label="Warp yarn cost (raw)" value={formatInr(result.warpCostRaw)} />
         <Row label="Weft yarn cost (raw)" value={formatInr(result.weftCostRaw)} />
@@ -81,15 +92,15 @@ export function ResultsPage({
         <Row label="K constant" value={result.k.toFixed(4)} muted />
       </section>
 
-      <section className="mb-4 space-y-2 rounded-2xl border border-white/10 bg-card/70 p-4">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-accent">Warp yarns</h3>
+      <section className="mb-6 space-y-2">
+        <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Warp yarns</h3>
         {result.warpLines.map((l) => (
-          <div key={l.label} className="rounded-xl bg-ink/40 px-3 py-2 text-sm">
+          <div key={l.label} className="border-t border-plum/10 py-2 text-sm">
             <div className="flex justify-between gap-2">
-              <span className="text-cream">{l.label}</span>
-              <span className="tabular-nums text-accent-soft">{formatInr(l.yarnCostRaw)}</span>
+              <span className="text-ink">{l.label}</span>
+              <span className="tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
             </div>
-            <p className="text-xs text-muted">
+            <p className="text-xs text-plum/60">
               {l.pct}% · Ne {l.count} · rate {l.rate}
               {l.sizingCost != null ? ` · sizing ${formatInr(l.sizingCost)}` : ''}
             </p>
@@ -97,36 +108,36 @@ export function ResultsPage({
         ))}
       </section>
 
-      <section className="mb-4 space-y-2 rounded-2xl border border-white/10 bg-card/70 p-4">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-accent">Weft yarns</h3>
+      <section className="mb-6 space-y-2">
+        <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Weft yarns</h3>
         {result.weftLines.map((l) => (
-          <div key={l.label} className="rounded-xl bg-ink/40 px-3 py-2 text-sm">
+          <div key={l.label} className="border-t border-plum/10 py-2 text-sm">
             <div className="flex justify-between gap-2">
-              <span className="text-cream">{l.label}</span>
-              <span className="tabular-nums text-accent-soft">{formatInr(l.yarnCostRaw)}</span>
+              <span className="text-ink">{l.label}</span>
+              <span className="tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
             </div>
-            <p className="text-xs text-muted">
+            <p className="text-xs text-plum/60">
               {l.pct}% · Ne {l.count} · rate {l.rate}
             </p>
           </div>
         ))}
       </section>
 
-      <section className="mb-5 space-y-2 rounded-2xl border border-white/10 bg-card/70 p-4">
-        <h3 className="text-xs font-semibold uppercase tracking-widest text-accent">Markups on final</h3>
-        <div className="grid grid-cols-3 gap-2">
+      <section className="mb-6 space-y-2">
+        <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Markups on final</h3>
+        <div className="grid grid-cols-3 gap-x-3 gap-y-3">
           {result.markups.map((m) => (
-            <div key={m.pct} className="rounded-xl bg-ink/40 px-2 py-2 text-center">
-              <p className="text-[10px] text-muted">+{m.pct}%</p>
-              <p className="text-xs font-semibold tabular-nums text-cream">{formatInr(m.amount)}</p>
+            <div key={m.pct} className="text-center">
+              <p className="text-[11px] text-plum/55">+{m.pct}%</p>
+              <p className="text-xs font-semibold tabular-nums text-ink">{formatInr(m.amount)}</p>
             </div>
           ))}
         </div>
       </section>
 
       {editing ? (
-        <section className="mb-5 space-y-3 rounded-2xl border border-accent/30 bg-accent/5 p-4">
-          <h3 className="text-sm font-semibold text-cream">Edit inputs & recalculate</h3>
+        <section className="mb-5 space-y-3">
+          <h3 className="font-display text-lg font-semibold text-ink">Edit inputs & recalculate</h3>
           {mode === 'single' ? (
             <>
               {(
@@ -157,7 +168,7 @@ export function ResultsPage({
               ))}
             </>
           ) : (
-            <p className="text-sm text-muted">
+            <p className="text-sm text-plum/70">
               For multi-yarn edits, go back to the fields step for full yarn % / count / rate controls, or tweak
               shared values below.
             </p>
@@ -187,7 +198,7 @@ export function ResultsPage({
               ))}
             </>
           ) : null}
-          {error ? <p className="text-sm text-red-300">{error}</p> : null}
+          {error ? <p className="text-sm text-rose">{error}</p> : null}
           <PrimaryButton onClick={recalculate}>Recalculate</PrimaryButton>
           <PrimaryButton variant="secondary" onClick={() => setEditing(false)}>
             Cancel
@@ -213,8 +224,8 @@ export function ResultsPage({
 function Row({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
   return (
     <div className="flex items-baseline justify-between gap-3 text-sm">
-      <span className={muted ? 'text-muted' : 'text-muted'}>{label}</span>
-      <span className={`tabular-nums ${muted ? 'text-muted' : 'font-medium text-cream'}`}>{value}</span>
+      <span className={muted ? 'text-plum/50' : 'text-plum/70'}>{label}</span>
+      <span className={`tabular-nums ${muted ? 'text-plum/50' : 'font-semibold text-ink'}`}>{value}</span>
     </div>
   )
 }

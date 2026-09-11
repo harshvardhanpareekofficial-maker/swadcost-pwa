@@ -23,6 +23,9 @@ if (!globalThis.crypto?.subtle) {
 }
 
 function clearAuthStorage() {
+  localStorage.removeItem('fabriccost.accounts')
+  localStorage.removeItem('fabriccost.auth_session')
+  localStorage.removeItem('fabriccost.auth_user')
   localStorage.removeItem('swadcost.accounts')
   localStorage.removeItem('swadcost_auth_session')
   localStorage.removeItem('swadcost_auth_user')
@@ -46,6 +49,17 @@ describe('validateNewAccount', () => {
 
   it('accepts a valid payload', () => {
     expect(validateNewAccount('Maya', 'secret1', 'secret1')).toBeNull()
+  })
+})
+
+describe('legacy key migration', () => {
+  it('promotes an old session so existing users stay signed in', () => {
+    localStorage.setItem('swadcost_auth_session', '1')
+    localStorage.setItem('swadcost_auth_user', 'rohitbohara')
+    expect(isAuthenticated()).toBe(true)
+    expect(currentUser()).toBe('rohitbohara')
+    expect(localStorage.getItem('fabriccost.auth_session')).toBe('1')
+    expect(localStorage.getItem('swadcost_auth_session')).toBeNull()
   })
 })
 

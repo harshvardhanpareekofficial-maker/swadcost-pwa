@@ -2,6 +2,7 @@ import { Layout } from '../components/Layout'
 import { CardButton } from '../components/CardButton'
 import { Stepper } from '../components/Stepper'
 import { PrimaryButton } from '../components/PrimaryButton'
+import { IconWarp, IconWeave } from '../components/Icons'
 import type { CostMode } from '../lib/types'
 
 type Props = {
@@ -15,36 +16,38 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
   return (
     <Layout
       title="New costing"
-      subtitle="Name the fabric, then choose a mode"
+      subtitle="Name the fabric, then choose how the yarns are arranged."
       showLogout
       onLogout={onLogout}
     >
       <Stepper step={0} />
-      <label className="mb-5 block rounded-2xl border border-white/10 bg-card/80 px-3 py-3">
-        <span className="mb-1 block text-sm font-medium text-cream">Fabric / job name</span>
+      <label className="mb-7 block">
+        <span className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">
+          Fabric / job name
+        </span>
         <input
           value={fabricName}
           onChange={(e) => onFabricName(e.target.value)}
           placeholder="e.g. Grey 40s 72×68"
-          className="w-full rounded-xl border border-white/10 bg-ink/50 px-3 py-3 text-cream"
+          className="w-full rounded-[14px] border border-plum/12 bg-paper px-3.5 py-3.5 text-ink placeholder:text-plum/35"
         />
       </label>
       <div className="space-y-3">
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-accent">Costing mode</h2>
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Costing mode</h2>
         <CardButton
           title="Single Warp"
-          description="One warp yarn + one weft yarn — classic Costing.aspx flow."
-          icon="糸"
+          description="One warp yarn and one weft yarn — the classic mill sheet."
+          icon={<IconWarp />}
           onClick={() => onChooseMode('single')}
         />
         <CardButton
           title="Multiple Warp / Weft"
-          description="Up to 3 warp and 3 weft yarns with % split — MultiCosting.aspx."
-          icon="織"
+          description="Up to three warp and three weft yarns, split by percentage."
+          icon={<IconWeave />}
           onClick={() => onChooseMode('multi')}
         />
       </div>
-      <div className="mt-6">
+      <div className="mt-8">
         <PrimaryButton variant="ghost" onClick={onLogout}>
           Switch account
         </PrimaryButton>

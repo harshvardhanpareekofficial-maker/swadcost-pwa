@@ -26,3 +26,6 @@ dist-ssr
 .env
 
 .env.local
+
+# Impeccable engine binary (downloaded per machine)
+.cursor/skills/impeccable/scripts/bin/

@@ -12,13 +12,11 @@ export function CardButton({ title, description, icon, onClick }: Props) {
     <button
       type="button"
       onClick={onClick}
-      className="group w-full rounded-3xl border border-white/10 bg-gradient-to-br from-card to-indigo-deep/80 p-5 text-left shadow-xl transition hover:border-accent/40 hover:shadow-accent/10"
+      className="group w-full rounded-3xl border border-plum/10 bg-paper px-5 py-5 text-left shadow-[0_18px_40px_rgba(26,20,35,0.08)] transition hover:border-plum/25"
     >
-      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/15 text-2xl text-accent">
-        {icon ?? '◈'}
-      </div>
-      <h2 className="text-lg font-bold text-cream group-hover:text-accent-soft">{title}</h2>
-      <p className="mt-1 text-sm leading-relaxed text-muted">{description}</p>
+      {icon ? <div className="mb-3 text-plum">{icon}</div> : null}
+      <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-ink">{title}</h2>
+      <p className="mt-1.5 text-sm leading-relaxed text-plum/75">{description}</p>
     </button>
   )
 }

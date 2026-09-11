@@ -1,15 +1,23 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #0f172a;
-  --color-indigo-deep: #1e1b4b;
-  --color-indigo-mid: #312e81;
-  --color-accent: #f59e0b;
-  --color-accent-soft: #fbbf24;
-  --color-cream: #f8f5f0;
-  --color-card: #1e293b;
-  --color-muted: #94a3b8;
-  --font-sans: "Segoe UI", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --color-ink: #1a1423;
+  --color-plum: #3b1f4a;
+  --color-plum-deep: #2a1534;
+  --color-saffron: #e8a838;
+  --color-accent: #e8a838;
+  --color-accent-soft: #c48a22;
+  --color-ivory: #f7f1e8;
+  --color-paper: #fffbf4;
+  --color-cream: #1a1423;
+  --color-card: #fffbf4;
+  --color-muted: #5c4766;
+  --color-rose: #9b2c2c;
+  --color-ready: #2f7a4a;
+  --color-indigo-deep: #3b1f4a;
+  --color-indigo-mid: #5a2f6e;
+  --font-sans: "IBM Plex Sans", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", Palatino, Georgia, serif;
 }
 
 html,
@@ -21,12 +29,27 @@ body,
 body {
   margin: 0;
   font-family: var(--font-sans);
-  background:
-    radial-gradient(ellipse at top, #312e81 0%, transparent 55%),
-    linear-gradient(180deg, #0f172a 0%, #1e1b4b 40%, #0f172a 100%);
+  background-color: #f7f1e8;
+  background-image:
+    radial-gradient(ellipse at 12% -10%, rgba(232, 168, 56, 0.16), transparent 42%),
+    radial-gradient(ellipse at 110% 0%, rgba(59, 31, 74, 0.08), transparent 36%);
   background-attachment: fixed;
-  color: #e2e8f0;
+  color: #1a1423;
   -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+::selection {
+  background: rgba(59, 31, 74, 0.18);
+  color: #1a1423;
+}
+
+input,
+textarea {
+  caret-color: #3b1f4a;
 }
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -40,6 +63,6 @@ input[type="number"] {
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid #e8a838;
   outline-offset: 2px;
 }

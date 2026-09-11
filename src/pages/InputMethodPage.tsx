@@ -2,6 +2,7 @@ import { Layout } from '../components/Layout'
 import { CardButton } from '../components/CardButton'
 import { Stepper } from '../components/Stepper'
 import { PrimaryButton } from '../components/PrimaryButton'
+import { IconKeys, IconMic } from '../components/Icons'
 import type { InputMethod } from '../lib/types'
 
 type Props = {
@@ -19,17 +20,17 @@ export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack }: Pro
         <CardButton
           title="Speak"
           description="Use the microphone. When a number is heard, the current field fills and advances."
-          icon="🎙️"
+          icon={<IconMic />}
           onClick={() => onChoose('speak')}
         />
         <CardButton
           title="Type"
           description="Tap fields and enter numbers on the keypad. Best for precise edits."
-          icon="⌨️"
+          icon={<IconKeys />}
           onClick={() => onChoose('type')}
         />
       </div>
-      <div className="mt-6">
+      <div className="mt-8">
         <PrimaryButton variant="secondary" onClick={onBack}>
           Back
         </PrimaryButton>

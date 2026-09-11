@@ -1,6 +1,22 @@
-const ACCOUNTS_KEY = 'swadcost.accounts'
-const SESSION_KEY = 'swadcost_auth_session'
-const USER_KEY = 'swadcost_auth_user'
+import {
+  AUTH_ACCOUNTS_KEY,
+  AUTH_SESSION_KEY,
+  AUTH_USER_KEY,
+  migrateAuthStorage,
+  safeGet,
+  safeRemove,
+  safeSet,
+} from './storage'
+
+migrateAuthStorage()
+
+function localStore(): Storage | undefined {
+  try {
+    return localStorage
+  } catch {
+    return undefined
+  }
+}
 
 export const DEMO_USERNAME = 'rohitbohara'
 export const DEMO_PASSWORD = 'rohitbohara'
@@ -15,23 +31,16 @@ export type Account = {
 export type AuthResult = { ok: true; username: string } | { ok: false; error: string }
 
 function readStorage(key: string): string | null {
-  try {
-    return localStorage.getItem(key)
-  } catch {
-    return null
-  }
+  migrateAuthStorage()
+  return safeGet(localStore(), key)
 }
 
 function writeStorage(key: string, value: string): void {
-  localStorage.setItem(key, value)
+  safeSet(localStore(), key, value)
 }
 
 function removeStorage(key: string): void {
-  try {
-    localStorage.removeItem(key)
-  } catch {
-    /* ignore quota / private-mode errors on logout */
-  }
+  safeRemove(localStore(), key)
 }
 
 function isAccount(value: unknown): value is Account {
@@ -51,7 +60,7 @@ export function normalizeUsername(username: string): string {
 }
 
 export function loadAccounts(): Account[] {
-  const raw = readStorage(ACCOUNTS_KEY)
+  const raw = readStorage(AUTH_ACCOUNTS_KEY)
   if (!raw) return []
   try {
     const parsed = JSON.parse(raw) as unknown
@@ -63,7 +72,7 @@ export function loadAccounts(): Account[] {
 }
 
 function saveAccounts(accounts: Account[]): void {
-  writeStorage(ACCOUNTS_KEY, JSON.stringify(accounts))
+  writeStorage(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts))
 }
 
 export function findAccount(username: string, accounts = loadAccounts()): Account | undefined {
@@ -128,21 +137,27 @@ export async function ensureSeedAccounts(): Promise<void> {
 }
 
 function setSession(username: string): void {
-  writeStorage(SESSION_KEY, '1')
-  writeStorage(USER_KEY, username)
+  writeStorage(AUTH_SESSION_KEY, '1')
+  writeStorage(AUTH_USER_KEY, username)
 }
 
 export function isAuthenticated(): boolean {
-  return readStorage(SESSION_KEY) === '1'
+  return readStorage(AUTH_SESSION_KEY) === '1'
 }
 
 export function currentUser(): string | null {
-  return readStorage(USER_KEY)
+  return readStorage(AUTH_USER_KEY)
 }
 
 export function logout(): void {
-  removeStorage(SESSION_KEY)
-  removeStorage(USER_KEY)
+  removeStorage(AUTH_SESSION_KEY)
+  removeStorage(AUTH_USER_KEY)
+}
+
+export const GUEST_USERNAME = 'Guest'
+
+export function enterGuest(): void {
+  setSession(GUEST_USERNAME)
 }
 
 function loginFailure(error: string): AuthResult {

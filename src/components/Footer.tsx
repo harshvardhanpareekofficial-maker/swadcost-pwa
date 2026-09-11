@@ -1,9 +1,8 @@
 export function Footer() {
   return (
-    <footer className="mt-auto border-t border-white/10 bg-ink/60 px-4 py-4 text-center text-sm text-muted backdrop-blur">
+    <footer className="mt-10 border-t border-plum/10 pt-4 text-left text-sm text-plum/70">
       <p>
-        Made by{' '}
-        <span className="font-semibold text-accent-soft">Harshvardhan Pareek</span>
+        Made by <span className="font-semibold text-plum">Harshvardhan Pareek</span>
       </p>
     </footer>
   )
