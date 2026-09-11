@@ -24,7 +24,7 @@ Static site on Render. Client-side accounts in localStorage. Optional Supabase a
 
 ## Capabilities and Constraints
 
-- Sign in / Create account (hashed passwords, demo seed `rohitbohara` / `rohitbohara`). Guest “explore first” is allowed.
+- Sign in / Create account only (hashed passwords, demo seed `rohitbohara` / `rohitbohara`). No guest / “explore first” path.
 - Costing math follows the owner mill notebook (warp weight example 0.082). Do not reintroduce the old K-constant SwadCost fit.
 - Secret owner vault (not `/admin`) gated by `VITE_OWNER_GATE`.
 - Analytics tables keep backend names `swadcost_accounts` / `swadcost_calcs`; never surface that brand in UI.

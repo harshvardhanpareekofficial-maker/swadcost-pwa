@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   SAMPLE_MULTI,
   SAMPLE_SINGLE,
+  SWADCOST_LIVE_SAMPLE,
   applyWastagePct,
   calculateMulti,
   calculateSingle,
@@ -68,6 +69,14 @@ describe('calculateSingle', () => {
 
   it('throws on zero warp count', () => {
     expect(() => calculateSingle({ ...SAMPLE_SINGLE, warpCount: 0 })).toThrow(/count/i)
+  })
+
+  it('does not silently match the live SwadCost 1698.77 oracle', () => {
+    const asPickRate = calculateSingle(SWADCOST_LIVE_SAMPLE)
+    const majuriAsFlat = calculateSingle({ ...SWADCOST_LIVE_SAMPLE, pickRate: 0 })
+    expect(asPickRate.grandTotal).not.toBe(1698.77)
+    expect(majuriAsFlat.grandTotal).not.toBe(1698.77)
+    expect(asPickRate.warpWeight).toBeCloseTo((60 * 80 * 120) / (1825 * 40 * 2), 6)
   })
 })
 

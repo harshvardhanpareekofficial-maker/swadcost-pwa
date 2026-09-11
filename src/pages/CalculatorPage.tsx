@@ -137,9 +137,36 @@ export function CalculatorPage({
     }
   }, [inputMethod, speech.supported, speech.listening])
 
+  const renderField = (i: number) => {
+    const f = fields[i]
+    if (!f) return null
+    return (
+      <NumberField
+        key={f.key}
+        ref={(el) => { fieldRefs.current[i] = el }}
+        label={f.label}
+        unit={f.unit}
+        hint={f.hint}
+        value={f.get()}
+        onChange={(v) => {
+          f.set(v)
+          setFocusIdx(i)
+        }}
+        active={focusIdx === i}
+        id={f.key}
+      />
+    )
+  }
+
+  const pair = (a: number, b: number) => (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {renderField(a)}
+      {renderField(b)}
+    </div>
+  )
+
   return (
     <Layout
-      eyebrow="Cost sheet"
       title={mode === 'single' ? 'Single Warp' : 'Multiple Warp / Weft'}
       subtitle={`${fabricName || 'Untitled'} · ${inputMethod === 'speak' ? 'Speak' : 'Type'}`}
     >
@@ -166,98 +193,76 @@ export function CalculatorPage({
         </StudioSheet>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-3 pb-28">
         {mode === 'single' ? (
           <>
             <SectionLabel>Warp</SectionLabel>
-            {fields.slice(0, 6).map((f, i) => (
-              <NumberField
-                key={f.key}
-                ref={(el) => { fieldRefs.current[i] = el }}
-                label={f.label}
-                unit={f.unit}
-                hint={f.hint}
-                value={f.get()}
-                onChange={f.set}
-                active={focusIdx === i}
-                id={f.key}
-              />
-            ))}
+            {pair(0, 1)}
+            {renderField(2)}
+            {pair(3, 4)}
+            {renderField(5)}
             <SectionLabel className="pt-2">Weft</SectionLabel>
-            {fields.slice(6, 11).map((f, i) => {
-              const idx = i + 6
+            {pair(6, 7)}
+            {pair(8, 9)}
+            {renderField(10)}
+            <SectionLabel className="pt-2">Job & other</SectionLabel>
+            {pair(11, 12)}
+          </>
+        ) : (
+          <>
+            <SectionLabel>Warp</SectionLabel>
+            {pair(0, 1)}
+            {renderField(2)}
+            {[0, 1, 2].map((yarn) => {
+              const base = 3 + yarn * 4
               return (
-                <NumberField
-                  key={f.key}
-                  ref={(el) => { fieldRefs.current[idx] = el }}
-                  label={f.label}
-                  unit={f.unit}
-                  hint={f.hint}
-                  value={f.get()}
-                  onChange={f.set}
-                  active={focusIdx === idx}
-                  id={f.key}
-                />
+                <div key={`warp-yarn-${yarn}`} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {renderField(base)}
+                  {renderField(base + 1)}
+                  {renderField(base + 2)}
+                  {renderField(base + 3)}
+                </div>
+              )
+            })}
+            <SectionLabel className="pt-2">Weft</SectionLabel>
+            {pair(15, 16)}
+            {renderField(17)}
+            {[0, 1, 2].map((yarn) => {
+              const base = 18 + yarn * 3
+              return (
+                <div key={`weft-yarn-${yarn}`} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {renderField(base)}
+                  {renderField(base + 1)}
+                  <div className="sm:col-span-2">{renderField(base + 2)}</div>
+                </div>
               )
             })}
             <SectionLabel className="pt-2">Job & other</SectionLabel>
-            {fields.slice(11).map((f, i) => {
-              const idx = i + 11
-              return (
-                <NumberField
-                  key={f.key}
-                  ref={(el) => { fieldRefs.current[idx] = el }}
-                  label={f.label}
-                  unit={f.unit}
-                  hint={f.hint}
-                  value={f.get()}
-                  onChange={f.set}
-                  active={focusIdx === idx}
-                  id={f.key}
-                />
-              )
-            })}
+            {pair(fields.length - 2, fields.length - 1)}
           </>
-        ) : (
-          fields.map((f, i) => (
-            <NumberField
-              key={f.key}
-              ref={(el) => { fieldRefs.current[i] = el }}
-              label={f.label}
-              unit={f.unit}
-              hint={f.hint}
-              value={f.get()}
-              onChange={(v) => {
-                f.set(v)
-                setFocusIdx(i)
-              }}
-              active={focusIdx === i}
-              id={f.key}
-            />
-          ))
         )}
       </div>
 
-      <div className="mt-6 space-y-3">
-        <PrimaryButton onClick={onCalculate}>
-          Calculate
-        </PrimaryButton>
-        <PrimaryButton
-          variant="secondary"
-          onClick={() => {
-            if (mode === 'single') onChangeSingle({ ...SAMPLE_SINGLE })
-            else onChangeMulti({
-              ...SAMPLE_MULTI,
-              warpYarns: SAMPLE_MULTI.warpYarns.map((y) => ({ ...y })),
-              weftYarns: SAMPLE_MULTI.weftYarns.map((y) => ({ ...y })),
-            })
-          }}
-        >
-          Load sample values
-        </PrimaryButton>
-        <PrimaryButton variant="secondary" onClick={onBack}>
-          Back
-        </PrimaryButton>
+      <div className="sticky bottom-0 z-20 -mx-4 mt-2 border-t border-plum/10 bg-ivory/95 px-4 py-3 backdrop-blur-sm pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
+        <PrimaryButton onClick={onCalculate}>Calculate</PrimaryButton>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <PrimaryButton
+            variant="secondary"
+            onClick={() => {
+              if (mode === 'single') onChangeSingle({ ...SAMPLE_SINGLE })
+              else onChangeMulti({
+                ...SAMPLE_MULTI,
+                warpYarns: SAMPLE_MULTI.warpYarns.map((y) => ({ ...y })),
+                weftYarns: SAMPLE_MULTI.weftYarns.map((y) => ({ ...y })),
+              })
+            }}
+          >
+            Load sample
+          </PrimaryButton>
+          <PrimaryButton variant="secondary" onClick={onBack}>
+            Back
+          </PrimaryButton>
+        </div>
       </div>
     </Layout>
   )

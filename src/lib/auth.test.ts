@@ -47,12 +47,25 @@ describe('validateNewAccount', () => {
     expect(validateNewAccount('maya', 'abcdef', 'abcdeg')).toMatch(/match/i)
   })
 
+  it('rejects a reserved guest username', () => {
+    expect(validateNewAccount('Guest', 'abcdef', 'abcdef')).toMatch(/reserved/i)
+    expect(validateNewAccount('guest', 'abcdef', 'abcdef')).toMatch(/reserved/i)
+  })
+
   it('accepts a valid payload', () => {
     expect(validateNewAccount('Maya', 'secret1', 'secret1')).toBeNull()
   })
 })
 
 describe('legacy key migration', () => {
+  it('clears a leftover Guest explore-first session', () => {
+    localStorage.setItem('fabriccost.auth_session', '1')
+    localStorage.setItem('fabriccost.auth_user', 'Guest')
+    expect(isAuthenticated()).toBe(false)
+    expect(currentUser()).toBeNull()
+    expect(localStorage.getItem('fabriccost.auth_session')).toBeNull()
+  })
+
   it('promotes an old session so existing users stay signed in', () => {
     localStorage.setItem('swadcost_auth_session', '1')
     localStorage.setItem('swadcost_auth_user', 'rohitbohara')
@@ -134,6 +147,12 @@ describe('createAccount', () => {
     const dup = await createAccount('maya', 'otherpw', 'otherpw')
     expect(dup.ok).toBe(false)
     if (!dup.ok) expect(dup.error).toMatch(/already taken/i)
+  })
+
+  it('rejects creating a Guest account', async () => {
+    const result = await createAccount('Guest', 'abcdef', 'abcdef')
+    expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error).toMatch(/reserved/i)
   })
 
   it('does not collide with the seeded demo username', async () => {

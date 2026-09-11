@@ -223,7 +223,7 @@ export function recordSuccessfulCalc(args: {
         }
 
   void recordCalc({
-    username: args.username?.trim() || 'Guest',
+    username: args.username?.trim() || 'unknown',
     fabricName: args.fabricName.trim() || 'Untitled fabric',
     mode: args.mode,
     reed,
@@ -250,7 +250,7 @@ function mapRemoteCalc(row: Record<string, unknown>): CalcEvent | null {
   if (!mode) return null
   return {
     id: typeof row.id === 'string' ? row.id : newId(),
-    username: typeof row.username === 'string' ? row.username : 'Guest',
+    username: typeof row.username === 'string' ? row.username : 'unknown',
     fabricName: typeof row.fabric_name === 'string' ? row.fabric_name : '',
     mode,
     reed: Number(row.reed) || 0,

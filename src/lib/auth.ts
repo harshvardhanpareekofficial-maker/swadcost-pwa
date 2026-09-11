@@ -142,22 +142,24 @@ function setSession(username: string): void {
 }
 
 export function isAuthenticated(): boolean {
-  return readStorage(AUTH_SESSION_KEY) === '1'
+  if (readStorage(AUTH_SESSION_KEY) !== '1') return false
+  const user = readStorage(AUTH_USER_KEY)
+  // Legacy “explore first” guest sessions are no longer valid.
+  if (!user || normalizeUsername(user) === 'guest') {
+    logout()
+    return false
+  }
+  return true
 }
 
 export function currentUser(): string | null {
+  if (!isAuthenticated()) return null
   return readStorage(AUTH_USER_KEY)
 }
 
 export function logout(): void {
   removeStorage(AUTH_SESSION_KEY)
   removeStorage(AUTH_USER_KEY)
-}
-
-export const GUEST_USERNAME = 'Guest'
-
-export function enterGuest(): void {
-  setSession(GUEST_USERNAME)
 }
 
 function loginFailure(error: string): AuthResult {
@@ -202,6 +204,7 @@ export function validateNewAccount(
 ): string | null {
   const name = username.trim()
   if (!name) return 'Enter a name to use as your username.'
+  if (normalizeUsername(name) === 'guest') return 'That username is reserved. Choose another name.'
   if (!password) return 'Enter a password.'
   if (password.length < MIN_PASSWORD_LENGTH) {
     return `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`

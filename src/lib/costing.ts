@@ -342,6 +342,27 @@ export const SAMPLE_SINGLE: SingleInputs = {
   warping: 0,
 }
 
+/**
+ * Live Costing.aspx sample posted 2026-09-11 → Final Cost 1698.77.
+ * Majuri on that form is a rupee box; mapping it to pickRate is a labeled trial
+ * in FORMULA_CROSSCHECK.md — not a form prefill.
+ */
+export const SWADCOST_LIVE_SAMPLE: SingleInputs = {
+  reed: 80,
+  warpReedspace: 60,
+  l2l: 2,
+  warpCount: 40,
+  warpRate: 300,
+  sizingRate: 5,
+  pick: 50,
+  weftReedspace: 60,
+  weftCount: 40,
+  weftRate: 280,
+  wastagePct: 5,
+  pickRate: 10,
+  warping: 0,
+}
+
 export const SAMPLE_MULTI: MultiInputs = {
   reed: SAMPLE_SINGLE.reed,
   warpReedspace: SAMPLE_SINGLE.warpReedspace,

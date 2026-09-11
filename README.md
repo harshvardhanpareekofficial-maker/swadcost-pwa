@@ -44,7 +44,7 @@ Mill-sheet notebook (owner handwritten):
 - **Sizing** = warp weight × sizing rate
 - **Job rate** = Pick × pick rate
 
-Costs are weight × yarn rate; grand total adds sizing, job, and optional warping. Multi-yarn uses the same constants, split by yarn %. See comments in `src/lib/costing.ts` for labeled assumptions.
+See [`FORMULA_CROSSCHECK.md`](FORMULA_CROSSCHECK.md) for the live SwadCost demo comparison (1698.77). The mill notebook is the engine; the old K-fit is not restored.
 
 ## Deploy on Render (static site)
 

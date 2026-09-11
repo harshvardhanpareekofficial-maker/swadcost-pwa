@@ -70,3 +70,19 @@ input[type="number"] {
   outline: 2px solid #e8a838;
   outline-offset: 2px;
 }
+
+html {
+  scroll-padding-bottom: 7rem;
+}
+
+button,
+a,
+input {
+  touch-action: manipulation;
+}
+
+@supports (scrollbar-color: auto) {
+  * {
+    scrollbar-color: rgba(59, 31, 74, 0.35) transparent;
+  }
+}

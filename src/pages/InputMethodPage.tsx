@@ -16,7 +16,6 @@ type Props = {
 export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack }: Props) {
   return (
     <Layout
-      eyebrow="Entry method"
       title="How will you enter values?"
       subtitle={`${fabricName || 'Untitled'} · ${modeLabel}`}
     >

@@ -1,6 +1,5 @@
 import { Layout } from '../components/Layout'
 import { CardButton } from '../components/CardButton'
-import { CheckList } from '../components/CheckList'
 import { Stepper } from '../components/Stepper'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { IconWarp, IconWeave } from '../components/Icons'
@@ -18,17 +17,13 @@ type Props = {
 export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: Props) {
   return (
     <Layout
-      eyebrow="The fabric costing workspace"
       title="New costing"
       subtitle="Name the fabric, then choose how the yarns are arranged."
       showLogout
       onLogout={onLogout}
     >
       <Stepper step={0} />
-      <div className="mb-7">
-        <CheckList items={['Single & multiple yarns', 'Editable calculations', 'Voice entry']} />
-      </div>
-      <label className="mb-7 block">
+      <label className="mb-6 block">
         <span className={`mb-1.5 block ${studioLabelClass}`}>Fabric / job name</span>
         <input
           value={fabricName}

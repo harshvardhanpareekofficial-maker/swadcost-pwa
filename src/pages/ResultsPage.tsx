@@ -70,21 +70,19 @@ export function ResultsPage({
   }
 
   return (
-    <Layout eyebrow="Final account" title="Cost breakdown" subtitle={fabricName || 'Untitled fabric'}>
+    <Layout title="Cost breakdown" subtitle={fabricName || 'Untitled fabric'}>
       <Stepper step={3} />
 
       <StudioSheet className="mb-6 overflow-hidden sm:mb-8">
-        <p className="font-display break-words text-3xl font-semibold tabular-nums tracking-[-0.03em] text-ink sm:text-4xl">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/55">Final cost</p>
+        <p className="font-display mt-1 break-words text-[2rem] font-semibold tabular-nums tracking-[-0.03em] text-ink sm:text-4xl">
           {formatInr(result.grandTotal)}
         </p>
-        <p className="mt-2 text-sm text-plum/70">
-          Final cost
-          {result.length > 0 ? (
-            <span className="block text-xs text-plum/55 sm:inline sm:before:content-['·_']">
-              {formatInr(result.costPerUnitLength)} ÷ L2L (derived)
-            </span>
-          ) : null}
-        </p>
+        {result.length > 0 ? (
+          <p className="mt-2 text-xs text-plum/55">
+            {formatInr(result.costPerUnitLength)} ÷ L2L (derived, not on the mill sheet)
+          </p>
+        ) : null}
       </StudioSheet>
 
       <section className="mb-6 space-y-2">
