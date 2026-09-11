@@ -465,8 +465,8 @@ export function parseSpokenTokens(stripped: string): number | null {
 export function extractSpokenNumber(transcript: string): number | null {
   const cleaned = normalizeDigits(transcript)
     .replace(/,/g, ' ')
-    .replace(/([a-z\u0900-\u097F])-([a-z\u0900-\u097F])/gi, '$1 $2')
-    .replace(/[^\p{L}\p{N}.\s-]/gu, ' ')
+    .replace(/([a-z])-([a-z])/gi, '$1 $2')
+    .replace(/[^\p{L}\p{M}\p{N}.\s-]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim()
     .toLowerCase()
