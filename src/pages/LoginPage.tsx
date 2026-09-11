@@ -86,6 +86,13 @@ export function LoginPage({ onSuccess }: Props) {
     setConfirmPassword('')
   }
 
+  function updateField(setter: (value: string) => void) {
+    return (value: string) => {
+      setError(null)
+      setter(value)
+    }
+  }
+
   async function submit(e: FormEvent) {
     e.preventDefault()
     setBusy(true)
@@ -166,7 +173,7 @@ export function LoginPage({ onSuccess }: Props) {
               autoCorrect="off"
               spellCheck={false}
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => updateField(setUsername)(e.target.value)}
               placeholder={signingIn ? 'Your username' : 'Display name or username'}
               className="w-full rounded-xl border border-white/10 bg-ink/50 px-3 py-3 text-cream placeholder:text-muted/50"
               required
@@ -179,7 +186,7 @@ export function LoginPage({ onSuccess }: Props) {
           <PasswordField
             label="Password"
             value={password}
-            onChange={setPassword}
+            onChange={updateField(setPassword)}
             autoComplete={signingIn ? 'current-password' : 'new-password'}
             placeholder={signingIn ? 'Your password' : `At least ${MIN_PASSWORD_LENGTH} characters`}
           />
@@ -188,7 +195,7 @@ export function LoginPage({ onSuccess }: Props) {
             <PasswordField
               label="Confirm password"
               value={confirmPassword}
-              onChange={setConfirmPassword}
+              onChange={updateField(setConfirmPassword)}
               autoComplete="new-password"
               placeholder="Type the same password again"
             />
