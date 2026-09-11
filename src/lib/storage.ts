@@ -1,3 +1,5 @@
+import { IDLE_TTL_MS } from './idle'
+
 /** Copy a legacy swadcost_* key to fabriccost_* once, then drop the old key. */
 export function migrateStorageKey(
   oldKey: string,
@@ -67,14 +69,46 @@ export const OWNER_SESSION_KEY = 'fabriccost.owner_ok'
 export const ACCOUNTS_EPOCH_KEY = 'fabriccost.accounts_epoch'
 export const ACCOUNTS_EPOCH = 'empty-2026-09'
 
+function stampAccountsEpoch(local: Storage): boolean {
+  try {
+    local.setItem(ACCOUNTS_EPOCH_KEY, ACCOUNTS_EPOCH)
+  } catch {
+    return false
+  }
+  return safeGet(local, ACCOUNTS_EPOCH_KEY) === ACCOUNTS_EPOCH
+}
+
+/** Keep hashed accounts that are still inside the idle window — never loop-wipe a new studio login. */
+export function hasFreshHashedAccounts(raw: string | null, now = Date.now()): boolean {
+  if (!raw) return false
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return false
+    return parsed.some((row) => {
+      if (!row || typeof row !== 'object') return false
+      const rec = row as Record<string, unknown>
+      if (typeof rec.passwordHash !== 'string' || rec.passwordHash.length === 0) return false
+      const created = typeof rec.createdAt === 'number' ? rec.createdAt : 0
+      const active = typeof rec.lastActiveAt === 'number' ? rec.lastActiveAt : created
+      const at = active > 0 ? active : created
+      return Number.isFinite(at) && at > 0 && now - at <= IDLE_TTL_MS
+    })
+  } catch {
+    return false
+  }
+}
+
 function wipeLocalAccountStore(local: Storage | undefined): void {
   if (!local) return
   if (safeGet(local, ACCOUNTS_EPOCH_KEY) === ACCOUNTS_EPOCH) return
+  // Stamp first. If the marker cannot persist, skip the delete so every load
+  // cannot wipe a brand-new Create account.
+  if (!stampAccountsEpoch(local)) return
+  if (hasFreshHashedAccounts(safeGet(local, AUTH_ACCOUNTS_KEY))) return
   safeRemove(local, AUTH_ACCOUNTS_KEY)
   safeRemove(local, AUTH_SESSION_KEY)
   safeRemove(local, AUTH_USER_KEY)
   safeRemove(local, ACCOUNT_META_KEY)
-  safeSet(local, ACCOUNTS_EPOCH_KEY, ACCOUNTS_EPOCH)
 }
 
 export function migrateAuthStorage(): void {
@@ -89,7 +123,8 @@ export function migrateTelemetryStorage(): void {
   const local = browserLocal()
   migrateStorageKey('swadcost.account_meta', ACCOUNT_META_KEY, local)
   migrateStorageKey('swadcost.calc_events', CALC_EVENTS_KEY, local)
-  wipeLocalAccountStore(local)
+  // Epoch wipe stays on migrateAuthStorage only — a telemetry read must not
+  // delete hashed accounts.
 }
 
 export function migrateOwnerStorage(): void {

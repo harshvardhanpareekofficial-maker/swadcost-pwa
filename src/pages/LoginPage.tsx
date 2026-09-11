@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { createAccount, login, MIN_PASSWORD_LENGTH } from '../lib/auth'
+import { createAccount, login, MIN_PASSWORD_LENGTH, NO_LOCAL_ACCOUNT } from '../lib/auth'
 import { IconArrow } from '../components/Icons'
 import { CheckList } from '../components/CheckList'
 import { Footer, MakerNote } from '../components/Footer'
@@ -7,7 +7,7 @@ import { PrimaryButton } from '../components/PrimaryButton'
 import { StudioBar } from '../components/StudioBar'
 import { WeaveGraphic } from '../components/WeaveGraphic'
 import { studioFieldClass, studioLabelClass } from '../components/studio'
-import { markAccountActive } from '../lib/telemetry'
+import { accountRememberedElsewhere, markAccountActive, REMOTE_ACCOUNT_NEEDS_RECREATE } from '../lib/telemetry'
 
 type Props = { onSuccess: () => void }
 type Mode = 'signin' | 'signup'
@@ -107,6 +107,11 @@ export function LoginPage({ onSuccess }: Props) {
       if (result.ok) {
         await markAccountActive(result.username)
         onSuccess()
+        return
+      }
+      if (mode === 'signin' && result.error === NO_LOCAL_ACCOUNT) {
+        const remembered = await accountRememberedElsewhere(username)
+        setError(remembered ? REMOTE_ACCOUNT_NEEDS_RECREATE : result.error)
         return
       }
       setError(result.error)

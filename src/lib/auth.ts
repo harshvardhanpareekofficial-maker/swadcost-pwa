@@ -22,6 +22,12 @@ function localStore(): Storage | undefined {
 export const MIN_PASSWORD_LENGTH = 6
 export { IDLE_TTL_DAYS }
 
+export const NO_LOCAL_ACCOUNT =
+  'No account found for that username on this device. Create an account if you are new.'
+
+export const ACCOUNT_SAVE_FAILED =
+  'Could not save the account in this browser. Allow site data / localStorage and try Create account again.'
+
 export type Account = {
   username: string
   passwordHash: string
@@ -68,8 +74,9 @@ function toAccount(value: unknown): Account | null {
   }
 }
 
+/** Trim, collapse inner spaces, casefold. Harshvardhan == HARSHVARDHAN == harshvardhan. */
 export function normalizeUsername(username: string): string {
-  return username.trim().toLowerCase()
+  return username.trim().replace(/\s+/g, ' ').toLowerCase()
 }
 
 export function loadAccounts(): Account[] {
@@ -84,8 +91,17 @@ export function loadAccounts(): Account[] {
   }
 }
 
-function saveAccounts(accounts: Account[]): void {
-  writeStorage(AUTH_ACCOUNTS_KEY, JSON.stringify(accounts))
+function persistAccounts(accounts: Account[]): boolean {
+  const payload = JSON.stringify(accounts)
+  writeStorage(AUTH_ACCOUNTS_KEY, payload)
+  const raw = safeGet(localStore(), AUTH_ACCOUNTS_KEY)
+  if (!raw) return false
+  try {
+    const parsed = JSON.parse(raw) as unknown
+    return Array.isArray(parsed) && parsed.length === accounts.length
+  } catch {
+    return false
+  }
 }
 
 export function findAccount(username: string, accounts = loadAccounts()): Account | undefined {
@@ -152,7 +168,7 @@ export function touchAccountLastActive(username: string, at = Date.now()): Accou
     found = { ...account, lastActiveAt: at }
     return found
   })
-  if (found) saveAccounts(next)
+  if (found) persistAccounts(next)
   return found
 }
 
@@ -165,7 +181,7 @@ export function purgeIdleLocalAccounts(now = Date.now()): string[] {
     if (isIdleTimestamp(account.lastActiveAt, now)) removed.push(account.username)
     else kept.push(account)
   }
-  if (removed.length > 0) saveAccounts(kept)
+  if (removed.length > 0) persistAccounts(kept)
 
   const user = readStorage(AUTH_USER_KEY)
   if (user && removed.some((name) => normalizeUsername(name) === normalizeUsername(user))) {
@@ -181,7 +197,7 @@ export async function login(username: string, password: string): Promise<AuthRes
 
   const account = findAccount(name)
   if (!account) {
-    return loginFailure('No account found for that username. Create an account if you are new.')
+    return loginFailure(NO_LOCAL_ACCOUNT)
   }
 
   let hash: string
@@ -244,7 +260,9 @@ export async function createAccount(
     createdAt: now,
     lastActiveAt: now,
   })
-  saveAccounts(accounts)
+  if (!persistAccounts(accounts) || !findAccount(name)) {
+    return loginFailure(ACCOUNT_SAVE_FAILED)
+  }
   setSession(name)
   return { ok: true, username: name }
 }
