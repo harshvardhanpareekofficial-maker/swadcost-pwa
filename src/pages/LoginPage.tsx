@@ -151,7 +151,7 @@ export function LoginPage({ onSuccess }: Props) {
           ? await login(username, password)
           : await createAccount(username, password, confirmPassword)
       if (result.ok) {
-        if (mode === 'signup') void recordAccount(result.username)
+        if (mode === 'signup') await recordAccount(result.username)
         onSuccess()
         return
       }

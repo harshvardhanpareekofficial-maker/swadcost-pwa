@@ -141,13 +141,13 @@ export async function recordAccount(username: string): Promise<void> {
   const client = getSupabase()
   if (!client) return
   try {
-    await client.from('swadcost_accounts').insert({
-      id: row.id,
-      username: row.username,
-      created_at: row.createdAt,
-    })
+    // Username only — never send a password. Unique on generated username_norm.
+    await client.from('swadcost_accounts').upsert(
+      { username: row.username },
+      { onConflict: 'username_norm', ignoreDuplicates: true },
+    )
   } catch {
-    /* duplicate or network — local copy already saved */
+    /* network — local copy already saved */
   }
 }
 
@@ -174,17 +174,15 @@ export async function recordCalc(event: Omit<CalcEvent, 'id' | 'createdAt'> & { 
   if (!client) return
   try {
     await client.from('swadcost_calcs').insert({
-      id: row.id,
       username: row.username,
       fabric_name: row.fabricName,
       mode: row.mode,
       reed: row.reed,
       pick: row.pick,
       warp_rs: row.warpRs,
-      quality_label: row.qualityLabel,
+      quality_label: row.qualityLabel || null,
       final_cost: row.finalCost,
       payload: row.payload,
-      created_at: row.createdAt,
     })
   } catch {
     /* local copy already saved */
