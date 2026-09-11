@@ -65,6 +65,20 @@ describe('studio chrome', () => {
     expect(ui).not.toMatch(/swadcost/)
   })
 
+  it('does not bake demo account credentials', () => {
+    const auth = read('src/lib/auth.ts')
+    const login = read('src/pages/LoginPage.tsx')
+    const envExample = read('.env.example')
+    expect(auth).not.toMatch(/DEMO_PASSWORD/)
+    expect(auth).not.toMatch(/DEMO_USERNAME/)
+    expect(auth).not.toMatch(/ensureSeedAccounts/)
+    expect(auth).not.toMatch(/rohitbohara/)
+    expect(login).not.toMatch(/DEMO_USERNAME/)
+    expect(login).not.toMatch(/rohitbohara/)
+    expect(envExample).not.toMatch(/VITE_AUTH_PASS=/)
+    expect(envExample).not.toMatch(/VITE_AUTH_PASSWORD=/)
+  })
+
   it('keeps maker attribution', () => {
     expect(read('src/components/Footer.tsx')).toContain('Harshvardhan Pareek')
   })

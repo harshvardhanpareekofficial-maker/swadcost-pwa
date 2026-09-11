@@ -8,7 +8,7 @@ Polished, installable Progressive Web App for single + multi warp/weft grey fabr
 
 ## Features
 
-- Client-side accounts in `localStorage` (Sign in + Create account). Demo `rohitbohara` / `rohitbohara` is seeded; optional `VITE_AUTH_USER` / `VITE_AUTH_PASS` (or `VITE_AUTH_*NAME` / `VITE_AUTH_*PASSWORD`) add another seed.
+- Client-side accounts in `localStorage` (Sign in + Create account). Fresh installs start empty — there is no baked-in demo user.
 - Home: fabric name + **Single Warp** / **Multiple Warp / Weft**
 - Speak (Web Speech API) or Type input; mic fills current field and advances
 - Full cost breakdown with editable inputs + recalculate
@@ -53,7 +53,6 @@ See [`FORMULA_CROSSCHECK.md`](FORMULA_CROSSCHECK.md) for the live SwadCost demo 
    - **Build command:** `npm ci && npm run build`
    - **Publish directory:** `dist`
 3. Optional env vars (baked in at build time):
-   - `VITE_AUTH_USER` / `VITE_AUTH_PASS` or `VITE_AUTH_USERNAME` / `VITE_AUTH_PASSWORD`
    - `VITE_OWNER_GATE`
    - `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY`
 4. Custom domain: add `harshvardhanpareek.com` in Render → Domains, then point DNS:
@@ -69,6 +68,19 @@ Impeccable design context lives in `PRODUCT.md` and `DESIGN.md`. Install the ski
 ## Auth note
 
 Auth is a **simple client-side gate** for convenience — not server security. Account hashes live in `localStorage` (`fabriccost.accounts`). Anyone can inspect the bundle. Replace with real auth before exposing sensitive business data.
+
+New browsers start with an empty account list. A one-time local epoch wipe drops historic seeded users from existing devices.
+
+## Idle account purge (12 days)
+
+Each account stores `lastActiveAt` / `last_active_at`. The stamp updates on successful **sign-in** and successful **Calculate**.
+
+On every app load the client:
+
+1. Removes hashed accounts idle longer than 12 days from `localStorage` (and matching local telemetry).
+2. Deletes matching rows in Supabase `swadcost_accounts` and `swadcost_calcs`.
+
+Remote deletes only succeed for idle rows (RLS). Apply [`supabase/migrations/20260911_last_active_idle_purge.sql`](supabase/migrations/20260911_last_active_idle_purge.sql) so the `last_active_at` column and policies exist. The owner vault lists last active and notes the 12-day rule. Existing cloud rows are wiped by the coordinator, not by this client.
 
 ## Remaining blockers
 

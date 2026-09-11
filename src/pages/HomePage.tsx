@@ -17,12 +17,13 @@ type Props = {
 export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: Props) {
   return (
     <Layout
+      eyebrow="Costing studio"
       title="New grey fabric costing"
       subtitle="Name the fabric, then choose single or multiple warp and weft yarns for powerloom textile costing."
       onLogout={onLogout}
     >
       <Stepper step={0} />
-      <label className="mb-6 block">
+      <label className="mb-4 block sm:mb-6">
         <span className={`mb-1.5 block ${studioLabelClass}`}>Fabric / job name</span>
         <input
           value={fabricName}
@@ -36,7 +37,7 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
           </p>
         ) : null}
       </label>
-      <div className="space-y-3">
+      <div className="space-y-2.5 sm:space-y-3">
         <SectionLabel>Costing mode</SectionLabel>
         <CardButton
           title="Single Warp"

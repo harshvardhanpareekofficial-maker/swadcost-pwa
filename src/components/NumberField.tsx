@@ -20,7 +20,7 @@ export const NumberField = forwardRef<HTMLInputElement, Props>(function NumberFi
   return (
     <label
       className={[
-        'block min-w-0 rounded-[14px] border px-3.5 py-3 transition',
+        'block min-w-0 rounded-[14px] border px-3 py-2.5 transition sm:px-3.5 sm:py-3',
         active ? 'border-saffron bg-paper/90 shadow-[0_2px_8px_rgba(59,31,74,0.06),0_0_0_3px_rgba(232,168,56,0.22)]' : 'border-plum/12 bg-paper/70',
       ].join(' ')}
     >

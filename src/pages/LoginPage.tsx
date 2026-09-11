@@ -1,10 +1,5 @@
-import { useEffect, useState, type FormEvent } from 'react'
-import {
-  createAccount,
-  DEMO_USERNAME,
-  login,
-  MIN_PASSWORD_LENGTH,
-} from '../lib/auth'
+import { useState, type FormEvent } from 'react'
+import { createAccount, login, MIN_PASSWORD_LENGTH } from '../lib/auth'
 import { IconArrow } from '../components/Icons'
 import { CheckList } from '../components/CheckList'
 import { Footer, MakerNote } from '../components/Footer'
@@ -12,7 +7,7 @@ import { PrimaryButton } from '../components/PrimaryButton'
 import { StudioBar } from '../components/StudioBar'
 import { WeaveGraphic } from '../components/WeaveGraphic'
 import { studioFieldClass, studioLabelClass } from '../components/studio'
-import { recordAccount } from '../lib/telemetry'
+import { markAccountActive } from '../lib/telemetry'
 
 type Props = { onSuccess: () => void }
 type Mode = 'signin' | 'signup'
@@ -86,10 +81,6 @@ export function LoginPage({ onSuccess }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
-  useEffect(() => {
-    void recordAccount(DEMO_USERNAME)
-  }, [])
-
   function switchMode(next: Mode) {
     setMode(next)
     setError(null)
@@ -114,7 +105,7 @@ export function LoginPage({ onSuccess }: Props) {
           ? await login(username, password)
           : await createAccount(username, password, confirmPassword)
       if (result.ok) {
-        if (mode === 'signup') await recordAccount(result.username)
+        await markAccountActive(result.username)
         onSuccess()
         return
       }

@@ -7,7 +7,7 @@
 ## Built
 
 - Vite + React 19 + TypeScript + Tailwind v4 + vite-plugin-pwa
-- Client accounts in `localStorage` (`fabriccost.accounts`): Sign in + Create account, SHA-256 hashes, seeded demo `rohitbohara` + optional `VITE_AUTH_*`
+- Client accounts in `localStorage` (`fabriccost.accounts`): Sign in + Create account, SHA-256 hashes, empty store (no demo seed)
 - Flow: Login → Home (fabric name + **Single Warp** / **Multiple Warp / Weft**) → Speak|Type → Fields → Results
 - Speak: Web Speech API fills current field and advances
 - Results: breakdown, markups 5–16%, edit + recalculate
@@ -36,7 +36,7 @@ npm run build
 npm run dev      # or: npm run preview
 ```
 
-Default login: `rohitbohara` / `rohitbohara`
+Default login: create an account on first use. There is no seeded demo user.
 
 ## Deploy / push blockers
 

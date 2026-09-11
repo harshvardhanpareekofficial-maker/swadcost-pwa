@@ -72,12 +72,18 @@ export function ResultsPage({
   }
 
   return (
-    <Layout title="Cost breakdown" subtitle={fabricName || 'Untitled fabric'} onBack={onBackEdit} onLogout={onLogout}>
+    <Layout
+      eyebrow="Cost sheet"
+      title="Cost breakdown"
+      subtitle={fabricName || 'Untitled fabric'}
+      onBack={onBackEdit}
+      onLogout={onLogout}
+    >
       <Stepper step={3} />
 
-      <StudioSheet className="mb-6 overflow-hidden sm:mb-8">
+      <StudioSheet className="mb-4 overflow-hidden sm:mb-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/55">Final cost</p>
-        <p className="font-display mt-1 break-words text-[2.35rem] font-semibold tabular-nums tracking-[-0.03em] text-ink sm:text-5xl">
+        <p className="font-display mt-1 break-words text-[2.1rem] font-semibold tabular-nums tracking-[-0.03em] text-ink sm:text-5xl">
           {formatInr(result.grandTotal)}
         </p>
         {result.length > 0 ? (
@@ -87,53 +93,67 @@ export function ResultsPage({
         ) : null}
       </StudioSheet>
 
-      <section className="mb-6 space-y-2">
+      <StudioSheet className="mb-4 sm:mb-5">
         <SectionLabel>Summary</SectionLabel>
-        <Row label="Total ends (Reed × RS)" value={String(result.totalEnds)} />
-        <Row label="Warp weight" value={String(result.warpWeight)} />
-        <Row label="Weft weight (base)" value={String(result.weftWeightBase)} />
-        <Row label="Weft weight (after wastage)" value={String(result.weftWeight)} />
-        <Row label="Warp cost" value={formatInr(result.warpCostRaw)} />
-        <Row label="Weft cost" value={formatInr(result.weftCostRaw)} />
-        <Row label="Sizing" value={formatInr(result.sizingCost)} />
-        <Row label="Job (pick × pick rate)" value={formatInr(result.jobCost)} />
-        <Row label="Warping" value={formatInr(result.warping)} />
-      </section>
+        <div className="mt-3 space-y-2">
+          <Row label="Total ends (Reed × RS)" value={String(result.totalEnds)} />
+          <Row label="Warp weight" value={String(result.warpWeight)} />
+          <Row label="Weft weight (base)" value={String(result.weftWeightBase)} />
+          <Row label="Weft weight (after wastage)" value={String(result.weftWeight)} />
+          <Row label="Warp cost" value={formatInr(result.warpCostRaw)} />
+          <Row label="Weft cost" value={formatInr(result.weftCostRaw)} />
+          <Row label="Sizing" value={formatInr(result.sizingCost)} />
+          <Row label="Job (pick × pick rate)" value={formatInr(result.jobCost)} />
+          <Row label="Warping" value={formatInr(result.warping)} />
+        </div>
+      </StudioSheet>
 
-      <section className="mb-6 space-y-2">
+      <StudioSheet className="mb-4 sm:mb-5">
         <SectionLabel>Warp yarns</SectionLabel>
-        {result.warpLines.map((l) => (
-          <div key={l.label} className="border-t border-plum/10 py-2 text-sm">
-            <div className="flex min-w-0 justify-between gap-2">
-              <span className="min-w-0 break-words text-ink">{l.label}</span>
-              <span className="shrink-0 tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
-            </div>
-            <p className="text-xs text-plum/60">
-              {l.pct}% · Ne {l.count} · wt {l.weight} · rate {l.rate}
-              {l.sizingCost != null ? ` · sizing ${formatInr(l.sizingCost)}` : ''}
-            </p>
+        {result.warpLines.length === 0 ? (
+          <p className="mt-3 text-sm text-plum/55">No warp lines on this sheet.</p>
+        ) : (
+          <div className="mt-1">
+            {result.warpLines.map((l) => (
+              <div key={l.label} className="border-t border-plum/10 py-2.5 text-sm first:border-t-0">
+                <div className="flex min-w-0 justify-between gap-2">
+                  <span className="min-w-0 break-words text-ink">{l.label}</span>
+                  <span className="shrink-0 tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
+                </div>
+                <p className="text-xs text-plum/60">
+                  {l.pct}% · Ne {l.count} · wt {l.weight} · rate {l.rate}
+                  {l.sizingCost != null ? ` · sizing ${formatInr(l.sizingCost)}` : ''}
+                </p>
+              </div>
+            ))}
           </div>
-        ))}
-      </section>
+        )}
+      </StudioSheet>
 
-      <section className="mb-6 space-y-2">
+      <StudioSheet className="mb-4 sm:mb-5">
         <SectionLabel>Weft yarns</SectionLabel>
-        {result.weftLines.map((l) => (
-          <div key={l.label} className="border-t border-plum/10 py-2 text-sm">
-            <div className="flex min-w-0 justify-between gap-2">
-              <span className="min-w-0 break-words text-ink">{l.label}</span>
-              <span className="shrink-0 tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
-            </div>
-            <p className="text-xs text-plum/60">
-              {l.pct}% · Ne {l.count} · wt {l.weight} · rate {l.rate}
-            </p>
+        {result.weftLines.length === 0 ? (
+          <p className="mt-3 text-sm text-plum/55">No weft lines on this sheet.</p>
+        ) : (
+          <div className="mt-1">
+            {result.weftLines.map((l) => (
+              <div key={l.label} className="border-t border-plum/10 py-2.5 text-sm first:border-t-0">
+                <div className="flex min-w-0 justify-between gap-2">
+                  <span className="min-w-0 break-words text-ink">{l.label}</span>
+                  <span className="shrink-0 tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
+                </div>
+                <p className="text-xs text-plum/60">
+                  {l.pct}% · Ne {l.count} · wt {l.weight} · rate {l.rate}
+                </p>
+              </div>
+            ))}
           </div>
-        ))}
-      </section>
+        )}
+      </StudioSheet>
 
-      <section className="mb-6 space-y-2">
+      <StudioSheet className="mb-5 sm:mb-6">
         <SectionLabel>Markups on final</SectionLabel>
-        <div className="grid grid-cols-2 gap-x-3 gap-y-3 sm:grid-cols-3">
+        <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-4">
           {result.markups.map((m) => (
             <div key={m.pct} className="min-w-0 text-center">
               <p className="text-[11px] text-plum/55">+{m.pct}%</p>
@@ -141,7 +161,7 @@ export function ResultsPage({
             </div>
           ))}
         </div>
-      </section>
+      </StudioSheet>
 
       {editing ? (
         <section className="mb-5 space-y-3">

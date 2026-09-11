@@ -63,18 +63,33 @@ export const AUTH_USER_KEY = 'fabriccost.auth_user'
 export const ACCOUNT_META_KEY = 'fabriccost.account_meta'
 export const CALC_EVENTS_KEY = 'fabriccost.calc_events'
 export const OWNER_SESSION_KEY = 'fabriccost.owner_ok'
+/** Bump to empty the local account store once (drops historic demo seeds). */
+export const ACCOUNTS_EPOCH_KEY = 'fabriccost.accounts_epoch'
+export const ACCOUNTS_EPOCH = 'empty-2026-09'
+
+function wipeLocalAccountStore(local: Storage | undefined): void {
+  if (!local) return
+  if (safeGet(local, ACCOUNTS_EPOCH_KEY) === ACCOUNTS_EPOCH) return
+  safeRemove(local, AUTH_ACCOUNTS_KEY)
+  safeRemove(local, AUTH_SESSION_KEY)
+  safeRemove(local, AUTH_USER_KEY)
+  safeRemove(local, ACCOUNT_META_KEY)
+  safeSet(local, ACCOUNTS_EPOCH_KEY, ACCOUNTS_EPOCH)
+}
 
 export function migrateAuthStorage(): void {
   const local = browserLocal()
   migrateStorageKey('swadcost.accounts', AUTH_ACCOUNTS_KEY, local)
   migrateStorageKey('swadcost_auth_session', AUTH_SESSION_KEY, local)
   migrateStorageKey('swadcost_auth_user', AUTH_USER_KEY, local)
+  wipeLocalAccountStore(local)
 }
 
 export function migrateTelemetryStorage(): void {
   const local = browserLocal()
   migrateStorageKey('swadcost.account_meta', ACCOUNT_META_KEY, local)
   migrateStorageKey('swadcost.calc_events', CALC_EVENTS_KEY, local)
+  wipeLocalAccountStore(local)
 }
 
 export function migrateOwnerStorage(): void {

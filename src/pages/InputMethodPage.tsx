@@ -16,13 +16,14 @@ type Props = {
 export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack, onLogout }: Props) {
   return (
     <Layout
+      eyebrow="Input"
       title="How will you enter values?"
       subtitle={`${fabricName || 'Untitled'} · ${modeLabel}`}
       onBack={onBack}
       onLogout={onLogout}
     >
       <Stepper step={1} />
-      <div className="space-y-3">
+      <div className="space-y-2.5 sm:space-y-3">
         <SectionLabel>Speak or type</SectionLabel>
         <CardButton
           title="Speak"
