@@ -193,7 +193,7 @@ export function LoginPage({ onSuccess }: Props) {
           </div>
         </section>
 
-        <section className="flex flex-1 items-start justify-center px-4 py-5 sm:px-8 sm:py-8 lg:items-center lg:py-6">
+        <section className="flex flex-1 items-start justify-center px-[max(1rem,env(safe-area-inset-left))] py-5 pr-[max(1rem,env(safe-area-inset-right))] sm:px-8 sm:py-8 lg:items-center lg:py-6">
           <StudioSheet className="w-full max-w-md">
             <Eyebrow>Your work, in one place</Eyebrow>
             <h1 className="font-display mt-2 text-[1.65rem] font-semibold leading-[1.12] tracking-[-0.02em] text-ink sm:text-2xl">
@@ -293,7 +293,7 @@ export function LoginPage({ onSuccess }: Props) {
         </section>
       </main>
 
-      <Footer className="px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8" />
+      <Footer className="px-[max(1rem,env(safe-area-inset-left))] py-3 pr-[max(1rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8" />
     </div>
   )
 }

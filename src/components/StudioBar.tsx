@@ -7,7 +7,7 @@ interface StudioBarProps {
 
 export function StudioBar({ trailing }: StudioBarProps) {
   return (
-    <header className="flex min-h-11 items-center justify-between gap-2 border-b border-plum/10 px-4 py-2.5 pt-[max(0.65rem,env(safe-area-inset-top))] sm:gap-3 sm:px-8 sm:py-3.5">
+    <header className="flex min-h-11 items-center justify-between gap-2 border-b border-plum/10 px-[max(1rem,env(safe-area-inset-left))] py-2.5 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(0.65rem,env(safe-area-inset-top))] sm:gap-3 sm:px-8 sm:py-3.5">
       <p className="min-w-0 font-display text-base tracking-tight sm:text-lg">
         <span className="font-semibold text-ink">fabriccost</span>
         <span className="ml-1.5 align-middle text-[10px] font-semibold uppercase tracking-[0.28em] text-plum/70 sm:ml-2 sm:text-[11px]">

@@ -251,7 +251,7 @@ export function CalculatorPage({
         )}
       </div>
 
-      <div className="sticky bottom-0 z-20 -mx-4 mt-2 border-t border-plum/10 bg-ivory/95 px-4 py-3 backdrop-blur-sm pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
+      <div className="sticky bottom-0 z-20 -ml-[max(1rem,env(safe-area-inset-left))] -mr-[max(1rem,env(safe-area-inset-right))] mt-2 border-t border-plum/10 bg-ivory/95 px-[max(1rem,env(safe-area-inset-left))] py-3 pr-[max(1rem,env(safe-area-inset-right))] backdrop-blur-sm pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:-mx-8 sm:px-8">
         <PrimaryButton onClick={onCalculate}>Calculate</PrimaryButton>
         <div className="mt-2 grid grid-cols-2 gap-2">
           <PrimaryButton

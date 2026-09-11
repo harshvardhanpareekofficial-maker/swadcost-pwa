@@ -22,7 +22,7 @@ export function Layout({ children, eyebrow, title, subtitle, onLogout, showLogou
           ) : null
         }
       />
-      <main className="mx-auto flex w-full min-w-0 max-w-lg flex-1 flex-col px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 sm:max-w-xl sm:px-8 sm:pt-8">
+      <main className="mx-auto flex w-full min-w-0 max-w-lg flex-1 flex-col px-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-4 sm:max-w-xl sm:px-8 sm:pt-8">
         {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
         {title ? (
           <h1

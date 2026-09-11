@@ -145,7 +145,7 @@ export function ResultsPage({
         <section className="mb-5 space-y-3">
           <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink">Edit inputs & recalculate</h3>
           {mode === 'single' ? (
-            <>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {(
                 [
                   ['reed', 'Reed', single.reed],
@@ -172,7 +172,7 @@ export function ResultsPage({
                   }
                 />
               ))}
-            </>
+            </div>
           ) : (
             <p className="text-sm text-plum/70">
               For multi-yarn edits, go back to the fields step for full yarn % / count / rate controls, or tweak
@@ -180,7 +180,7 @@ export function ResultsPage({
             </p>
           )}
           {mode === 'multi' ? (
-            <>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {(
                 [
                   ['reed', 'Reed', multi.reed],
@@ -202,7 +202,7 @@ export function ResultsPage({
                   }
                 />
               ))}
-            </>
+            </div>
           ) : null}
           {error ? (
             <p className="rounded-[14px] border border-rose/30 bg-rose/10 px-3.5 py-2.5 text-sm text-rose">{error}</p>
@@ -233,7 +233,9 @@ function Row({ label, value, muted }: { label: string; value: string; muted?: bo
   return (
     <div className="flex min-w-0 items-baseline justify-between gap-3 text-sm">
       <span className={`min-w-0 break-words ${muted ? 'text-plum/50' : 'text-plum/70'}`}>{label}</span>
-      <span className={`shrink-0 tabular-nums ${muted ? 'text-plum/50' : 'font-semibold text-ink'}`}>{value}</span>
+      <span className={`max-w-[48%] shrink-0 text-right tabular-nums ${muted ? 'text-plum/50' : 'font-semibold text-ink'}`}>
+        {value}
+      </span>
     </div>
   )
 }

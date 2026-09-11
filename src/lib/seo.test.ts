@@ -40,6 +40,7 @@ describe('on-page SEO', () => {
     expect(html).toContain('WebApplication')
     expect(html).toContain('"@type": "Organization"')
     expect(html).toMatch(/"name": "Harshvardhan Pareek"/)
+    expect(html).toMatch(/"keywords": "[^"]*fabric cost calculator/)
   })
 
   it('allows the site and disallows the owner vault', () => {
