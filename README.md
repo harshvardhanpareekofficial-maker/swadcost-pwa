@@ -14,6 +14,7 @@ Polished, installable Progressive Web App for single + multi warp/weft grey fabr
 - Full cost breakdown with editable inputs + recalculate
 - Markup table (5%–16%)
 - SEO meta, OG tags, manifest, icons, `robots.txt`, `sitemap.xml`
+- IndexNow key at the site root so Bing/Yandex/etc. can be notified of the homepage
 - Footer on every page: *Made by Harshvardhan Pareek*
 
 ## Local development
@@ -33,6 +34,7 @@ npm run dev
 | `npm test` | Vitest (notebook warp-weight 0.082 + costing / auth / telemetry) |
 | `npm run build` | Typecheck + production build → `dist/` |
 | `npm run preview` | Preview production build |
+| `npm run indexnow` | POST the homepage to https://api.indexnow.org/indexnow (after the key file is live) |
 
 ## Formula
 
@@ -59,7 +61,36 @@ See [`FORMULA_CROSSCHECK.md`](FORMULA_CROSSCHECK.md) for the live SwadCost demo 
    - Apex: A/ALIAS to Render, or CNAME flattening per Render docs
    - `www` CNAME → your Render host
 
-SPA fallback is configured in `render.yaml` (`/*` → `/index.html`).
+SPA fallback is configured in `render.yaml` (`/*` → `/index.html`). Render serves a real file when it exists, so `robots.txt`, `sitemap.xml`, and the IndexNow key file are not rewritten to the SPA shell.
+
+## IndexNow
+
+Vite copies everything in `public/` to the site root, so the ownership key is served at:
+
+`https://harshvardhanpareek.com/e792e9188ca94764b14f9524069ecac1.txt`
+
+The file body is that same key on one line.
+
+After the key is live on production, notify Bing/Yandex (and other IndexNow engines) of the homepage:
+
+```bash
+npm run indexnow
+# or inspect the JSON without submitting:
+node scripts/ping-indexnow.mjs --dry-run
+```
+
+That POSTs to `https://api.indexnow.org/indexnow` with:
+
+```json
+{
+  "host": "harshvardhanpareek.com",
+  "key": "e792e9188ca94764b14f9524069ecac1",
+  "keyLocation": "https://harshvardhanpareek.com/e792e9188ca94764b14f9524069ecac1.txt",
+  "urlList": ["https://harshvardhanpareek.com/"]
+}
+```
+
+A `200` or `202` means the endpoint received the URL. Do not ping until the key file is deployed; search engines fetch `keyLocation` to prove ownership.
 
 ## Design
 

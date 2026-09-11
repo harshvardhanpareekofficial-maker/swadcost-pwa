@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "oxlint"
+    "lint": "oxlint",
+    "indexnow": "node scripts/ping-indexnow.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

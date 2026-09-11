@@ -9,7 +9,14 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'robots.txt', 'sitemap.xml', 'icons/*.svg', 'icons/*.png'],
+      includeAssets: [
+        'favicon.svg',
+        'robots.txt',
+        'sitemap.xml',
+        'e792e9188ca94764b14f9524069ecac1.txt',
+        'icons/*.svg',
+        'icons/*.png',
+      ],
       manifest: {
         name: 'fabriccost STUDIO — Fabric Cost Calculator',
         short_name: 'fabriccost STUDIO',
@@ -38,6 +45,8 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: '/index.html',
+        // Keep IndexNow / robots / sitemap as real files, not the SPA shell.
+        navigateFallbackDenylist: [/\.txt$/, /\.xml$/],
       },
     }),
   ],
