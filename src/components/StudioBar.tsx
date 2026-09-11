@@ -31,7 +31,9 @@ export function StudioBar({ trailing, onBack, backLabel = 'Back', onLogout }: St
           <StudioBarAction onClick={onLogout}>Log out</StudioBarAction>
         ) : null}
         {trailing}
-        <p className="flex items-center gap-1.5 text-[11px] font-medium text-plum/70">
+        <p
+          className={`${onBack || onLogout || trailing ? 'hidden sm:flex' : 'flex'} items-center gap-1.5 text-[11px] font-medium text-plum/70`}
+        >
           <span className="h-2 w-2 rounded-full bg-ready" />
           <span className="hidden sm:inline">Workspace ready</span>
         </p>

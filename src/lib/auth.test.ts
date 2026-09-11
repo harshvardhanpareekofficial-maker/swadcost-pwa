@@ -4,9 +4,6 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   createAccount,
   currentUser,
-  DEMO_PASSWORD,
-  DEMO_USERNAME,
-  ensureSeedAccounts,
   findAccount,
   hashPassword,
   isAuthenticated,
@@ -14,9 +11,12 @@ import {
   login,
   logout,
   MIN_PASSWORD_LENGTH,
-  normalizeUsername,
+  purgeIdleLocalAccounts,
+  touchAccountLastActive,
   validateNewAccount,
 } from './auth'
+import { IDLE_TTL_MS } from './idle'
+import { ACCOUNTS_EPOCH, ACCOUNTS_EPOCH_KEY } from './storage'
 
 if (!globalThis.crypto?.subtle) {
   Object.defineProperty(globalThis, 'crypto', { value: webcrypto, configurable: true })
@@ -26,6 +26,8 @@ function clearAuthStorage() {
   localStorage.removeItem('fabriccost.accounts')
   localStorage.removeItem('fabriccost.auth_session')
   localStorage.removeItem('fabriccost.auth_user')
+  localStorage.removeItem('fabriccost.accounts_epoch')
+  localStorage.removeItem('fabriccost.account_meta')
   localStorage.removeItem('swadcost.accounts')
   localStorage.removeItem('swadcost_auth_session')
   localStorage.removeItem('swadcost_auth_user')
@@ -57,8 +59,28 @@ describe('validateNewAccount', () => {
   })
 })
 
+describe('empty account store', () => {
+  it('starts with no local accounts and does not seed a demo user', () => {
+    expect(loadAccounts()).toEqual([])
+    expect(localStorage.getItem('fabriccost.accounts')).toBeNull()
+  })
+
+  it('wipes a leftover local account store once', () => {
+    localStorage.setItem(
+      'fabriccost.accounts',
+      JSON.stringify([{ username: 'legacy-user', passwordHash: 'hash', createdAt: 1, lastActiveAt: 1 }]),
+    )
+    localStorage.setItem('fabriccost.auth_session', '1')
+    localStorage.setItem('fabriccost.auth_user', 'legacy-user')
+    expect(loadAccounts()).toEqual([])
+    expect(isAuthenticated()).toBe(false)
+    expect(localStorage.getItem(ACCOUNTS_EPOCH_KEY)).toBe(ACCOUNTS_EPOCH)
+  })
+})
+
 describe('legacy key migration', () => {
   it('clears a leftover Guest explore-first session', () => {
+    localStorage.setItem(ACCOUNTS_EPOCH_KEY, ACCOUNTS_EPOCH)
     localStorage.setItem('fabriccost.auth_session', '1')
     localStorage.setItem('fabriccost.auth_user', 'Guest')
     expect(isAuthenticated()).toBe(false)
@@ -66,39 +88,14 @@ describe('legacy key migration', () => {
     expect(localStorage.getItem('fabriccost.auth_session')).toBeNull()
   })
 
-  it('promotes an old session so existing users stay signed in', () => {
+  it('promotes an old session after the empty-store epoch is applied', () => {
+    localStorage.setItem(ACCOUNTS_EPOCH_KEY, ACCOUNTS_EPOCH)
     localStorage.setItem('swadcost_auth_session', '1')
-    localStorage.setItem('swadcost_auth_user', 'rohitbohara')
+    localStorage.setItem('swadcost_auth_user', 'maya')
     expect(isAuthenticated()).toBe(true)
-    expect(currentUser()).toBe('rohitbohara')
+    expect(currentUser()).toBe('maya')
     expect(localStorage.getItem('fabriccost.auth_session')).toBe('1')
     expect(localStorage.getItem('swadcost_auth_session')).toBeNull()
-  })
-})
-
-describe('ensureSeedAccounts + demo login', () => {
-  it('seeds the demo account and signs in with those credentials', async () => {
-    await ensureSeedAccounts()
-    const demo = findAccount(DEMO_USERNAME)
-    expect(demo?.username).toBe(DEMO_USERNAME)
-    expect(demo?.passwordHash).toBe(await hashPassword(DEMO_USERNAME, DEMO_PASSWORD))
-
-    const result = await login(DEMO_USERNAME, DEMO_PASSWORD)
-    expect(result).toEqual({ ok: true, username: DEMO_USERNAME })
-    expect(isAuthenticated()).toBe(true)
-    expect(currentUser()).toBe(DEMO_USERNAME)
-  })
-
-  it('accepts the demo username case-insensitively', async () => {
-    const result = await login('RohitBohara', DEMO_PASSWORD)
-    expect(result.ok).toBe(true)
-    if (result.ok) expect(result.username).toBe(DEMO_USERNAME)
-  })
-
-  it('does not duplicate the demo seed on later loads', async () => {
-    await ensureSeedAccounts()
-    await ensureSeedAccounts()
-    expect(loadAccounts().filter((a) => normalizeUsername(a.username) === DEMO_USERNAME)).toHaveLength(1)
   })
 })
 
@@ -118,12 +115,14 @@ describe('login errors', () => {
   })
 
   it('explains an incorrect password without a cryptic fail', async () => {
-    await expectFail(await login(DEMO_USERNAME, 'wrong-password'), /incorrect password/i)
+    await createAccount('Maya', 'loompass', 'loompass')
+    logout()
+    await expectFail(await login('Maya', 'wrong-password'), /incorrect password/i)
   })
 })
 
 describe('createAccount', () => {
-  it('stores a hashed password, auto-logs in, and survives reload', async () => {
+  it('stores a hashed password, stamps last active, auto-logs in, and survives reload', async () => {
     const created = await createAccount('Maya Weaver', 'loompass', 'loompass')
     expect(created).toEqual({ ok: true, username: 'Maya Weaver' })
     expect(isAuthenticated()).toBe(true)
@@ -133,12 +132,16 @@ describe('createAccount', () => {
     expect(stored?.username).toBe('Maya Weaver')
     expect(stored?.passwordHash).toBe(await hashPassword('Maya Weaver', 'loompass'))
     expect(stored?.passwordHash).not.toContain('loompass')
+    expect(stored?.lastActiveAt).toBeGreaterThan(0)
+    expect(stored?.lastActiveAt).toBe(stored?.createdAt)
 
     logout()
     expect(isAuthenticated()).toBe(false)
 
     const again = await login('maya weaver', 'loompass')
     expect(again).toEqual({ ok: true, username: 'Maya Weaver' })
+    const afterLogin = findAccount('Maya Weaver')
+    expect(afterLogin?.lastActiveAt).toBeGreaterThanOrEqual(stored?.lastActiveAt ?? 0)
   })
 
   it('rejects a duplicate username case-insensitively', async () => {
@@ -154,10 +157,32 @@ describe('createAccount', () => {
     expect(result.ok).toBe(false)
     if (!result.ok) expect(result.error).toMatch(/reserved/i)
   })
+})
 
-  it('does not collide with the seeded demo username', async () => {
-    const dup = await createAccount('RohitBohara', 'newpass', 'newpass')
-    expect(dup.ok).toBe(false)
-    if (!dup.ok) expect(dup.error).toMatch(/already taken/i)
+describe('last active + idle purge', () => {
+  it('updates lastActiveAt on touch and login', async () => {
+    await createAccount('Maya', 'loompass', 'loompass')
+    const created = findAccount('Maya')!
+    touchAccountLastActive('Maya', created.lastActiveAt + 5_000)
+    expect(findAccount('Maya')?.lastActiveAt).toBe(created.lastActiveAt + 5_000)
+  })
+
+  it('removes accounts idle longer than 12 days and logs them out', async () => {
+    await createAccount('Maya', 'loompass', 'loompass')
+    expect(isAuthenticated()).toBe(true)
+    const now = Date.now()
+    touchAccountLastActive('Maya', now - IDLE_TTL_MS - 1_000)
+    const removed = purgeIdleLocalAccounts(now)
+    expect(removed).toEqual(['Maya'])
+    expect(loadAccounts()).toEqual([])
+    expect(isAuthenticated()).toBe(false)
+  })
+
+  it('keeps an account that signed in inside the window', async () => {
+    await createAccount('Maya', 'loompass', 'loompass')
+    const now = Date.now()
+    touchAccountLastActive('Maya', now - IDLE_TTL_MS + 60_000)
+    expect(purgeIdleLocalAccounts(now)).toEqual([])
+    expect(findAccount('Maya')?.username).toBe('Maya')
   })
 })

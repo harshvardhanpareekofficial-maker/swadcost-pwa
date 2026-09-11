@@ -155,20 +155,23 @@ export function CalculatorPage({
   }
 
   const pair = (a: number, b: number) => (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
       {renderField(a)}
       {renderField(b)}
     </div>
   )
 
+  const millBlank = fields.every((f) => f.get() === '' || f.get() === 0)
+
   return (
     <Layout
+      eyebrow="Mill sheet"
       title={mode === 'single' ? 'Single Warp' : 'Multiple Warp / Weft'}
       subtitle={`${fabricName || 'Untitled'} · ${inputMethod === 'speak' ? 'Speak' : 'Type'}`}
       onBack={onBack}
       onLogout={onLogout}
       stickyFooter={
-        <div className="studio-sticky z-20 shrink-0 px-[max(1rem,env(safe-area-inset-left))] py-3 pr-[max(1rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8">
+        <div className="studio-sticky z-20 shrink-0 px-[max(1rem,env(safe-area-inset-left))] py-2.5 pr-[max(1rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-3">
           <div className="mx-auto max-w-lg sm:max-w-xl">
             <PrimaryButton onClick={onCalculate}>Calculate</PrimaryButton>
             <button
@@ -182,7 +185,7 @@ export function CalculatorPage({
                     weftYarns: SAMPLE_MULTI.weftYarns.map((y) => ({ ...y })),
                   })
               }}
-              className="mt-2 inline-flex min-h-11 w-full items-center justify-center text-sm font-semibold text-plum/70 hover:text-plum"
+              className="mt-1.5 inline-flex min-h-11 w-full items-center justify-center text-sm font-semibold text-plum/70 hover:text-plum"
             >
               Load sample
             </button>
@@ -192,8 +195,14 @@ export function CalculatorPage({
     >
       <Stepper step={2} />
 
+      {millBlank ? (
+        <p className="mb-3 rounded-[14px] border border-dashed border-plum/15 bg-paper/40 px-3.5 py-3 text-sm leading-relaxed text-plum/70">
+          The mill sheet starts blank. Enter reed, counts and rates — or load a sample under Calculate.
+        </p>
+      ) : null}
+
       {inputMethod === 'speak' ? (
-        <StudioSheet className="mb-4 border-saffron/40">
+        <StudioSheet className="mb-3 sm:mb-4">
           <p className="text-sm text-ink">
             Active field: <strong>{fields[focusIdx]?.label}</strong>
           </p>
@@ -227,7 +236,7 @@ export function CalculatorPage({
         </StudioSheet>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-3 pb-4">
+      <div className="grid grid-cols-1 gap-2.5 pb-2 sm:gap-3 sm:pb-4">
         {mode === 'single' ? (
           <>
             <SectionLabel>Warp</SectionLabel>
@@ -235,11 +244,11 @@ export function CalculatorPage({
             {renderField(2)}
             {pair(3, 4)}
             {renderField(5)}
-            <SectionLabel className="pt-2">Weft</SectionLabel>
+            <SectionLabel className="pt-1.5 sm:pt-2">Weft</SectionLabel>
             {pair(6, 7)}
             {pair(8, 9)}
             {renderField(10)}
-            <SectionLabel className="pt-2">Job & other</SectionLabel>
+            <SectionLabel className="pt-1.5 sm:pt-2">Job & other</SectionLabel>
             {pair(11, 12)}
           </>
         ) : (
@@ -250,7 +259,7 @@ export function CalculatorPage({
             {[0, 1, 2].map((yarn) => {
               const base = 3 + yarn * 4
               return (
-                <div key={`warp-yarn-${yarn}`} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div key={`warp-yarn-${yarn}`} className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
                   {renderField(base)}
                   {renderField(base + 1)}
                   {renderField(base + 2)}
@@ -258,20 +267,20 @@ export function CalculatorPage({
                 </div>
               )
             })}
-            <SectionLabel className="pt-2">Weft</SectionLabel>
+            <SectionLabel className="pt-1.5 sm:pt-2">Weft</SectionLabel>
             {pair(15, 16)}
             {renderField(17)}
             {[0, 1, 2].map((yarn) => {
               const base = 18 + yarn * 3
               return (
-                <div key={`weft-yarn-${yarn}`} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div key={`weft-yarn-${yarn}`} className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
                   {renderField(base)}
                   {renderField(base + 1)}
                   <div className="sm:col-span-2">{renderField(base + 2)}</div>
                 </div>
               )
             })}
-            <SectionLabel className="pt-2">Job & other</SectionLabel>
+            <SectionLabel className="pt-1.5 sm:pt-2">Job & other</SectionLabel>
             {pair(fields.length - 2, fields.length - 1)}
           </>
         )}

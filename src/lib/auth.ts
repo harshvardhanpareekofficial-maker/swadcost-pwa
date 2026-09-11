@@ -1,3 +1,4 @@
+import { IDLE_TTL_DAYS, isIdleTimestamp } from './idle'
 import {
   AUTH_ACCOUNTS_KEY,
   AUTH_SESSION_KEY,
@@ -18,14 +19,14 @@ function localStore(): Storage | undefined {
   }
 }
 
-export const DEMO_USERNAME = 'rohitbohara'
-export const DEMO_PASSWORD = 'rohitbohara'
 export const MIN_PASSWORD_LENGTH = 6
+export { IDLE_TTL_DAYS }
 
 export type Account = {
   username: string
   passwordHash: string
   createdAt: number
+  lastActiveAt: number
 }
 
 export type AuthResult = { ok: true; username: string } | { ok: false; error: string }
@@ -43,16 +44,28 @@ function removeStorage(key: string): void {
   safeRemove(localStore(), key)
 }
 
-function isAccount(value: unknown): value is Account {
-  if (!value || typeof value !== 'object') return false
+function toAccount(value: unknown): Account | null {
+  if (!value || typeof value !== 'object') return null
   const rec = value as Record<string, unknown>
-  return (
-    typeof rec.username === 'string' &&
-    rec.username.trim().length > 0 &&
-    typeof rec.passwordHash === 'string' &&
-    rec.passwordHash.length > 0 &&
-    typeof rec.createdAt === 'number'
-  )
+  if (
+    typeof rec.username !== 'string' ||
+    rec.username.trim().length === 0 ||
+    typeof rec.passwordHash !== 'string' ||
+    rec.passwordHash.length === 0 ||
+    typeof rec.createdAt !== 'number'
+  ) {
+    return null
+  }
+  const lastActiveAt =
+    typeof rec.lastActiveAt === 'number' && Number.isFinite(rec.lastActiveAt)
+      ? rec.lastActiveAt
+      : rec.createdAt
+  return {
+    username: rec.username,
+    passwordHash: rec.passwordHash,
+    createdAt: rec.createdAt,
+    lastActiveAt,
+  }
 }
 
 export function normalizeUsername(username: string): string {
@@ -65,7 +78,7 @@ export function loadAccounts(): Account[] {
   try {
     const parsed = JSON.parse(raw) as unknown
     if (!Array.isArray(parsed)) return []
-    return parsed.filter(isAccount)
+    return parsed.map(toAccount).filter((row): row is Account => Boolean(row))
   } catch {
     return []
   }
@@ -98,44 +111,6 @@ export async function hashPassword(username: string, password: string): Promise<
   return sha256Hex(`${normalizeUsername(username)}\0${password}`)
 }
 
-function envSeedUser(): string {
-  return (import.meta.env.VITE_AUTH_USER || import.meta.env.VITE_AUTH_USERNAME || '').trim()
-}
-
-function envSeedPass(): string {
-  return import.meta.env.VITE_AUTH_PASS || import.meta.env.VITE_AUTH_PASSWORD || ''
-}
-
-async function addSeedIfMissing(
-  accounts: Account[],
-  username: string,
-  password: string,
-): Promise<boolean> {
-  const name = username.trim()
-  if (!name || !password) return false
-  if (findAccount(name, accounts)) return false
-  accounts.push({
-    username: name,
-    passwordHash: await hashPassword(name, password),
-    createdAt: Date.now(),
-  })
-  return true
-}
-
-/** Seed demo + optional VITE_AUTH_* bootstrap accounts into localStorage. */
-export async function ensureSeedAccounts(): Promise<void> {
-  const accounts = loadAccounts()
-  let changed = await addSeedIfMissing(accounts, DEMO_USERNAME, DEMO_PASSWORD)
-
-  const envUser = envSeedUser()
-  const envPass = envSeedPass()
-  if (envUser && envPass) {
-    changed = (await addSeedIfMissing(accounts, envUser, envPass)) || changed
-  }
-
-  if (changed) saveAccounts(accounts)
-}
-
 function setSession(username: string): void {
   writeStorage(AUTH_SESSION_KEY, '1')
   writeStorage(AUTH_USER_KEY, username)
@@ -166,16 +141,43 @@ function loginFailure(error: string): AuthResult {
   return { ok: false, error }
 }
 
+/** Stamp last_active_at on a local hashed account. No-op if the user is not in the store. */
+export function touchAccountLastActive(username: string, at = Date.now()): Account | undefined {
+  const accounts = loadAccounts()
+  const key = normalizeUsername(username)
+  if (!key) return undefined
+  let found: Account | undefined
+  const next = accounts.map((account) => {
+    if (normalizeUsername(account.username) !== key) return account
+    found = { ...account, lastActiveAt: at }
+    return found
+  })
+  if (found) saveAccounts(next)
+  return found
+}
+
+/** Drop local hashed accounts idle longer than 12 days. Logs out if the current session was removed. */
+export function purgeIdleLocalAccounts(now = Date.now()): string[] {
+  const accounts = loadAccounts()
+  const kept: Account[] = []
+  const removed: string[] = []
+  for (const account of accounts) {
+    if (isIdleTimestamp(account.lastActiveAt, now)) removed.push(account.username)
+    else kept.push(account)
+  }
+  if (removed.length > 0) saveAccounts(kept)
+
+  const user = readStorage(AUTH_USER_KEY)
+  if (user && removed.some((name) => normalizeUsername(name) === normalizeUsername(user))) {
+    logout()
+  }
+  return removed
+}
+
 export async function login(username: string, password: string): Promise<AuthResult> {
   const name = username.trim()
   if (!name) return loginFailure('Enter a username.')
   if (!password) return loginFailure('Enter a password.')
-
-  try {
-    await ensureSeedAccounts()
-  } catch {
-    return loginFailure('Could not prepare saved accounts. Try again.')
-  }
 
   const account = findAccount(name)
   if (!account) {
@@ -193,6 +195,7 @@ export async function login(username: string, password: string): Promise<AuthRes
     return loginFailure('Incorrect password. Try again.')
   }
 
+  touchAccountLastActive(account.username)
   setSession(account.username)
   return { ok: true, username: account.username }
 }
@@ -222,13 +225,6 @@ export async function createAccount(
   if (validationError) return loginFailure(validationError)
 
   const name = username.trim()
-
-  try {
-    await ensureSeedAccounts()
-  } catch {
-    return loginFailure('Could not prepare saved accounts. Try again.')
-  }
-
   const accounts = loadAccounts()
   if (findAccount(name, accounts)) {
     return loginFailure('That username is already taken. Try another name or sign in.')
@@ -241,20 +237,14 @@ export async function createAccount(
     return loginFailure('Could not save the password in this browser. Try HTTPS or another browser.')
   }
 
+  const now = Date.now()
   accounts.push({
     username: name,
     passwordHash,
-    createdAt: Date.now(),
+    createdAt: now,
+    lastActiveAt: now,
   })
   saveAccounts(accounts)
   setSession(name)
   return { ok: true, username: name }
-}
-
-/** Kept for any leftover callers; prefer login() against the local account store. */
-export function getCredentials(): { username: string; password: string } {
-  return {
-    username: envSeedUser() || DEMO_USERNAME,
-    password: envSeedPass() || DEMO_PASSWORD,
-  }
 }

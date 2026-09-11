@@ -1,4 +1,6 @@
+import { touchAccountLastActive } from './auth'
 import type { CostBreakdown, MultiInputs, SingleInputs } from './costing'
+import { idleCutoffIso, isIdleTimestamp, parseIsoMillis } from './idle'
 import { ACCOUNT_META_KEY, CALC_EVENTS_KEY, migrateTelemetryStorage } from './storage'
 import { getSupabase } from './supabase'
 import type { CostMode } from './types'
@@ -9,6 +11,7 @@ export type AccountMeta = {
   id: string
   username: string
   createdAt: string
+  lastActiveAt: string
 }
 
 export type CalcEvent = {
@@ -59,10 +62,20 @@ function newId(): string {
   return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
-function isAccountMeta(value: unknown): value is AccountMeta {
-  if (!value || typeof value !== 'object') return false
+function toAccountMeta(value: unknown): AccountMeta | null {
+  if (!value || typeof value !== 'object') return null
   const rec = value as Record<string, unknown>
-  return typeof rec.id === 'string' && typeof rec.username === 'string' && typeof rec.createdAt === 'string'
+  if (typeof rec.id !== 'string' || typeof rec.username !== 'string' || typeof rec.createdAt !== 'string') {
+    return null
+  }
+  const lastActiveAt =
+    typeof rec.lastActiveAt === 'string' && rec.lastActiveAt.length > 0 ? rec.lastActiveAt : rec.createdAt
+  return {
+    id: rec.id,
+    username: rec.username,
+    createdAt: rec.createdAt,
+    lastActiveAt,
+  }
 }
 
 function isCalcEvent(value: unknown): value is CalcEvent {
@@ -78,7 +91,7 @@ function isCalcEvent(value: unknown): value is CalcEvent {
 
 export function loadLocalAccounts(): AccountMeta[] {
   const raw = readJson<unknown>(ACCOUNT_META_KEY, [])
-  return Array.isArray(raw) ? raw.filter(isAccountMeta) : []
+  return Array.isArray(raw) ? raw.map(toAccountMeta).filter((row): row is AccountMeta => Boolean(row)) : []
 }
 
 export function loadLocalCalcs(): CalcEvent[] {
@@ -123,32 +136,56 @@ export function buildUsageReport(calcs: CalcEvent[]): UsageReport {
   }
 }
 
-export async function recordAccount(username: string): Promise<void> {
-  const name = username.trim()
-  if (!name || name.toLowerCase() === 'guest') return
+function usernameKey(name: string): string {
+  return name.trim().toLowerCase()
+}
 
-  const existing = loadLocalAccounts()
-  const already = existing.some((a) => a.username.trim().toLowerCase() === name.toLowerCase())
-  const row: AccountMeta = already
-    ? existing.find((a) => a.username.trim().toLowerCase() === name.toLowerCase())!
-    : { id: newId(), username: name, createdAt: new Date().toISOString() }
-
-  if (!already) {
-    existing.unshift(row)
-    saveLocalAccounts(existing)
-  }
-
+async function syncLastActiveRemote(username: string, atIso: string): Promise<void> {
   const client = getSupabase()
   if (!client) return
   try {
-    // Username only — never send a password. Unique on generated username_norm.
-    await client.from('swadcost_accounts').upsert(
-      { username: row.username },
-      { onConflict: 'username_norm', ignoreDuplicates: true },
+    const withStamp = await client.from('swadcost_accounts').upsert(
+      { username, last_active_at: atIso },
+      { onConflict: 'username_norm' },
     )
+    if (withStamp.error) {
+      await client.from('swadcost_accounts').upsert({ username }, { onConflict: 'username_norm' })
+    }
   } catch {
     /* network — local copy already saved */
   }
+}
+
+/** Record (or refresh) an account and stamp last_active_at. Never sends a password. */
+export async function markAccountActive(username: string, at = new Date()): Promise<void> {
+  const name = username.trim()
+  if (!name || name.toLowerCase() === 'guest') return
+
+  touchAccountLastActive(name, at.getTime())
+
+  const existing = loadLocalAccounts()
+  const key = usernameKey(name)
+  const atIso = at.toISOString()
+  const already = existing.find((a) => usernameKey(a.username) === key)
+  if (already) {
+    already.lastActiveAt = atIso
+    saveLocalAccounts(existing)
+  } else {
+    existing.unshift({
+      id: newId(),
+      username: name,
+      createdAt: atIso,
+      lastActiveAt: atIso,
+    })
+    saveLocalAccounts(existing)
+  }
+
+  await syncLastActiveRemote(name, atIso)
+}
+
+/** @deprecated Prefer markAccountActive — kept for older call sites. */
+export async function recordAccount(username: string): Promise<void> {
+  await markAccountActive(username)
 }
 
 export async function recordCalc(event: Omit<CalcEvent, 'id' | 'createdAt'> & { id?: string; createdAt?: string }): Promise<void> {
@@ -222,8 +259,11 @@ export function recordSuccessfulCalc(args: {
           weftYarns: args.multi.weftYarns.map((y) => ({ pct: y.pct, count: y.count })),
         }
 
+  const username = args.username?.trim() || 'unknown'
+  if (args.username?.trim()) void markAccountActive(args.username)
+
   void recordCalc({
-    username: args.username?.trim() || 'unknown',
+    username,
     fabricName: args.fabricName.trim() || 'Untitled fabric',
     mode: args.mode,
     reed,
@@ -238,10 +278,13 @@ export function recordSuccessfulCalc(args: {
 function mapRemoteAccount(row: Record<string, unknown>): AccountMeta | null {
   const username = typeof row.username === 'string' ? row.username : ''
   if (!username) return null
+  const createdAt = typeof row.created_at === 'string' ? row.created_at : new Date().toISOString()
+  const lastActiveAt = typeof row.last_active_at === 'string' ? row.last_active_at : createdAt
   return {
     id: typeof row.id === 'string' ? row.id : newId(),
     username,
-    createdAt: typeof row.created_at === 'string' ? row.created_at : new Date().toISOString(),
+    createdAt,
+    lastActiveAt,
   }
 }
 
@@ -269,6 +312,99 @@ function mergeById<T extends { id: string; createdAt: string }>(remote: T[], loc
   return [...map.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
 }
 
+function laterIso(a: string, b: string): string {
+  return a > b ? a : b
+}
+
+function mergeAccountsByUsername(remote: AccountMeta[], local: AccountMeta[]): AccountMeta[] {
+  const map = new Map<string, AccountMeta>()
+  for (const row of [...local, ...remote]) {
+    const key = usernameKey(row.username)
+    const prev = map.get(key)
+    if (!prev) {
+      map.set(key, row)
+      continue
+    }
+    map.set(key, {
+      id: remote.some((r) => r.id === row.id) ? row.id : prev.id,
+      username: row.username || prev.username,
+      createdAt: prev.createdAt <= row.createdAt ? prev.createdAt : row.createdAt,
+      lastActiveAt: laterIso(prev.lastActiveAt, row.lastActiveAt),
+    })
+  }
+  return [...map.values()].sort((a, b) => b.lastActiveAt.localeCompare(a.lastActiveAt))
+}
+
+export function purgeLocalTelemetryForUsers(usernames: string[]): void {
+  if (usernames.length === 0) return
+  const keys = new Set(usernames.map(usernameKey))
+  saveLocalAccounts(loadLocalAccounts().filter((row) => !keys.has(usernameKey(row.username))))
+  saveLocalCalcs(loadLocalCalcs().filter((row) => !keys.has(usernameKey(row.username))))
+}
+
+export function purgeIdleLocalTelemetry(now = Date.now()): string[] {
+  const idle = loadLocalAccounts().filter((row) => {
+    const at = parseIsoMillis(row.lastActiveAt) ?? parseIsoMillis(row.createdAt) ?? 0
+    return isIdleTimestamp(at, now)
+  })
+  const names = idle.map((row) => row.username)
+  purgeLocalTelemetryForUsers(names)
+  return names
+}
+
+function looksMissingColumn(message: string | undefined, column: string): boolean {
+  if (!message) return false
+  return message.toLowerCase().includes(column.toLowerCase())
+}
+
+/** Delete idle rows from swadcost_accounts + matching swadcost_calcs. RLS only allows idle rows. */
+export async function purgeIdleSupabase(now = Date.now()): Promise<number> {
+  const client = getSupabase()
+  if (!client) return 0
+  const cutoff = idleCutoffIso(now)
+
+  try {
+    const listed = await client
+      .from('swadcost_accounts')
+      .select('username, last_active_at, created_at')
+      .or(`last_active_at.lt.${cutoff},and(last_active_at.is.null,created_at.lt.${cutoff})`)
+
+    let idleNames: string[] = []
+    if (listed.error && looksMissingColumn(listed.error.message, 'last_active_at')) {
+      const fallback = await client
+        .from('swadcost_accounts')
+        .select('username, created_at')
+        .lt('created_at', cutoff)
+      if (fallback.error || !Array.isArray(fallback.data)) return 0
+      idleNames = fallback.data
+        .map((row) => (typeof row.username === 'string' ? row.username : ''))
+        .filter(Boolean)
+    } else if (listed.error || !Array.isArray(listed.data)) {
+      return 0
+    } else {
+      idleNames = listed.data
+        .map((row) => (typeof row.username === 'string' ? row.username : ''))
+        .filter(Boolean)
+    }
+
+    if (idleNames.length === 0) return 0
+
+    for (const name of idleNames) {
+      await client.from('swadcost_calcs').delete().ilike('username', name)
+    }
+
+    const byStamp = await client.from('swadcost_accounts').delete().lt('last_active_at', cutoff)
+    if (byStamp.error && looksMissingColumn(byStamp.error.message, 'last_active_at')) {
+      await client.from('swadcost_accounts').delete().lt('created_at', cutoff)
+    }
+
+    purgeLocalTelemetryForUsers(idleNames)
+    return idleNames.length
+  } catch {
+    return 0
+  }
+}
+
 export async function loadOwnerSnapshot(): Promise<{
   accounts: AccountMeta[]
   calcs: CalcEvent[]
@@ -282,24 +418,35 @@ export async function loadOwnerSnapshot(): Promise<{
   }
 
   try {
-    const [accountsRes, calcsRes] = await Promise.all([
-      client.from('swadcost_accounts').select('id, username, created_at').order('created_at', { ascending: false }),
-      client
-        .from('swadcost_calcs')
-        .select('id, username, fabric_name, mode, reed, pick, warp_rs, quality_label, final_cost, payload, created_at')
-        .order('created_at', { ascending: false })
-        .limit(500),
-    ])
+    const withStamp = await client
+      .from('swadcost_accounts')
+      .select('id, username, created_at, last_active_at')
+      .order('created_at', { ascending: false })
+    const accountsRes =
+      withStamp.error && looksMissingColumn(withStamp.error.message, 'last_active_at')
+        ? await client
+            .from('swadcost_accounts')
+            .select('id, username, created_at')
+            .order('created_at', { ascending: false })
+        : withStamp
+
+    const calcsRes = await client
+      .from('swadcost_calcs')
+      .select('id, username, fabric_name, mode, reed, pick, warp_rs, quality_label, final_cost, payload, created_at')
+      .order('created_at', { ascending: false })
+      .limit(500)
 
     const remoteAccounts = Array.isArray(accountsRes.data)
-      ? accountsRes.data.map((row) => mapRemoteAccount(row as Record<string, unknown>)).filter((row): row is AccountMeta => Boolean(row))
+      ? accountsRes.data
+          .map((row) => mapRemoteAccount(row as Record<string, unknown>))
+          .filter((row): row is AccountMeta => Boolean(row))
       : []
     const remoteCalcs = Array.isArray(calcsRes.data)
       ? calcsRes.data.map((row) => mapRemoteCalc(row as Record<string, unknown>)).filter((row): row is CalcEvent => Boolean(row))
       : []
 
     const failed = Boolean(accountsRes.error || calcsRes.error)
-    const accounts = mergeById(remoteAccounts, localAccounts)
+    const accounts = mergeAccountsByUsername(remoteAccounts, localAccounts)
     const calcs = mergeById(remoteCalcs, localCalcs)
     const source = failed || remoteAccounts.length + remoteCalcs.length === 0 ? 'mixed' : 'supabase'
     return { accounts, calcs, source }
