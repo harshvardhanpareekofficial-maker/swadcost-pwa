@@ -24,7 +24,7 @@ export const FINISH_SETUP_HINT =
   'This name is on the studio list. Finish setup on this device — set a password for this browser. The cloud never stores your password.'
 
 export const USERNAME_TAKEN_CLOUD =
-  'This username is already taken. Pick another — add mill initials if you need a unique handle.'
+  'Name taken — pick another. This username is already taken. Add mill initials if you need a unique handle.'
 
 export type SignInStart =
   | { status: 'ok'; username: string }

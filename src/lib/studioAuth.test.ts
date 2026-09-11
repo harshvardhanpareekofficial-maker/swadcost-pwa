@@ -138,7 +138,9 @@ describe('createStudioAccount', () => {
       code: 'TAKEN',
       username: 'Harshvardhan',
     })
+    expect(created.ok === false && created.error).toMatch(/name taken/i)
     expect(created.ok === false && created.error).toMatch(/already taken/i)
+    expect(created.ok === false && created.error).toMatch(/mill initials/i)
     expect(findAccount('harshvardhan')).toBeUndefined()
     expect(upserts).toEqual([])
 
@@ -147,6 +149,28 @@ describe('createStudioAccount', () => {
     const finished = await finishDeviceSetup('harshvardhan', 'loompass', 'loompass')
     expect(finished).toEqual({ ok: true, username: 'Harshvardhan' })
     expect(upserts).toEqual(['Harshvardhan'])
+  })
+
+  it('lets a different handle succeed when the first name is taken (rahul vs rahul2)', async () => {
+    const upserts: string[] = []
+    __setCloudAccountAdaptersForTests({
+      lookup: async (norm) =>
+        norm === 'rahul'
+          ? { status: 'found', username: 'Rahul', usernameNorm: norm }
+          : { status: 'missing' },
+      upsert: async (username) => {
+        upserts.push(username)
+        return { ok: true }
+      },
+    })
+    const taken = await createStudioAccount('Rahul', 'loompass', 'loompass')
+    expect(taken).toMatchObject({ ok: false, code: 'TAKEN', username: 'Rahul' })
+    expect(taken.ok === false && taken.error).toBe(USERNAME_TAKEN_CLOUD)
+    expect(upserts).toEqual([])
+
+    const other = await createStudioAccount('rahul2', 'loompass', 'loompass')
+    expect(other).toEqual({ ok: true, username: 'rahul2' })
+    expect(upserts).toEqual(['rahul2'])
   })
 
   it('does not claim success when the cloud upsert fails', async () => {

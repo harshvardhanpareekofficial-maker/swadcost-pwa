@@ -193,7 +193,7 @@ export function LoginPage({ onSuccess }: Props) {
     ? FINISH_SETUP_HINT
     : signingIn
       ? 'Sign in to keep your cost sheets together.'
-      : 'Choose a name and password. They stay on this device.'
+      : 'Choose a unique handle and password. They stay on this device. Two people named Rahul need different IDs (rahul_loom / rahul2).'
   const cloudBlocked = error === CLOUD_UNAVAILABLE || error === CLOUD_NOT_CONFIGURED
   const actionLabel = pendingCloud
     ? 'Retry'
