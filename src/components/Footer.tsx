@@ -1,7 +1,8 @@
 export function MakerNote({ className = '' }: { className?: string }) {
   return (
     <p className={`text-xs leading-relaxed text-plum/55 ${className}`}>
-      Harshvardhan Pareek built fabriccost STUDIO in Ichalkaranji, India.
+      Harshvardhan Pareek built fabriccost STUDIO in Ichalkaranji, India — a fabric
+      cost calculator for powerloom grey fabric costing.
     </p>
   )
 }

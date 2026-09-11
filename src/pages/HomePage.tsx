@@ -20,7 +20,7 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
     <Layout
       eyebrow="Costing studio"
       title="New grey fabric costing"
-      subtitle="Name the dalal / broker, then choose single or multiple warp and weft yarns for powerloom textile costing."
+      subtitle="Name the dalal / broker, then choose single or multiple warp and weft yarns for powerloom grey fabric costing — mill-sheet math from Ichalkaranji."
       onLogout={onLogout}
     >
       <Stepper step={0} />

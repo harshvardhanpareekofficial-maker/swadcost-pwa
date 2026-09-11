@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { OWNER_PATH } from './owner'
-import { isOwnerVaultPath } from './seo'
+import { STUDIO_FAQS, isOwnerVaultPath } from './seo'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -26,6 +26,11 @@ describe('on-page SEO', () => {
     expect(html).toMatch(/name="keywords"[^>]*content="[^"]*harshvardhan pareek/)
     expect(html).toMatch(/name="keywords"[^>]*content="[^"]*Pareektech/)
     expect(html).toMatch(/name="keywords"[^>]*content="[^"]*fabric cost calculator/)
+    expect(html).toMatch(/fabric cost calculator Ichalkaranji/)
+    expect(html).toMatch(/powerloom grey fabric costing/)
+    expect(html).toMatch(/Harshvardhan Pareek maker/)
+    expect(html).toContain('rel="alternate" hrefLang="en-IN"')
+    expect(html).toContain('rel="alternate" hrefLang="x-default"')
   })
 
   it('completes Open Graph and Twitter tags', () => {
@@ -60,7 +65,24 @@ describe('on-page SEO', () => {
     const types = graph['@graph'].flatMap((node) =>
       Array.isArray(node['@type']) ? node['@type'] : [node['@type']],
     )
-    expect(types).toEqual(expect.arrayContaining(['SoftwareApplication', 'WebApplication', 'Organization', 'Person']))
+    expect(types).toEqual(
+      expect.arrayContaining([
+        'SoftwareApplication',
+        'WebApplication',
+        'Organization',
+        'Person',
+        'FAQPage',
+        'WebPage',
+      ]),
+    )
+    const faq = graph['@graph'].find((node) => node['@type'] === 'FAQPage') as {
+      mainEntity?: Array<{ name?: string; acceptedAnswer?: { text?: string } }>
+    }
+    expect(faq?.mainEntity).toHaveLength(STUDIO_FAQS.length)
+    expect(faq?.mainEntity?.map((q) => q.name)).toEqual(STUDIO_FAQS.map((item) => item.q))
+    expect(faq?.mainEntity?.map((q) => q.acceptedAnswer?.text)).toEqual(STUDIO_FAQS.map((item) => item.a))
+    expect(STUDIO_FAQS.length).toBeGreaterThanOrEqual(3)
+    expect(STUDIO_FAQS.length).toBeLessThanOrEqual(6)
     const person = graph['@graph'].find((node) => node['@type'] === 'Person')
     expect(person?.sameAs).toEqual(
       expect.arrayContaining([
@@ -75,7 +97,7 @@ describe('on-page SEO', () => {
     expect(robots).toContain(`Disallow: ${OWNER_PATH}`)
     expect(robots).toContain('Sitemap: https://harshvardhanpareek.com/sitemap.xml')
     expect(sitemap).toContain('https://harshvardhanpareek.com/')
-    expect(sitemap).toContain('<lastmod>2026-09-11T00:00:00+00:00</lastmod>')
+    expect(sitemap).toContain('<lastmod>2026-09-11T17:36:00+00:00</lastmod>')
     expect(sitemap).not.toContain('<changefreq>')
     expect(sitemap).not.toContain('<priority>')
     expect(sitemap).not.toContain(OWNER_PATH)
@@ -94,5 +116,18 @@ describe('on-page SEO', () => {
     expect(isOwnerVaultPath(`${OWNER_PATH}/`)).toBe(true)
     expect(isOwnerVaultPath('/')).toBe(false)
     expect(isOwnerVaultPath('/login')).toBe(false)
+  })
+
+  it('keeps FAQ copy on the public login page and documents a post-deploy recrawl', () => {
+    const login = readFileSync(join(root, 'src/pages/LoginPage.tsx'), 'utf8')
+    const readme = readFileSync(join(root, 'README.md'), 'utf8')
+    const envExample = readFileSync(join(root, '.env.example'), 'utf8')
+    expect(login).toContain('StudioFaq')
+    expect(login).toContain('fabric cost calculator for Ichalkaranji')
+    expect(readme).toMatch(/URL Inspection/)
+    expect(readme).toMatch(/days to weeks/)
+    expect(readme).toMatch(/cannot guarantee overnight/)
+    expect(envExample).toMatch(/No API key required/)
+    expect(envExample).toMatch(/speechSynthesis/)
   })
 })
