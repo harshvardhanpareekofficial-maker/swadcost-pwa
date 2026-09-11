@@ -11,12 +11,12 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.svg', 'robots.txt', 'sitemap.xml', 'icons/*.svg', 'icons/*.png'],
       manifest: {
-        name: 'SwadCost — Fabric Cost Calculator',
-        short_name: 'SwadCost',
+        name: 'fabriccost STUDIO — Fabric Cost Calculator',
+        short_name: 'fabriccost',
         description:
           'Indian powerloom grey fabric costing for single and multi warp/weft. Speak or type inputs, edit results, install as PWA.',
-        theme_color: '#1e1b4b',
-        background_color: '#0f172a',
+        theme_color: '#3B1F4A',
+        background_color: '#F7F1E8',
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/',

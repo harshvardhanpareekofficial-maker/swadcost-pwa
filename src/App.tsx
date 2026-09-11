@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
-import { isAuthenticated, logout } from './lib/auth'
+import { currentUser, isAuthenticated, logout } from './lib/auth'
 import { calculateMulti, calculateSingle, type CostBreakdown } from './lib/costing'
+import { recordSuccessfulCalc } from './lib/telemetry'
 import {
   emptyMulti,
   emptySingle,
@@ -112,6 +113,14 @@ export default function App() {
                 return
               }
               const r = mode === 'single' ? calculateSingle(single) : calculateMulti(multi)
+              recordSuccessfulCalc({
+                username: currentUser(),
+                fabricName,
+                mode,
+                single,
+                multi,
+                result: r,
+              })
               setResult(r)
               setScreen('results')
             } catch (e) {
@@ -120,7 +129,7 @@ export default function App() {
           }}
         />
         {calcError ? (
-          <p className="fixed bottom-20 left-1/2 z-50 w-[min(92%,24rem)] -translate-x-1/2 rounded-xl bg-red-900/90 px-4 py-3 text-center text-sm text-red-100">
+          <p className="fixed bottom-20 left-1/2 z-50 w-[min(92%,24rem)] -translate-x-1/2 rounded-[14px] border border-rose/30 bg-paper px-4 py-3 text-center text-sm text-rose shadow-sheet">
             {calcError}
           </p>
         ) : null}

@@ -1,13 +1,13 @@
-# SwadCost PWA — STATUS
+# fabriccost STUDIO — STATUS
 
 **Path:** `/workspace/swadcost-pwa`  
 **Date:** 2026-09-11 (Asia/Calcutta)  
-**Verify:** `npm test` ✅ 16/16 · `npm run build` ✅ (`dist/` + PWA service worker)
+**Verify:** `npm test` ✅ 27/27 · `npm run build` ✅ (`dist/` + PWA service worker)
 
 ## Built
 
 - Vite + React 19 + TypeScript + Tailwind v4 + vite-plugin-pwa
-- Client login gate (`rohitbohara` / `VITE_AUTH_*`), `localStorage` session
+- Client accounts in `localStorage` (`fabriccost.accounts`): Sign in + Create account, SHA-256 hashes, seeded demo `rohitbohara` + optional `VITE_AUTH_*`
 - Flow: Login → Home (fabric name + **Single Warp** / **Multiple Warp / Weft**) → Speak|Type → Fields → Results
 - Speak: Web Speech API fills current field and advances
 - Results: breakdown, markups 5–16%, edit + recalculate
