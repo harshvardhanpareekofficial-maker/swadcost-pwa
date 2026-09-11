@@ -5,7 +5,7 @@ migrateOwnerStorage()
 /** Secret owner vault path — not linked from the public UI. Do not add /admin. */
 export const OWNER_PATH = '/owner-vault-hvp-7k9m2xq4'
 
-export const OWNER_GATE_FALLBACK = 'LoomStudio#HVP5381'
+export const OWNER_GATE_FALLBACK = 'LoomStudio-HVP5381'
 
 export function ownerGate(): string {
   return (import.meta.env.VITE_OWNER_GATE || OWNER_GATE_FALLBACK).trim()
