@@ -23,6 +23,9 @@ export const CLOUD_SYNC_FAILED =
 export const FINISH_SETUP_HINT =
   'This name is on the studio list. Finish setup on this device — set a password for this browser. The cloud never stores your password.'
 
+export const USERNAME_TAKEN_CLOUD =
+  'This username is already taken. Pick another — add mill initials if you need a unique handle.'
+
 export type SignInStart =
   | { status: 'ok'; username: string }
   | { status: 'finish-setup'; username: string }
@@ -83,7 +86,11 @@ export async function finishDeviceSetup(
   return { ok: true, username: registered.username }
 }
 
-/** Create on this device. If the cloud already has the name and local is empty, this is Finish setup — not “taken”. */
+/**
+ * Create a new handle on this device.
+ * If the cloud already has username_norm and this browser has no local hash, the name is taken —
+ * do not silently Finish setup (that reclaim path is Sign-in only).
+ */
 export async function createStudioAccount(
   username: string,
   password: string,
@@ -96,6 +103,15 @@ export async function createStudioAccount(
   if (existing) {
     return { ok: false, error: USERNAME_TAKEN, code: 'TAKEN', username: existing.username }
   }
+
+  const cloud = await lookupCloudAccount(username)
+  if (cloud.status === 'unavailable') {
+    return { ok: false, error: cloud.error }
+  }
+  if (cloud.status === 'found') {
+    return { ok: false, error: USERNAME_TAKEN_CLOUD, code: 'TAKEN', username: cloud.username }
+  }
+
   return finishDeviceSetup(username, password, confirmPassword)
 }
 

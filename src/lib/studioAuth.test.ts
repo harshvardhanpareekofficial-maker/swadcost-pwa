@@ -19,6 +19,7 @@ import {
   finishDeviceSetup,
   retryCloudLink,
   switchStudioAccount,
+  USERNAME_TAKEN_CLOUD,
 } from './studioAuth'
 import { usernameNorm } from './usernames'
 
@@ -118,17 +119,34 @@ describe('createStudioAccount', () => {
     expect(dup).toMatchObject({ ok: false, code: 'TAKEN' })
   })
 
-  it('treats Create as Finish setup when cloud has the name and local is empty', async () => {
+  it('rejects Create when the cloud already has the username_norm — Sign-in is the Finish setup path', async () => {
+    const upserts: string[] = []
     __setCloudAccountAdaptersForTests({
       lookup: async (norm) =>
         norm === 'harshvardhan'
           ? { status: 'found', username: 'Harshvardhan', usernameNorm: norm }
           : { status: 'missing' },
-      upsert: async () => ({ ok: true }),
+      upsert: async (username) => {
+        upserts.push(username)
+        return { ok: true }
+      },
     })
     const created = await createStudioAccount('harshvardhan', 'loompass', 'loompass')
-    expect(created).toEqual({ ok: true, username: 'Harshvardhan' })
-    expect(findAccount('HARSHVARDHAN')?.username).toBe('Harshvardhan')
+    expect(created).toEqual({
+      ok: false,
+      error: USERNAME_TAKEN_CLOUD,
+      code: 'TAKEN',
+      username: 'Harshvardhan',
+    })
+    expect(created.ok === false && created.error).toMatch(/already taken/i)
+    expect(findAccount('harshvardhan')).toBeUndefined()
+    expect(upserts).toEqual([])
+
+    const started = await beginSignIn('HARSHVARDHAN', 'x')
+    expect(started).toEqual({ status: 'finish-setup', username: 'Harshvardhan' })
+    const finished = await finishDeviceSetup('harshvardhan', 'loompass', 'loompass')
+    expect(finished).toEqual({ ok: true, username: 'Harshvardhan' })
+    expect(upserts).toEqual(['Harshvardhan'])
   })
 
   it('does not claim success when the cloud upsert fails', async () => {
@@ -157,15 +175,20 @@ describe('createStudioAccount', () => {
 })
 
 describe('device bind + switch', () => {
-  function cloudHarshvardhan() {
+  function cloudStore(seed: Record<string, string> = {}) {
+    const byNorm = { ...seed }
     const upserts: string[] = []
     __setCloudAccountAdaptersForTests({
-      lookup: async (norm) =>
-        norm === 'harshvardhan'
-          ? { status: 'found', username: 'Harshvardhan', usernameNorm: norm }
-          : { status: 'missing' },
+      lookup: async (norm) => {
+        const username = byNorm[norm]
+        return username
+          ? { status: 'found', username, usernameNorm: norm }
+          : { status: 'missing' }
+      },
       upsert: async (username) => {
         upserts.push(username)
+        const norm = usernameNorm(username)
+        if (!byNorm[norm]) byNorm[norm] = username
         return { ok: true }
       },
     })
@@ -173,7 +196,7 @@ describe('device bind + switch', () => {
   }
 
   it('binds after Sign in, Finish setup, and Create', async () => {
-    const upserts = cloudHarshvardhan()
+    const upserts = cloudStore()
     const created = await createStudioAccount('Harshvardhan', 'loompass', 'loompass')
     expect(created).toEqual({ ok: true, username: 'Harshvardhan' })
     expect(boundUsername()).toBe('Harshvardhan')
@@ -198,7 +221,7 @@ describe('device bind + switch', () => {
   })
 
   it('blocks Create / Sign-in for a different username and does not upsert a second cloud person', async () => {
-    const upserts = cloudHarshvardhan()
+    const upserts = cloudStore()
     await createStudioAccount('Harshvardhan', 'loompass', 'loompass')
     logout()
 
@@ -218,16 +241,17 @@ describe('device bind + switch', () => {
     expect(upserts).toEqual(['Harshvardhan'])
   })
 
-  it('Create of an existing cloud username_norm Finish-setups the same row, never a case-variant duplicate', async () => {
-    const upserts = cloudHarshvardhan()
+  it('Create of an existing cloud username_norm is taken (same row, never a case-variant person)', async () => {
+    const upserts = cloudStore({ harshvardhan: 'Harshvardhan' })
     const created = await createStudioAccount('harshvardhan', 'loompass', 'loompass')
-    expect(created).toEqual({ ok: true, username: 'Harshvardhan' })
-    expect(findAccount('HARSHVARDHAN')?.username).toBe('Harshvardhan')
-    expect(upserts).toEqual(['Harshvardhan'])
+    expect(created).toMatchObject({ ok: false, code: 'TAKEN', username: 'Harshvardhan' })
+    expect(created.ok === false && created.error).toBe(USERNAME_TAKEN_CLOUD)
+    expect(findAccount('HARSHVARDHAN')).toBeUndefined()
+    expect(upserts).toEqual([])
   })
 
   it('Switch account is a no-op without confirm and clears bind + hash only after confirm', async () => {
-    cloudHarshvardhan()
+    cloudStore()
     await createStudioAccount('Harshvardhan', 'loompass', 'loompass')
     logout()
 
@@ -248,7 +272,7 @@ describe('device bind + switch', () => {
   })
 
   it('blocks a second username when only the bind stamp remains (local hash wiped)', async () => {
-    const upserts = cloudHarshvardhan()
+    const upserts = cloudStore()
     await createStudioAccount('Harshvardhan', 'loompass', 'loompass')
     logout()
     localStorage.removeItem('fabriccost.accounts')

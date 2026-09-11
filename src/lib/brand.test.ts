@@ -99,6 +99,8 @@ describe('studio chrome', () => {
     expect(studioAuth).toContain("cloud.status === 'found'")
     expect(studioAuth).toContain('deviceBoundBlock')
     expect(studioAuth).toContain('switchStudioAccount')
+    expect(studioAuth).toContain('USERNAME_TAKEN_CLOUD')
+    expect(studioAuth).toContain('This username is already taken')
   })
 
   it('activates new PWA builds without requiring clear-data every visit', () => {
