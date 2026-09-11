@@ -15,6 +15,7 @@ import {
 } from '../lib/costing'
 import { currentUser } from '../lib/auth'
 import { recordSuccessfulCalc } from '../lib/telemetry'
+import { DALAL_COST_LINE_LABEL, PICK_RATE_LABEL } from '../lib/labels'
 import { validateMultiInputs, validateSingleInputs, type CostMode } from '../lib/types'
 
 type Props = {
@@ -103,7 +104,7 @@ export function ResultsPage({
           <Row label="Warp cost" value={formatInr(result.warpCostRaw)} />
           <Row label="Weft cost" value={formatInr(result.weftCostRaw)} />
           <Row label="Sizing" value={formatInr(result.sizingCost)} />
-          <Row label="Job (pick × pick rate)" value={formatInr(result.jobCost)} />
+          <Row label={DALAL_COST_LINE_LABEL} value={formatInr(result.jobCost)} />
           <Row label="Warping" value={formatInr(result.warping)} />
         </div>
       </StudioSheet>
@@ -181,7 +182,7 @@ export function ResultsPage({
                   ['weftCount', 'Weft Count', single.weftCount],
                   ['weftRate', 'Weft Rate', single.weftRate],
                   ['wastagePct', 'Wastage %', single.wastagePct],
-                  ['pickRate', 'Pick rate / Job rate', single.pickRate],
+                  ['pickRate', PICK_RATE_LABEL, single.pickRate],
                   ['warping', 'Warping', single.warping],
                 ] as const
               ).map(([key, label, val]) => (
@@ -211,7 +212,7 @@ export function ResultsPage({
                   ['pick', 'Pick', multi.pick],
                   ['weftReedspace', 'Weft RS', multi.weftReedspace],
                   ['wastagePct', 'Wastage %', multi.wastagePct],
-                  ['pickRate', 'Pick rate / Job rate', multi.pickRate],
+                  ['pickRate', PICK_RATE_LABEL, multi.pickRate],
                   ['warping', 'Warping', multi.warping],
                 ] as const
               ).map(([key, label, val]) => (

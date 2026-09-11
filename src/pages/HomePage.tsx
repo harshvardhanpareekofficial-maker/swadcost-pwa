@@ -5,6 +5,7 @@ import { Stepper } from '../components/Stepper'
 import { IconWarp, IconWeave } from '../components/Icons'
 import { SectionLabel } from '../components/SectionLabel'
 import { studioFieldClass, studioLabelClass } from '../components/studio'
+import { DALAL_NAME_LABEL } from '../lib/labels'
 import type { CostMode } from '../lib/types'
 
 type Props = {
@@ -19,21 +20,21 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
     <Layout
       eyebrow="Costing studio"
       title="New grey fabric costing"
-      subtitle="Name the fabric, then choose single or multiple warp and weft yarns for powerloom textile costing."
+      subtitle="Name the dalal / broker, then choose single or multiple warp and weft yarns for powerloom textile costing."
       onLogout={onLogout}
     >
       <Stepper step={0} />
       <label className="mb-4 block sm:mb-6">
-        <span className={`mb-1.5 block ${studioLabelClass}`}>Fabric / job name</span>
+        <span className={`mb-1.5 block ${studioLabelClass}`}>{DALAL_NAME_LABEL}</span>
         <input
           value={fabricName}
           onChange={(e) => onFabricName(e.target.value)}
-          placeholder="e.g. Grey 40s 72×68"
+          placeholder="e.g. Ramesh / ABC Agency"
           className={studioFieldClass}
         />
         {!fabricName.trim() ? (
           <p className="mt-2 text-xs leading-relaxed text-plum/55">
-            Optional — leave blank to cost as Untitled, or name the quality before you begin.
+            Optional — leave blank to cost as Untitled, or name the dalal / broker before you begin.
           </p>
         ) : null}
       </label>

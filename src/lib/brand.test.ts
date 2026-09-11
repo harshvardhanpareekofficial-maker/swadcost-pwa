@@ -82,4 +82,22 @@ describe('studio chrome', () => {
   it('keeps maker attribution', () => {
     expect(read('src/components/Footer.tsx')).toContain('Harshvardhan Pareek')
   })
+
+  it('labels the job identifier as Dalal name / Broker name', () => {
+    const labels = read('src/lib/labels.ts')
+    expect(labels).toContain("export const DALAL_NAME_LABEL = 'Dalal name / Broker name'")
+    expect(labels).toContain("export const PICK_RATE_LABEL = 'Pick rate / Dalal rate'")
+    expect(labels).toContain("export const DALAL_COST_LINE_LABEL = 'Dalal / Broker (pick × pick rate)'")
+    expect(home).toContain('DALAL_NAME_LABEL')
+    expect(home).not.toMatch(/Fabric \/ job name/i)
+    expect(home).not.toMatch(/>Job</)
+    expect(calc).toContain('PICK_RATE_LABEL')
+    expect(calc).toContain('DALAL_SECTION_LABEL')
+    expect(calc).not.toMatch(/Job rate/)
+    expect(calc).not.toMatch(/Job & other/)
+    expect(results).toContain('DALAL_COST_LINE_LABEL')
+    expect(results).toContain('PICK_RATE_LABEL')
+    expect(results).not.toMatch(/Job \(pick/)
+    expect(results).not.toMatch(/Job rate/)
+  })
 })
