@@ -10,7 +10,7 @@ Polished, installable Progressive Web App for single + multi warp/weft grey fabr
 
 - Client-side accounts in `localStorage` (Sign in + Create account). Fresh installs start empty — there is no baked-in demo user.
 - Home: fabric name + **Single Warp** / **Multiple Warp / Weft**
-- Speak (Chrome Web Speech, Hindi/English mill numbers) or Type; in-range values auto-advance; TTS via free `speechSynthesis` (Google/Microsoft/Apple voices when present). ElevenLabs only if `VITE_ELEVENLABS_API_KEY` is set — no key required.
+- Speak (Chrome Web Speech, Hindi/English) or Type. Speak mode stays listening so you can dictate a stream of mill values; named metrics or numbers in sheet order autofill in-range fields. TTS via free `speechSynthesis` is optional and stays quiet during dictation. ElevenLabs only if `VITE_ELEVENLABS_API_KEY` is set — no key required.
 - Full cost breakdown with editable inputs + recalculate
 - Markup table (5%–16%)
 - SEO meta, OG tags, manifest, icons, `robots.txt`, `sitemap.xml`

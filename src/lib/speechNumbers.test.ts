@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import {
+  consumeSpokenNumber,
   extractSpokenNumber,
   extractSpokenNumberFromAlternatives,
   preferredSpeechLang,
+  speechStreamTokens,
 } from './speechNumbers'
 
 describe('extractSpokenNumber', () => {
@@ -59,6 +61,22 @@ describe('extractSpokenNumber', () => {
   it('picks the first Chrome alternative that parses', () => {
     expect(extractSpokenNumberFromAlternatives(['hmm reed maybe', 'sixty five'])).toBe(65)
     expect(extractSpokenNumberFromAlternatives(['hello', 'nope'])).toBeNull()
+  })
+
+  it('consumes the longest mill number at the head of a stream', () => {
+    expect(consumeSpokenNumber(speechStreamTokens('sixty five 102'))).toEqual({
+      value: 65,
+      length: 2,
+    })
+    expect(consumeSpokenNumber(speechStreamTokens('eighty sixty four'))).toEqual({
+      value: 80,
+      length: 1,
+    })
+    expect(consumeSpokenNumber(speechStreamTokens('one hundred two reed'))).toEqual({
+      value: 102,
+      length: 3,
+    })
+    expect(consumeSpokenNumber(speechStreamTokens('reed 80'))).toBeNull()
   })
 
   it('prefers hi-IN when the device language is Hindi', () => {

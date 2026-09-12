@@ -441,6 +441,58 @@ function tokenize(stripped: string): string[] {
     .filter((t) => t && !SKIP.has(t) && !UNIT_TOKENS.has(t))
 }
 
+export function normalizeSpeechText(transcript: string): string {
+  return normalizeDigits(transcript)
+    .replace(/,/g, ' ')
+    .replace(/([a-z])-([a-z])/gi, '$1 $2')
+    .replace(/[^\p{L}\p{M}\p{N}.\s-]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLowerCase()
+}
+
+/** Tokens for a continuous utterance — keeps field names and unit words. */
+export function speechStreamTokens(transcript: string): string[] {
+  const cleaned = normalizeSpeechText(transcript).replace(/(\d)\.(?=\s|$)/g, '$1')
+  if (!cleaned) return []
+  return cleaned.split(' ').filter(Boolean)
+}
+
+export function speechTokenValue(token: string): number | null {
+  return tokenValue(token)
+}
+
+export function speechTokensLooselyEqual(a: string, b: string): boolean {
+  if (a === b) return true
+  const va = tokenValue(a)
+  const vb = tokenValue(b)
+  return va !== null && vb !== null && va === vb
+}
+
+export function isNumericSpeechToken(token: string): boolean {
+  if (/^\d+(?:\.\d+)?$/.test(token)) return true
+  if (POINT.has(token) || HUNDRED.has(token) || THOUSAND.has(token)) return true
+  if (HINDI_COMPOUND[token] !== undefined) return true
+  return SMALL[token] !== undefined
+}
+
+/**
+ * Longest mill number at the start of a token list.
+ * Stops before field names / leftover words so a stream can yield several values.
+ */
+export function consumeSpokenNumber(tokens: string[]): { value: number; length: number } | null {
+  let max = 0
+  while (max < tokens.length && max < 8 && isNumericSpeechToken(tokens[max])) max += 1
+  if (max === 0) return null
+  for (let len = max; len >= 1; len -= 1) {
+    const n = parseSpokenTokens(tokens.slice(0, len).join(' '))
+    if (n !== null && Number.isFinite(n) && n >= 0 && n <= 1_000_000) {
+      return { value: n, length: len }
+    }
+  }
+  return null
+}
+
 export function parseSpokenTokens(stripped: string): number | null {
   const tokens = tokenize(stripped)
   if (tokens.length === 0) return null
@@ -463,13 +515,7 @@ export function parseSpokenTokens(stripped: string): number | null {
  * Does not pull a digit out of a long misheard sentence.
  */
 export function extractSpokenNumber(transcript: string): number | null {
-  const cleaned = normalizeDigits(transcript)
-    .replace(/,/g, ' ')
-    .replace(/([a-z])-([a-z])/gi, '$1 $2')
-    .replace(/[^\p{L}\p{M}\p{N}.\s-]/gu, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .toLowerCase()
+  const cleaned = normalizeSpeechText(transcript)
   if (!cleaned) return null
   const stripped = cleaned
     .replace(UNIT_RE, ' ')
