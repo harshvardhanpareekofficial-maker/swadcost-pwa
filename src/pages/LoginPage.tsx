@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { boundUsername, MIN_PASSWORD_LENGTH } from '../lib/auth'
 import { IconArrow } from '../components/Icons'
 import { CheckList } from '../components/CheckList'
@@ -12,10 +13,13 @@ import {
   beginSignIn,
   CLOUD_NOT_CONFIGURED,
   CLOUD_UNAVAILABLE,
+  CREATE_ACCOUNT_PATH,
   createStudioAccount,
   FINISH_SETUP_HINT,
   finishDeviceSetup,
+  initialStudioMode,
   retryCloudLink,
+  STORE_CREDENTIALS_NOTE,
   switchStudioAccount,
 } from '../lib/studioAuth'
 import { markAccountActive } from '../lib/telemetry'
@@ -85,7 +89,9 @@ function PasswordField({
 }
 
 export function LoginPage({ onSuccess }: Props) {
-  const [mode, setMode] = useState<Mode>('signin')
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [mode, setMode] = useState<Mode>(() => initialStudioMode(location.pathname))
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -93,6 +99,7 @@ export function LoginPage({ onSuccess }: Props) {
   const [busy, setBusy] = useState(false)
   const [pendingCloud, setPendingCloud] = useState<string | null>(null)
   const [bound, setBound] = useState<string | null>(() => boundUsername())
+  const [readyName, setReadyName] = useState<string | null>(null)
 
   function switchMode(next: Mode) {
     setMode(next)
@@ -100,6 +107,17 @@ export function LoginPage({ onSuccess }: Props) {
     setPendingCloud(null)
     setPassword('')
     setConfirmPassword('')
+    setReadyName(null)
+    if (next === 'signup' && location.pathname !== CREATE_ACCOUNT_PATH) {
+      navigate(CREATE_ACCOUNT_PATH)
+    } else if (next === 'signin' && location.pathname === CREATE_ACCOUNT_PATH) {
+      navigate('/')
+    }
+  }
+
+  function enterStudio() {
+    if (location.pathname !== '/') navigate('/')
+    onSuccess()
   }
 
   function updateField(setter: (value: string) => void) {
@@ -123,19 +141,28 @@ export function LoginPage({ onSuccess }: Props) {
     setConfirmPassword('')
     setError(null)
     setPendingCloud(null)
+    setReadyName(null)
     setMode('signin')
+    if (location.pathname === CREATE_ACCOUNT_PATH) navigate('/')
   }
 
-  async function completeOk(name: string) {
+  async function completeOk(name: string, showStoreNote = false) {
     await markAccountActive(name)
     setPendingCloud(null)
     setBound(name)
-    onSuccess()
+    if (showStoreNote) {
+      setReadyName(name)
+      return
+    }
+    enterStudio()
   }
 
-  async function applyAuthResult(result: Awaited<ReturnType<typeof createStudioAccount>>) {
+  async function applyAuthResult(
+    result: Awaited<ReturnType<typeof createStudioAccount>>,
+    showStoreNote = false,
+  ) {
     if (result.ok) {
-      await completeOk(result.username)
+      await completeOk(result.username, showStoreNote)
       return
     }
     if (result.code === 'CLOUD_SYNC' && result.username) {
@@ -152,7 +179,7 @@ export function LoginPage({ onSuccess }: Props) {
     setError(null)
     try {
       if (pendingCloud) {
-        await applyAuthResult(await retryCloudLink(pendingCloud))
+        await applyAuthResult(await retryCloudLink(pendingCloud), true)
         return
       }
       if (mode === 'signin') {
@@ -175,7 +202,7 @@ export function LoginPage({ onSuccess }: Props) {
         mode === 'finish-setup'
           ? await finishDeviceSetup(username, password, confirmPassword)
           : await createStudioAccount(username, password, confirmPassword)
-      await applyAuthResult(result)
+      await applyAuthResult(result, true)
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {
@@ -248,13 +275,27 @@ export function LoginPage({ onSuccess }: Props) {
               Your work, in one place
             </p>
             <h1 className="font-display mt-1.5 text-[1.5rem] font-semibold leading-[1.12] tracking-[-0.03em] text-ink lg:mt-2 lg:text-[1.85rem]">
-              {heading}
+              {readyName ? 'Your studio account is ready.' : heading}
             </h1>
             <p className="mt-1 text-sm leading-snug text-plum/70 lg:mt-2 lg:leading-relaxed">
-              {blurb}
+              {readyName
+                ? `Keep ${readyName} and your password somewhere you can find them.`
+                : blurb}
             </p>
 
-            {bound ? (
+            {readyName ? (
+              <div className="mt-4 space-y-4 lg:mt-6">
+                <p className="rounded-[14px] border border-plum/15 bg-ivory/80 px-3.5 py-2.5 text-sm leading-relaxed text-plum">
+                  {STORE_CREDENTIALS_NOTE}
+                </p>
+                <PrimaryButton type="button" onClick={enterStudio}>
+                  Enter the studio
+                  <IconArrow />
+                </PrimaryButton>
+              </div>
+            ) : null}
+
+            {bound && !readyName ? (
               <div className="mt-3 rounded-[14px] border border-plum/15 bg-ivory/80 px-3.5 py-2.5 text-sm leading-relaxed text-plum">
                 <p>
                   This device is set up for <span className="font-semibold">{bound}</span>. Sign in as{' '}
@@ -271,83 +312,93 @@ export function LoginPage({ onSuccess }: Props) {
               </div>
             ) : null}
 
-            <form onSubmit={submit} className="mt-4 space-y-3 lg:mt-6 lg:space-y-4">
-              <label className="block">
-                <span className={`mb-1 block ${studioLabelClass}`}>
-                  {signingIn ? 'User ID' : 'Name'}
-                </span>
-                <input
-                  autoComplete="username"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  value={username}
-                  onChange={(e) => updateField(setUsername)(e.target.value)}
-                  placeholder={signingIn ? 'Your user ID' : 'Display name or username'}
-                  className={studioFieldClass}
-                  required
-                  readOnly={finishing}
-                />
-              </label>
+            {readyName ? null : (
+              <>
+                <form onSubmit={submit} className="mt-4 space-y-3 lg:mt-6 lg:space-y-4">
+                  <label className="block">
+                    <span className={`mb-1 block ${studioLabelClass}`}>
+                      {signingIn ? 'User ID' : 'Name'}
+                    </span>
+                    <input
+                      autoComplete="username"
+                      autoCapitalize="none"
+                      autoCorrect="off"
+                      spellCheck={false}
+                      value={username}
+                      onChange={(e) => updateField(setUsername)(e.target.value)}
+                      placeholder={signingIn ? 'Your user ID' : 'Display name or username'}
+                      className={studioFieldClass}
+                      required
+                      readOnly={finishing}
+                    />
+                  </label>
 
-              <PasswordField
-                label="Password"
-                value={password}
-                onChange={updateField(setPassword)}
-                autoComplete={signingIn && !finishing ? 'current-password' : 'new-password'}
-                placeholder={signingIn && !finishing ? 'Your password' : `At least ${MIN_PASSWORD_LENGTH} characters`}
-              />
+                  <PasswordField
+                    label="Password"
+                    value={password}
+                    onChange={updateField(setPassword)}
+                    autoComplete={signingIn && !finishing ? 'current-password' : 'new-password'}
+                    placeholder={signingIn && !finishing ? 'Your password' : `At least ${MIN_PASSWORD_LENGTH} characters`}
+                  />
 
-              {!signingIn || finishing ? (
-                <PasswordField
-                  label="Confirm password"
-                  value={confirmPassword}
-                  onChange={updateField(setConfirmPassword)}
-                  autoComplete="new-password"
-                  placeholder="Type the same password again"
-                />
-              ) : null}
+                  {!signingIn || finishing ? (
+                    <PasswordField
+                      label="Confirm password"
+                      value={confirmPassword}
+                      onChange={updateField(setConfirmPassword)}
+                      autoComplete="new-password"
+                      placeholder="Type the same password again"
+                    />
+                  ) : null}
 
-              {error ? (
-                <p
-                  role="alert"
-                  className="rounded-[14px] border border-rose/25 bg-rose/8 px-3.5 py-2.5 text-sm leading-relaxed text-rose"
-                >
-                  {error}
+                  {error ? (
+                    <p
+                      role="alert"
+                      className="rounded-[14px] border border-rose/25 bg-rose/8 px-3.5 py-2.5 text-sm leading-relaxed text-rose"
+                    >
+                      {error}
+                    </p>
+                  ) : null}
+
+                  {!signingIn ? (
+                    <p className="rounded-[14px] border border-plum/15 bg-ivory/80 px-3.5 py-2.5 text-sm leading-relaxed text-plum">
+                      {STORE_CREDENTIALS_NOTE}
+                    </p>
+                  ) : null}
+
+                  <PrimaryButton type="submit" disabled={busy}>
+                    {busy ? busyLabel : actionLabel}
+                    <IconArrow />
+                  </PrimaryButton>
+                </form>
+
+                <p className="mt-3 text-center text-sm text-plum/70 lg:mt-5">
+                  {signingIn ? (
+                    <>
+                      New to the studio?{' '}
+                      <button
+                        type="button"
+                        onClick={() => switchMode('signup')}
+                        className="min-h-11 font-semibold text-plum underline-offset-4 hover:underline"
+                      >
+                        Create an account
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      Already have an account on this device?{' '}
+                      <button
+                        type="button"
+                        onClick={() => switchMode('signin')}
+                        className="min-h-11 font-semibold text-plum underline-offset-4 hover:underline"
+                      >
+                        Sign in
+                      </button>
+                    </>
+                  )}
                 </p>
-              ) : null}
-
-              <PrimaryButton type="submit" disabled={busy}>
-                {busy ? busyLabel : actionLabel}
-                <IconArrow />
-              </PrimaryButton>
-            </form>
-
-            <p className="mt-3 text-center text-sm text-plum/70 lg:mt-5">
-              {signingIn ? (
-                <>
-                  New to the studio?{' '}
-                  <button
-                    type="button"
-                    onClick={() => switchMode('signup')}
-                    className="min-h-11 font-semibold text-plum underline-offset-4 hover:underline"
-                  >
-                    Create an account
-                  </button>
-                </>
-              ) : (
-                <>
-                  Already have an account on this device?{' '}
-                  <button
-                    type="button"
-                    onClick={() => switchMode('signin')}
-                    className="min-h-11 font-semibold text-plum underline-offset-4 hover:underline"
-                  >
-                    Sign in
-                  </button>
-                </>
-              )}
-            </p>
+              </>
+            )}
           </div>
         </section>
 

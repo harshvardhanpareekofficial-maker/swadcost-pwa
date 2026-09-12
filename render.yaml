@@ -12,6 +12,10 @@ services:
         value: https://stcjwprffdsojfeogfnx.supabase.co
       - key: VITE_SUPABASE_ANON_KEY
         sync: false
+    # SPA fallback. Existing files (/assets/*, robots.txt, sitemap.xml, IndexNow
+    # key) are served as-is; unknown paths rewrite to the client shell.
+    # Dashboard-created static sites do not read this file — add the same
+    # Rewrite /* → /index.html under Settings → Redirects/Rewrites if 404s persist.
     routes:
       - type: rewrite
         source: /sitemap.xml

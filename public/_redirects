@@ -1,0 +1,4 @@
+# SPA fallback for hosts that read this file (copied into dist by Vite).
+# Render static CDN uses Blueprint `routes` or Dashboard Redirects/Rewrites;
+# it does not apply this file. Keep the catch-all last so real files win.
+/*    /index.html   200

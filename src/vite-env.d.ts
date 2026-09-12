@@ -1,6 +1,15 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-plugin-pwa/client" />
 
+declare module '../../scripts/spa-shell-pages.mjs' {
+  export const CREATE_ACCOUNT_PATH: string
+  export function clientShellPaths(ownerSource: string): string[]
+  export function writeSpaShellPages(opts?: {
+    distDir?: string
+    ownerSource?: string
+  }): { indexHtml: string; written: string[]; bytes: number }
+}
+
 interface ImportMetaEnv {
   readonly VITE_AUTH_USER?: string
   readonly VITE_AUTH_PASS?: string

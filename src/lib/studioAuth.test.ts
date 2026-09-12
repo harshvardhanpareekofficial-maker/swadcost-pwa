@@ -15,8 +15,10 @@ import { __setCloudAccountAdaptersForTests, CLOUD_NOT_CONFIGURED, CLOUD_UNAVAILA
 import {
   beginSignIn,
   CLOUD_SYNC_FAILED,
+  CREATE_ACCOUNT_PATH,
   createStudioAccount,
   finishDeviceSetup,
+  initialStudioMode,
   retryCloudLink,
   switchStudioAccount,
   USERNAME_TAKEN_CLOUD,
@@ -34,6 +36,16 @@ function clear() {
 
 beforeEach(clear)
 afterEach(clear)
+
+describe('create-account path', () => {
+  it('opens Create from /create-account and Sign-in from other paths', () => {
+    expect(CREATE_ACCOUNT_PATH).toBe('/create-account')
+    expect(initialStudioMode('/create-account')).toBe('signup')
+    expect(initialStudioMode('/create-account/')).toBe('signup')
+    expect(initialStudioMode('/')).toBe('signin')
+    expect(initialStudioMode('/login')).toBe('signin')
+  })
+})
 
 describe('usernameNorm', () => {
   it('treats Harshvardhan / harshvardhan / HARSHVARDHAN as one key', () => {

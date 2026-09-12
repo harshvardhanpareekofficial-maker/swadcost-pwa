@@ -62,7 +62,15 @@ See [`FORMULA_CROSSCHECK.md`](FORMULA_CROSSCHECK.md) for the live SwadCost demo 
    - Apex: A/ALIAS to Render, or CNAME flattening per Render docs
    - `www` CNAME → your Render host
 
-SPA fallback is configured in `render.yaml` (`/*` → `/index.html`). Render serves a real file when it exists, so `robots.txt`, `sitemap.xml`, and the IndexNow key file are not rewritten to the SPA shell.
+SPA fallback is configured in `render.yaml` (`/*` → `/index.html`). Render serves a real file when it exists, so `robots.txt`, `sitemap.xml`, `/assets/*`, and the IndexNow key file are not rewritten to the SPA shell.
+
+If the live static site was created from the Dashboard (not Blueprint sync), `render.yaml` routes are ignored. Add the same **Rewrite** in Render → Settings → Redirects/Rewrites:
+
+- Action: **Rewrite**
+- Source: `/*`
+- Destination: `/index.html`
+
+The build also copies `index.html` into known client-route folders in `dist/` so those deep links resolve even before the Dashboard rule is saved. A catch-all rewrite is still required for any other client path.
 
 ## IndexNow
 
