@@ -10,23 +10,34 @@ type Props = {
   min?: number
   step?: string
   active?: boolean
+  voiceFilled?: boolean
   id?: string
 }
 
 export const NumberField = forwardRef<HTMLInputElement, Props>(function NumberField(
-  { label, hint, value, onChange, unit, min = 0, step = 'any', active, id },
+  { label, hint, value, onChange, unit, min = 0, step = 'any', active, voiceFilled, id },
   ref,
 ) {
   return (
     <label
       className={[
         'block min-w-0 rounded-[14px] border px-3 py-2.5 transition sm:px-3.5 sm:py-3',
-        active ? 'border-saffron bg-paper/90 shadow-[0_2px_8px_rgba(59,31,74,0.06),0_0_0_3px_rgba(232,168,56,0.22)]' : 'border-plum/12 bg-paper/70',
+        active
+          ? 'border-saffron bg-paper/90 shadow-[0_2px_8px_rgba(59,31,74,0.06),0_0_0_3px_rgba(232,168,56,0.22)]'
+          : voiceFilled
+            ? 'border-saffron/45 bg-paper/85'
+            : 'border-plum/12 bg-paper/70',
       ].join(' ')}
     >
       <div className="mb-1 flex min-w-0 items-baseline justify-between gap-2">
         <span className={`${studioLabelClass} min-w-0 break-words`}>{label}</span>
-        {unit ? <span className="shrink-0 text-[11px] text-plum/50">{unit}</span> : null}
+        {voiceFilled || unit ? (
+          <span className="shrink-0 text-[11px] text-plum/50">
+            {voiceFilled ? 'Spoken' : null}
+            {voiceFilled && unit ? ' · ' : null}
+            {unit}
+          </span>
+        ) : null}
       </div>
       <input
         ref={ref}

@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { extractSpokenNumberFromAlternatives, preferredSpeechLang } from '../lib/speechNumbers'
+import { appendSpeechChunk, pickBestSpeechChunk } from '../lib/speechStream'
+import { preferredSpeechLang } from '../lib/speechNumbers'
 
 export { extractSpokenNumber, parseSpokenTokens, preferredSpeechLang } from '../lib/speechNumbers'
 
 const RESTART_MS = 180
+
+export type SpeechFillEvent = {
+  fullTranscript: string
+  chunk: string
+  alternatives: string[]
+}
 
 function speechEngine(): (new () => SpeechRecognition) | null {
   return window.SpeechRecognition || window.webkitSpeechRecognition || null
@@ -26,13 +33,24 @@ function speechErrorMessage(code: string): string {
   }
 }
 
+function alternativesFrom(result: SpeechRecognitionResult): string[] {
+  const transcripts: string[] = []
+  for (let a = 0; a < result.length; a += 1) {
+    const piece = result[a]?.transcript ?? ''
+    if (piece) transcripts.push(piece)
+  }
+  return transcripts
+}
+
 export function useSpeechFill(
   enabled: boolean,
-  onNumber: (n: number) => void,
+  onFinal: (ev: SpeechFillEvent) => void,
 ): {
   listening: boolean
   supported: boolean
   error: string | null
+  transcript: string
+  interim: string
   lastHeard: string | null
   ignored: boolean
   start: () => void
@@ -41,15 +59,18 @@ export function useSpeechFill(
   const [listening, setListening] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [supported, setSupported] = useState(false)
+  const [transcript, setTranscript] = useState('')
+  const [interim, setInterim] = useState('')
   const [lastHeard, setLastHeard] = useState<string | null>(null)
   const [ignored, setIgnored] = useState(false)
   const recRef = useRef<SpeechRecognition | null>(null)
   const wantListenRef = useRef(false)
   const enabledRef = useRef(enabled)
   const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const onNumberRef = useRef(onNumber)
+  const onFinalRef = useRef(onFinal)
+  const finalRef = useRef('')
   enabledRef.current = enabled
-  onNumberRef.current = onNumber
+  onFinalRef.current = onFinal
 
   useEffect(() => {
     setSupported(Boolean(speechEngine()))
@@ -69,6 +90,7 @@ export function useSpeechFill(
     recRef.current = null
     rec?.abort()
     setListening(false)
+    setInterim('')
   }, [])
 
   const stop = useCallback(() => {
@@ -86,39 +108,43 @@ export function useSpeechFill(
     setError(null)
     setLastHeard(null)
     setIgnored(false)
+    finalRef.current = ''
+    setTranscript('')
+    setInterim('')
     wantListenRef.current = true
     const rec = new SR()
     rec.continuous = true
-    rec.interimResults = false
+    rec.interimResults = true
     rec.lang = preferredSpeechLang()
     rec.maxAlternatives = 5
     rec.onresult = (ev) => {
-      for (let i = ev.resultIndex; i < ev.results.length; i++) {
-        if (!ev.results[i].isFinal) continue
+      let liveInterim = ''
+      for (let i = ev.resultIndex; i < ev.results.length; i += 1) {
         const result = ev.results[i]
-        const transcripts: string[] = []
-        for (let a = 0; a < result.length; a++) {
-          const piece = result[a]?.transcript ?? ''
-          if (piece) transcripts.push(piece)
-        }
+        const alts = alternativesFrom(result)
         const top = result[0]
-        const t = top?.transcript ?? transcripts[0] ?? ''
+        const raw = top?.transcript ?? alts[0] ?? ''
+        if (!result.isFinal) {
+          liveInterim += raw
+          continue
+        }
         const confidence = top?.confidence ?? 0
         // Chrome often reports 0; only skip a genuinely low non-zero score.
         if (confidence > 0 && confidence < 0.28) {
-          setLastHeard(t.trim())
+          setLastHeard(raw.trim())
           setIgnored(true)
           continue
         }
-        const n = extractSpokenNumberFromAlternatives(transcripts)
-        setLastHeard(t.trim() || null)
-        if (n === null) {
-          setIgnored(true)
-          continue
-        }
+        const chunk = pickBestSpeechChunk(alts.length ? alts : [raw]).trim()
+        if (!chunk) continue
+        const full = appendSpeechChunk(finalRef.current, chunk)
+        finalRef.current = full
+        setTranscript(full)
+        setLastHeard(chunk)
         setIgnored(false)
-        onNumberRef.current(n)
+        onFinalRef.current({ fullTranscript: full, chunk, alternatives: alts })
       }
+      setInterim(liveInterim.trim())
     }
     rec.onerror = (ev) => {
       if (ev.error === 'aborted' || ev.error === 'no-speech') return
@@ -173,5 +199,5 @@ export function useSpeechFill(
     [halt],
   )
 
-  return { listening, supported, error, lastHeard, ignored, start, stop }
+  return { listening, supported, error, transcript, interim, lastHeard, ignored, start, stop }
 }

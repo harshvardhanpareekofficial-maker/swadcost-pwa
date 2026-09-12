@@ -27,7 +27,7 @@ export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack, onLog
         <SectionLabel>Speak or type</SectionLabel>
         <CardButton
           title="Speak"
-          description="Chrome Web Speech. Say one Hindi or English mill number. In-range values advance at once."
+          description="Chrome Web Speech. Keep talking — name metrics or say numbers in mill-sheet order. Fields fill as they are recognized."
           icon={<IconMic />}
           onClick={() => onChoose('speak')}
         />

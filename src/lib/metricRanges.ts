@@ -1,6 +1,6 @@
 /**
- * Typical powerloom grey-sheet ranges. Speak auto-advances only when the
- * heard value sits inside the range for the active metric — no extra confirm.
+ * Typical powerloom grey-sheet ranges. Continuous speak fills a field only
+ * when the heard value sits inside the range for that metric.
  */
 
 export type MetricRange = {

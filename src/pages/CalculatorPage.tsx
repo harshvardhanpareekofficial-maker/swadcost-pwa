@@ -5,11 +5,18 @@ import { NumberField } from '../components/NumberField'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { SectionLabel } from '../components/SectionLabel'
 import { StudioSheet } from '../components/StudioSheet'
-import { useSpeechFill } from '../hooks/useSpeechFill'
+import { useSpeechFill, type SpeechFillEvent } from '../hooks/useSpeechFill'
 import { SAMPLE_MULTI, SAMPLE_SINGLE, type MultiInputs, type SingleInputs } from '../lib/costing'
 import { DALAL_SECTION_LABEL, PICK_RATE_HINT, PICK_RATE_LABEL } from '../lib/labels'
-import { rangeHint, shouldAutoAdvance, spokenPromptFor } from '../lib/metricRanges'
-import { cancelSpeak, speakPrompt } from '../lib/speakPrompt'
+import { rangeHint } from '../lib/metricRanges'
+import { cancelSpeak } from '../lib/speakPrompt'
+import {
+  overlayVoiceFillsMulti,
+  overlayVoiceFillsSingle,
+  parseSpeechStream,
+  type SpeechFill,
+  type SpeechIgnore,
+} from '../lib/speechStream'
 import type { CostMode, InputMethod } from '../lib/types'
 
 type Num = number | ''
@@ -40,6 +47,17 @@ function n(v: Num): number {
   return v === '' || !Number.isFinite(v) ? 0 : v
 }
 
+function formatIgnored(ignored: SpeechIgnore[]): string | null {
+  if (!ignored.length) return null
+  const parts = ignored.slice(0, 4).map((item) => {
+    if (item.reason === 'out-of-range' && item.fieldLabel) {
+      return `“${item.text}” is outside the usual ${rangeHint(item.fieldKey ?? '').toLowerCase()} for ${item.fieldLabel}`
+    }
+    return `“${item.text}” was skipped`
+  })
+  return parts.join('. ') + (ignored.length > 4 ? '…' : '.')
+}
+
 export function CalculatorPage({
   fabricName,
   mode,
@@ -54,7 +72,11 @@ export function CalculatorPage({
 }: Props) {
   const [focusIdx, setFocusIdx] = useState(0)
   const [rangeNote, setRangeNote] = useState<string | null>(null)
+  const [voiceFills, setVoiceFills] = useState<SpeechFill[]>([])
   const fieldRefs = useRef<(HTMLInputElement | null)[]>([])
+  const baselineRef = useRef<{ single: SingleInputs; multi: MultiInputs } | null>(null)
+  const voiceKeysRef = useRef<string[]>([])
+  const sessionStartIdxRef = useRef(0)
 
   const fields: FieldDef[] = useMemo(() => {
     if (mode === 'single') {
@@ -121,35 +143,64 @@ export function CalculatorPage({
     return list
   }, [mode, single, multi, onChangeSingle, onChangeMulti])
 
-  const onNumber = useCallback(
-    (num: number) => {
-      const f = fields[focusIdx]
-      if (!f) return
-      f.set(num)
-      if (!shouldAutoAdvance(f.key, num)) {
-        setRangeNote(`“${num}” is outside the usual ${rangeHint(f.key).toLowerCase()} for ${f.label}. Stay on this field.`)
-        return
+  const applyTranscript = useCallback(
+    (fullTranscript: string) => {
+      const catalog = fields.map((f) => ({ key: f.key, label: f.label }))
+      const parsed = parseSpeechStream(fullTranscript, catalog, {
+        startIndex: sessionStartIdxRef.current,
+      })
+      const baseline = baselineRef.current ?? { single, multi }
+      if (mode === 'single') {
+        onChangeSingle(
+          overlayVoiceFillsSingle(single, baseline.single, voiceKeysRef.current, parsed.fills),
+        )
+      } else {
+        onChangeMulti(
+          overlayVoiceFillsMulti(multi, baseline.multi, voiceKeysRef.current, parsed.fills),
+        )
       }
-      setRangeNote(null)
-      // In-range mill number → next metric at once. No extra confirm.
-      setFocusIdx((i) => Math.min(i + 1, fields.length - 1))
+      voiceKeysRef.current = parsed.fills.map((f) => f.key)
+      setVoiceFills(parsed.fills)
+      setRangeNote(formatIgnored(parsed.ignored))
+      if (parsed.fills.length) {
+        const lastKey = parsed.fills[parsed.fills.length - 1].key
+        const idx = fields.findIndex((f) => f.key === lastKey)
+        if (idx >= 0) setFocusIdx(Math.min(idx + 1, fields.length - 1))
+      }
     },
-    [fields, focusIdx],
+    [fields, mode, onChangeSingle, onChangeMulti, single, multi],
   )
 
-  const speech = useSpeechFill(inputMethod === 'speak', onNumber)
+  const onSpeech = useCallback(
+    (ev: SpeechFillEvent) => {
+      applyTranscript(ev.fullTranscript)
+    },
+    [applyTranscript],
+  )
+
+  const speech = useSpeechFill(inputMethod === 'speak', onSpeech)
   const activeKey = fields[focusIdx]?.key
-  const activeLabel = fields[focusIdx]?.label
+  const voiceFilledKeys = useMemo(() => new Set(voiceFills.map((f) => f.key)), [voiceFills])
+
+  const startMic = useCallback(() => {
+    baselineRef.current = { single, multi }
+    voiceKeysRef.current = []
+    sessionStartIdxRef.current = focusIdx
+    setVoiceFills([])
+    setRangeNote(null)
+    cancelSpeak()
+    speech.start()
+  }, [focusIdx, speech, single, multi])
+
+  const stopMic = useCallback(() => {
+    speech.stop()
+  }, [speech])
 
   useEffect(() => {
     fieldRefs.current[focusIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }, [focusIdx])
 
-  useEffect(() => {
-    if (inputMethod !== 'speak' || !speech.listening || !activeKey) return
-    void speakPrompt(spokenPromptFor(activeKey, activeLabel))
-    return () => cancelSpeak()
-  }, [inputMethod, speech.listening, focusIdx, activeKey, activeLabel])
+  useEffect(() => () => { cancelSpeak() }, [])
 
   const renderField = (i: number) => {
     const f = fields[i]
@@ -167,6 +218,7 @@ export function CalculatorPage({
           setFocusIdx(i)
         }}
         active={focusIdx === i}
+        voiceFilled={voiceFilledKeys.has(f.key)}
         id={f.key}
       />
     )
@@ -222,35 +274,63 @@ export function CalculatorPage({
       {inputMethod === 'speak' ? (
         <StudioSheet className="mb-3 sm:mb-4">
           <p className="text-sm text-ink">
-            Active field: <strong>{fields[focusIdx]?.label}</strong>
-            {activeKey ? <span className="text-plum/60"> · {rangeHint(activeKey)}</span> : null}
+            {speech.listening ? 'Listening — keep talking.' : 'Speak a stream of mill values.'}
+            {activeKey ? (
+              <span className="text-plum/60">
+                {' '}
+                Next: <strong className="text-ink">{fields[focusIdx]?.label}</strong> · {rangeHint(activeKey)}
+              </span>
+            ) : null}
           </p>
           <p className="mt-1 text-xs text-plum/70">
-            Chrome Web Speech on HTTPS (Android or desktop). Say one mill number in Hindi or English.
-            A value in the usual range moves to the next metric at once — no extra confirm.
+            Chrome Web Speech on HTTPS (Android or desktop). Name the metric or say numbers in mill-sheet
+            order — reed, reedspace, L2L, counts, rates. Out-of-range tokens are skipped. Prompts stay
+            quiet so they do not talk over you.
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             {speech.listening ? (
-              <PrimaryButton variant="secondary" onClick={speech.stop}>
+              <PrimaryButton variant="secondary" onClick={stopMic}>
                 Stop mic
               </PrimaryButton>
             ) : (
-              <PrimaryButton onClick={speech.start} disabled={!speech.supported}>
+              <PrimaryButton onClick={startMic} disabled={!speech.supported}>
                 {speech.supported ? 'Start mic' : 'Mic unavailable'}
               </PrimaryButton>
             )}
           </div>
+          <div className="mt-3 rounded-[12px] border border-plum/10 bg-paper/50 px-3 py-2.5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-plum/50">Live transcript</p>
+            <p className="mt-1 min-h-6 text-sm leading-relaxed text-ink">
+              {speech.transcript ? <span>{speech.transcript}</span> : null}
+              {speech.interim ? (
+                <span className="text-plum/45">{speech.transcript ? ' ' : ''}{speech.interim}</span>
+              ) : null}
+              {!speech.transcript && !speech.interim
+                ? speech.listening
+                  ? 'Listening…'
+                  : 'Tap Start mic, then keep speaking.'
+                : null}
+            </p>
+          </div>
+          {voiceFills.length ? (
+            <p className="mt-2 text-xs text-plum/80">
+              Filled:{' '}
+              {voiceFills.map((f, i) => (
+                <span key={`${f.key}-${i}`}>
+                  {i ? ' · ' : null}
+                  <strong>{f.label}</strong> {f.value}
+                </span>
+              ))}
+            </p>
+          ) : null}
           {!speech.supported ? (
             <p className="mt-2 text-xs text-plum/70">
               This browser has no speech engine. Use Type, or Chrome on Android / desktop over HTTPS.
             </p>
           ) : null}
           {speech.error ? <p className="mt-2 text-xs text-rose">{speech.error}</p> : null}
-          {speech.lastHeard ? (
-            <p className="mt-2 text-xs text-plum/70">
-              Heard: “{speech.lastHeard}”
-              {speech.ignored ? ' — not a mill number, field unchanged.' : null}
-            </p>
+          {speech.lastHeard && speech.ignored ? (
+            <p className="mt-2 text-xs text-plum/70">Heard “{speech.lastHeard}” — not confident enough, ignored.</p>
           ) : null}
           {rangeNote ? <p className="mt-2 text-xs text-rose">{rangeNote}</p> : null}
         </StudioSheet>

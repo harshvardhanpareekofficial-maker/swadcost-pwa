@@ -23,7 +23,7 @@ export const STUDIO_FAQS = [
   },
   {
     q: 'Do spoken field prompts need a paid API key?',
-    a: 'No. Speak-mode prompts use the browser speechSynthesis voices — Google, Microsoft or Apple when the device has them. An ElevenLabs key is optional and not required.',
+    a: 'No. Speak mode uses free Chrome Web Speech for continuous dictation. Browser speechSynthesis voices (Google, Microsoft or Apple) are optional and stay quiet while you talk. An ElevenLabs key is optional and not required.',
   },
 ] as const
 
