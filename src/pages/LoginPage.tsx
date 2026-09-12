@@ -4,6 +4,7 @@ import { boundUsername, MIN_PASSWORD_LENGTH } from '../lib/auth'
 import { IconArrow } from '../components/Icons'
 import { CheckList } from '../components/CheckList'
 import { Footer, MakerNote } from '../components/Footer'
+import { GuideLinks } from '../components/GuideLinks'
 import { StudioFaq } from '../components/StudioFaq'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { StudioBar } from '../components/StudioBar'
@@ -418,6 +419,7 @@ export function LoginPage({ onSuccess }: Props) {
         </details>
       </main>
 
+      <GuideLinks className="mx-auto w-full max-w-6xl px-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:px-8" />
       <Footer className="px-[max(1rem,env(safe-area-inset-left))] py-2.5 pr-[max(1rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-4" />
     </div>
   )

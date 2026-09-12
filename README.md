@@ -13,7 +13,7 @@ Polished, installable Progressive Web App for single + multi warp/weft grey fabr
 - Speak (Chrome Web Speech, Hindi/English) or Type. Speak mode stays listening so you can dictate a stream of mill values; named metrics or numbers in sheet order autofill in-range fields. TTS via free `speechSynthesis` is optional and stays quiet during dictation. ElevenLabs only if `VITE_ELEVENLABS_API_KEY` is set — no key required.
 - Full cost breakdown with editable inputs + recalculate
 - Markup table (5%–16%)
-- SEO meta, OG tags, manifest, icons, `robots.txt`, `sitemap.xml`
+- SEO meta, OG tags, manifest, icons, `robots.txt`, `sitemap.xml` (homepage plus mill guides)
 - IndexNow key at the site root so Bing/Yandex/etc. can be notified of the homepage
 - Footer on every page: *Made by Harshvardhan Pareek*
 
@@ -103,13 +103,13 @@ A `200` or `202` means the endpoint received the URL. Do not ping until the key 
 
 ## Search (honest timeline)
 
-On-page SEO is in the repo: title/description, canonical + hreflang, Open Graph, FAQ JSON-LD, `robots.txt` (vault disallowed), and `sitemap.xml` for the real public homepage only. That cannot guarantee overnight #1 for “fabric cost calculator Ichalkaranji” or any other query. Rankings still take days to weeks after Google recrawls.
+On-page SEO is in the repo: title/description, canonical + hreflang, Open Graph, FAQ + HowTo JSON-LD, public mill guides under `/guides/…`, `robots.txt` (vault disallowed), and `sitemap.xml` for the homepage plus those guide URLs. That cannot guarantee overnight #1 for “fabric cost calculator Ichalkaranji” or any other query. Rankings still take days to weeks after Google recrawls.
 
 After each production deploy:
 
 1. Confirm `https://harshvardhanpareek.com/sitemap.xml` and `/robots.txt` are the real files (not the SPA shell).
-2. In Google Search Console: resubmit the sitemap and run **URL Inspection** on `https://harshvardhanpareek.com/`.
-3. Optionally `npm run indexnow` once the key file is live.
+2. In Google Search Console: resubmit the sitemap and run **URL Inspection** on `https://harshvardhanpareek.com/` and each `/guides/…` URL.
+3. Optionally `npm run indexnow` once the key file is live. You can pass the guide URLs as extra arguments after they are live.
 
 ## Design
 

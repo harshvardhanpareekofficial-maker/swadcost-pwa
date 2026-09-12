@@ -1,0 +1,189 @@
+{
+  "siteOrigin": "https://harshvardhanpareek.com",
+  "lastmod": "2026-09-12T17:05:00+00:00",
+  "guides": [
+    {
+      "slug": "fabric-cost-calculator-ichalkaranji",
+      "navLabel": "Ichalkaranji calculator",
+      "title": "Fabric cost calculator Ichalkaranji | Harshvardhan Pareek",
+      "ogTitle": "Fabric cost calculator Ichalkaranji | Harshvardhan Pareek",
+      "description": "Free fabric cost calculator for Ichalkaranji powerloom mills, made by Harshvardhan Pareek. Grey fabric: reed, pick, warp, weft, sizing and dalal rate.",
+      "keywords": "fabric cost calculator Ichalkaranji, Harshvardhan Pareek fabric cost, powerloom, grey fabric, Ichalkaranji, fabriccost STUDIO",
+      "h1": "Fabric cost calculator for Ichalkaranji mills",
+      "lead": "Ichalkaranji mills cost grey fabric from the same mill-sheet lines every day: reed, pick, counts and rates. Harshvardhan Pareek built fabriccost STUDIO so that sheet becomes a rupee total on the phone — in the shed, not after the shift.",
+      "sections": [
+        {
+          "heading": "What this calculator is for",
+          "paragraphs": [
+            "A fabric cost calculator for Ichalkaranji is not a generic rupee widget. Powerloom grey fabric is quoted from construction (reed × pick), yarn counts, and the rupee rates the dalal or broker is holding that morning. Miss one line and the total is theatre.",
+            "fabriccost STUDIO follows the owner mill notebook used in this cluster: warp weight uses 1825, weft weight uses 1693.33, sizing sits on warp weight, and the dalal line is pick × pick rate. You sign in, name the dalal or broker if you want, then speak or type the sheet."
+          ]
+        },
+        {
+          "heading": "Who it is for",
+          "paragraphs": [
+            "Jobbers, masters and office staff who already write reed space, L2L, warp count and weft wastage on paper. If you can read a grey-fabric quality, you can fill this studio. Hindi or English speech works in Chrome when you would rather talk than tap.",
+            "Harshvardhan Pareek is the maker — based in Ichalkaranji, Maharashtra. The same grey-fabric formulas are used across India; the studio is built around how this town actually costs cloth."
+          ]
+        },
+        {
+          "heading": "What you enter on the mill sheet",
+          "paragraphs": [
+            "Warp side: reed, warp reed space, L2L, warp count, warp rate and sizing rate. Weft side: pick, weft reed space, weft count, weft rate and wastage percent. Dalal / broker: pick rate. Warping is an optional flat rupee add-on.",
+            "Single Warp is one warp yarn and one weft yarn — the classic sheet. Multiple Warp / Weft splits up to three yarns on each side by percentage when the quality is mixed."
+          ]
+        },
+        {
+          "heading": "Open the studio",
+          "paragraphs": [
+            "The calculator lives on the fabriccost STUDIO homepage. Create a studio account on this device, name the job, and run the sheet. Nothing here promises a search ranking or a market price — only the mill math, clearly accounted for."
+          ]
+        }
+      ],
+      "howTo": {
+        "name": "How to use the Ichalkaranji fabric cost calculator",
+        "description": "Run a grey-fabric cost sheet in fabriccost STUDIO, made by Harshvardhan Pareek in Ichalkaranji.",
+        "steps": [
+          {
+            "name": "Open the studio and sign in",
+            "text": "Go to the fabriccost STUDIO homepage and sign in or create a studio account on this device."
+          },
+          {
+            "name": "Name the dalal or broker",
+            "text": "Optional — name the dalal / broker so the grey fabric job stays identifiable on the sheet."
+          },
+          {
+            "name": "Choose Single Warp or Multiple Warp / Weft",
+            "text": "Use Single Warp for one warp and one weft. Use Multiple Warp / Weft when yarns split by percentage."
+          },
+          {
+            "name": "Enter the mill-sheet values",
+            "text": "Speak or type reed, pick, counts, rates, sizing and pick / dalal rate, then calculate the rupee breakdown."
+          }
+        ]
+      }
+    },
+    {
+      "slug": "grey-fabric-costing",
+      "navLabel": "Grey fabric costing",
+      "title": "Grey fabric costing: reed, pick, warp, weft, sizing",
+      "ogTitle": "Grey fabric costing: reed, pick, warp, weft, sizing",
+      "description": "How grey fabric costing works on an Indian powerloom mill sheet — warp weight (1825), weft weight (1693.33), sizing, and dalal / pick rate.",
+      "keywords": "grey fabric costing, warp weft, reed pick, sizing, powerloom, mill sheet, fabriccost STUDIO",
+      "h1": "Grey fabric costing on a mill sheet",
+      "lead": "Grey fabric costing is the mill-sheet path from construction and yarn to rupees: warp weight, weft weight, sizing, and the dalal line. fabriccost STUDIO uses the notebook constants — 1825 on warp, 1693.33 on weft — not a fitted shortcut.",
+      "sections": [
+        {
+          "heading": "Warp weight (1825)",
+          "paragraphs": [
+            "Warp weight = (Reed space × Reed × 120) / (1825 × Warp count × L2L). Reed space and L2L are in the same inch units the shed already uses. The 120 in the numerator is the mill-sheet constant; 1825 in the denominator is the warp constant.",
+            "Worked example from the notebook: reed space 65\", reed 120, warp count 61, L2L 102. That is (65 × 120 × 120) / (1825 × 61 × 102) = 0.082. That weight is what you multiply by the warp yarn rate."
+          ]
+        },
+        {
+          "heading": "Weft weight (1693.33)",
+          "paragraphs": [
+            "Weft base = (Reed space × Pick) / (1693.33 × Weft count). Then weft weight = base × (1 + wastage% / 100). Wastage is some percent of that weft base only — the sheet draws the arrow there, not across the whole quality.",
+            "The weft line has no L2L. Do not invent one. If the UI shows a weft reed space, that is the reed space that feeds weft weight; warp reed space stays on the warp line."
+          ]
+        },
+        {
+          "heading": "Sizing, dalal rate, and the total",
+          "paragraphs": [
+            "Sizing = warp weight × sizing rate. It rides on warp weight, not on weft. The dalal / broker line (job rate on older sheets) is pick × pick rate. Warping, when you use it, is a flat rupee add-on.",
+            "Grand total = warp cost + weft cost + sizing + dalal line + warping. Warp cost is warp weight × warp rate; weft cost is weft weight × weft rate. Markup percentages on the results screen are a display on that total, not a second mill formula."
+          ]
+        },
+        {
+          "heading": "Run the sheet in the studio",
+          "paragraphs": [
+            "Open the fabric cost calculator, choose Single Warp or Multiple Warp / Weft, and enter the same lines you already keep on paper. Made by Harshvardhan Pareek in Ichalkaranji — the studio shows the breakdown so you can edit a rate and recalculate without rewriting the page."
+          ]
+        }
+      ],
+      "howTo": {
+        "name": "How to cost grey fabric from a mill sheet",
+        "description": "Turn reed, pick, counts and rates into warp weight, weft weight, sizing and a dalal total.",
+        "steps": [
+          {
+            "name": "Take reed, reed space, L2L and warp count",
+            "text": "Compute warp weight as (reed space × reed × 120) / (1825 × warp count × L2L)."
+          },
+          {
+            "name": "Take pick, weft reed space, weft count and wastage",
+            "text": "Compute weft base as (reed space × pick) / (1693.33 × weft count), then add wastage percent on that base only."
+          },
+          {
+            "name": "Apply yarn rates and sizing",
+            "text": "Multiply warp weight by warp rate and sizing rate. Multiply weft weight by weft rate."
+          },
+          {
+            "name": "Add the dalal line",
+            "text": "Dalal / broker cost is pick × pick rate. Add optional warping, then read the grand total."
+          }
+        ]
+      }
+    },
+    {
+      "slug": "powerloom-fabric-cost",
+      "navLabel": "Powerloom fabric cost",
+      "title": "Powerloom fabric cost — single and multi yarn sheets",
+      "ogTitle": "Powerloom fabric cost — single and multi yarn sheets",
+      "description": "Work out powerloom fabric cost from mill-sheet values: single or multiple warp/weft, dalal / pick rate, and an editable rupee breakdown.",
+      "keywords": "powerloom fabric cost, powerloom grey fabric costing, multiple warp weft, dalal rate, fabriccost STUDIO",
+      "h1": "Powerloom fabric cost, from sheet to rupees",
+      "lead": "Powerloom fabric cost is the rupee total of a grey quality: yarns, sizing and the dalal line. fabriccost STUDIO is built for that sheet — one warp or mixed yarns — so a master can speak the numbers or type them and see every thread accounted for.",
+      "sections": [
+        {
+          "heading": "Single Warp versus Multiple Warp / Weft",
+          "paragraphs": [
+            "Most powerloom grey qualities are one warp count and one weft count. Single Warp is that classic sheet: one reed, one pick, one rate on each side.",
+            "When the quality mixes yarns, Multiple Warp / Weft takes up to three warp slots and three weft slots. Each slot has a percentage, a count and a rate. Each slot takes its share of the same weight formula. The dalal line and warping are not split by yarn percent — they stay on the quality, not the spindle."
+          ]
+        },
+        {
+          "heading": "Pick rate, dalal, and other rupees",
+          "paragraphs": [
+            "On the mill sheet the making / dalal line is pick × pick rate (dalal rate). That is the job-rate line under another name. Enter the rupees per pick the broker is using; the studio multiplies by pick.",
+            "Warping is optional and flat. Results also show a markup table from 5% to 16% on the grand total so you can read a selling conversation without leaving the sheet. Those markups are not a mill law — they are a display on the same total."
+          ]
+        },
+        {
+          "heading": "Speak or type on the shop floor",
+          "paragraphs": [
+            "Type when the office is quiet. Speak when your hands are on the beam: Chrome Web Speech can stay listening and drop named metrics or numbers in sheet order into in-range fields. Browser voices are optional and stay quiet while you talk. No paid speech key is required.",
+            "After Calculate you can edit any field and run the sheet again. That is the point of a powerloom fabric cost tool — correct the pick or the weft rate without rewriting the page."
+          ]
+        },
+        {
+          "heading": "Start a cost sheet",
+          "paragraphs": [
+            "Open the fabric cost calculator on the homepage, sign in, and choose the yarn mode that matches the quality. Made by Harshvardhan Pareek. The studio does not quote a market; it accounts for the sheet you already trust."
+          ]
+        }
+      ],
+      "howTo": {
+        "name": "How to work out powerloom fabric cost",
+        "description": "Build a powerloom grey-fabric cost from single or multiple yarns and a dalal / pick rate.",
+        "steps": [
+          {
+            "name": "Match the yarn mode to the quality",
+            "text": "Choose Single Warp for one warp and one weft, or Multiple Warp / Weft when percentages split the yarns."
+          },
+          {
+            "name": "Fill construction and counts",
+            "text": "Enter reed, reed space, L2L, pick, warp and weft counts, and weft wastage the way the mill sheet is written."
+          },
+          {
+            "name": "Fill rupee rates",
+            "text": "Enter warp rate, weft rate, sizing rate, pick / dalal rate, and optional warping."
+          },
+          {
+            "name": "Calculate and edit",
+            "text": "Read warp, weft, sizing and dalal lines, then change a field and recalculate if the broker moves the rate."
+          }
+        ]
+      }
+    }
+  ]
+}
