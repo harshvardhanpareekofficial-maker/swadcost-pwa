@@ -104,6 +104,17 @@ describe('studio chrome', () => {
     expect(login).toContain('rahul_loom / rahul2')
   })
 
+  it('reminds new accounts to store ID and password before they leave the form', () => {
+    const studioAuth = read('src/lib/studioAuth.ts')
+    expect(studioAuth).toContain('STORE_CREDENTIALS_NOTE')
+    expect(studioAuth).toContain('Store this ID and password somewhere safe')
+    expect(studioAuth).toContain('will not display them again')
+    expect(login).toContain('STORE_CREDENTIALS_NOTE')
+    expect(login).toContain('CREATE_ACCOUNT_PATH')
+    expect(login).toContain('Your studio account is ready.')
+    expect(login).not.toMatch(/password is:|your password is/i)
+  })
+
   it('activates new PWA builds without requiring clear-data every visit', () => {
     const vite = read('vite.config.ts')
     const main = read('src/main.tsx')

@@ -26,6 +26,16 @@ export const FINISH_SETUP_HINT =
 export const USERNAME_TAKEN_CLOUD =
   'This username is already taken. Pick another — add mill initials if you need a unique handle.'
 
+export const CREATE_ACCOUNT_PATH = '/create-account'
+
+export const STORE_CREDENTIALS_NOTE =
+  'Store this ID and password somewhere safe. The studio will not display them again.'
+
+export function initialStudioMode(pathname: string): 'signin' | 'signup' {
+  const path = pathname.replace(/\/+$/, '') || '/'
+  return path === CREATE_ACCOUNT_PATH ? 'signup' : 'signin'
+}
+
 export type SignInStart =
   | { status: 'ok'; username: string }
   | { status: 'finish-setup'; username: string }
