@@ -3,6 +3,8 @@ import {
   consumeSpokenNumber,
   extractSpokenNumber,
   extractSpokenNumberFromAlternatives,
+  isPureDigitToken,
+  isTensSpeechToken,
   preferredSpeechLang,
   speechStreamTokens,
 } from './speechNumbers'
@@ -77,6 +79,14 @@ describe('extractSpokenNumber', () => {
       length: 3,
     })
     expect(consumeSpokenNumber(speechStreamTokens('reed 80'))).toBeNull()
+  })
+
+  it('classifies digit tails and tens words used by the grow debounce', () => {
+    expect(isPureDigitToken('12')).toBe(true)
+    expect(isPureDigitToken('120')).toBe(true)
+    expect(isPureDigitToken('sixty')).toBe(false)
+    expect(isTensSpeechToken('sixty')).toBe(true)
+    expect(isTensSpeechToken('65')).toBe(false)
   })
 
   it('prefers hi-IN when the device language is Hindi', () => {

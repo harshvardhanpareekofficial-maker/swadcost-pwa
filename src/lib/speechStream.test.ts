@@ -5,11 +5,16 @@ import {
   appendSpeechChunk,
   applyMultiFills,
   applySingleFills,
+  consumeNumberForField,
+  isEchoSpeechChunk,
+  isUnstableSpeechTail,
   overlayVoiceFillsSingle,
   parseSpeechStream,
   pickBestSpeechChunk,
   type SpeechField,
 } from './speechStream'
+import { isInStandardRange } from './metricRanges'
+import { speechStreamTokens } from './speechNumbers'
 
 const SINGLE_FIELDS: SpeechField[] = [
   { key: 'reed', label: 'Reed' },
@@ -183,5 +188,107 @@ describe('speech stream parse', () => {
   it('joins chunks and prefers the alternative with more mill numbers', () => {
     expect(appendSpeechChunk('reed 80', 'warp count 40')).toBe('reed 80 warp count 40')
     expect(pickBestSpeechChunk(['hmm reed maybe', 'sixty five 102'])).toBe('sixty five 102')
+  })
+
+  it('maps named reed despite STT hearing “read”', () => {
+    const parsed = parseSpeechStream('read 120', SINGLE_FIELDS)
+    expect(parsed.fills.map((f) => [f.key, f.value, f.source])).toEqual([['reed', 120, 'named']])
+    expect(parsed.ignored).toEqual([])
+    expect(parsed.pending).toBe(false)
+  })
+
+  it('does not lock Reed on a partial 12 while 120 is still arriving', () => {
+    const live = parseSpeechStream('read 12', SINGLE_FIELDS, { settle: false })
+    expect(live.fills).toEqual([])
+    expect(live.ignored).toEqual([])
+    expect(live.pending).toBe(true)
+
+    const grown = parseSpeechStream('read 12 0', SINGLE_FIELDS, { settle: false })
+    expect(grown.fills.map((f) => [f.key, f.value, f.source])).toEqual([['reed', 120, 'named']])
+    expect(grown.ignored).toEqual([])
+
+    const spoken = parseSpeechStream('read 120', SINGLE_FIELDS, { settle: false })
+    expect(spoken.fills.map((f) => [f.key, f.value])).toEqual([['reed', 120]])
+  })
+
+  it('quietly drops a settled 12 prefix instead of stacking a Reed range error', () => {
+    const settled = parseSpeechStream('read 12', SINGLE_FIELDS, { settle: true })
+    expect(settled.fills).toEqual([])
+    expect(settled.ignored).toEqual([])
+  })
+
+  it('does not glue 120 and 67 into 12067', () => {
+    const glued = parseSpeechStream('read 12067', SINGLE_FIELDS)
+    expect(glued.fills.map((f) => [f.key, f.value])).toEqual([
+      ['reed', 120],
+      ['warpReedspace', 67],
+    ])
+    expect(glued.ignored.some((i) => i.text === '12067')).toBe(false)
+
+    const spaced = parseSpeechStream('120 67', SINGLE_FIELDS)
+    expect(spaced.fills.map((f) => [f.key, f.value])).toEqual([
+      ['reed', 120],
+      ['warpReedspace', 67],
+    ])
+
+    const splitChunk = parseSpeechStream('read 12 067', SINGLE_FIELDS)
+    expect(splitChunk.fills.map((f) => [f.key, f.value])).toEqual([
+      ['reed', 120],
+      ['warpReedspace', 67],
+    ])
+  })
+
+  it('does not spill the same sequential value into the next field', () => {
+    const parsed = parseSpeechStream('120 99 99 41 355 355', SINGLE_FIELDS)
+    expect(parsed.fills.map((f) => [f.key, f.value])).toEqual([
+      ['reed', 120],
+      ['warpReedspace', 99],
+      ['l2l', 41],
+    ])
+    expect(parsed.fills.find((f) => f.key === 'l2l')?.value).not.toBe(99)
+    expect(parsed.fills.find((f) => f.key === 'sizingRate')).toBeUndefined()
+    expect(parsed.fills.filter((f) => f.value === 99)).toHaveLength(1)
+    expect(parsed.fills.filter((f) => f.value === 355)).toHaveLength(0)
+  })
+
+  it('allows repeating a value only when the metric is named again', () => {
+    const parsed = parseSpeechStream('reed 120 warp reed space 99 l2l 99', SINGLE_FIELDS)
+    expect(parsed.fills.map((f) => [f.key, f.value, f.source])).toEqual([
+      ['reed', 120, 'named'],
+      ['warpReedspace', 99, 'named'],
+      ['l2l', 99, 'named'],
+    ])
+  })
+
+  it('folds Chrome mill-speed finals without prefix errors, glue, or echo spill', () => {
+    const full = ['read read 12', '0', '67', '99', '99', '41', '355', '355'].reduce(
+      (acc, chunk) => appendSpeechChunk(acc, chunk),
+      '',
+    )
+    expect(full).toBe('read read 12 0 67 99 41 355')
+    const parsed = parseSpeechStream(full, SINGLE_FIELDS)
+    expect(parsed.fills.map((f) => [f.key, f.value])).toEqual([
+      ['reed', 120],
+      ['warpReedspace', 67],
+      ['l2l', 99],
+      ['warpCount', 41],
+      ['warpRate', 355],
+    ])
+    expect(parsed.ignored.some((i) => i.text === '12' || i.text === '12067')).toBe(false)
+    expect(parsed.fills.find((f) => f.key === 'sizingRate')).toBeUndefined()
+  })
+
+  it('treats a trailing 1–2 digit token as an unstable Chrome tail', () => {
+    expect(isUnstableSpeechTail('read 12')).toBe(true)
+    expect(isUnstableSpeechTail('read 120')).toBe(false)
+    expect(isUnstableSpeechTail('warp rate 355')).toBe(false)
+    expect(isEchoSpeechChunk('read 120 99', '99')).toBe(true)
+    expect(isEchoSpeechChunk('read 120 99', '41')).toBe(false)
+  })
+
+  it('grows 12 + 0 into 120 for Reed and splits leftover 67', () => {
+    const tokens = speechStreamTokens('12 0 67')
+    const first = consumeNumberForField(tokens, 0, 'reed', isInStandardRange, true)
+    expect(first).toMatchObject({ kind: 'value', value: 120 })
   })
 })
