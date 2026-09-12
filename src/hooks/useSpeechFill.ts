@@ -1,15 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { appendSpeechChunk, pickBestSpeechChunk } from '../lib/speechStream'
+import { appendSpeechChunk, isUnstableSpeechTail, pickBestSpeechChunk } from '../lib/speechStream'
 import { preferredSpeechLang } from '../lib/speechNumbers'
 
 export { extractSpokenNumber, parseSpokenTokens, preferredSpeechLang } from '../lib/speechNumbers'
 
 const RESTART_MS = 180
+const STABILIZE_MS = 480
 
 export type SpeechFillEvent = {
   fullTranscript: string
   chunk: string
   alternatives: string[]
+  /** False while a short/low tail may still grow (12 → 120). */
+  settled: boolean
 }
 
 function speechEngine(): (new () => SpeechRecognition) | null {
@@ -67,8 +70,11 @@ export function useSpeechFill(
   const wantListenRef = useRef(false)
   const enabledRef = useRef(enabled)
   const restartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const stabilizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const onFinalRef = useRef(onFinal)
   const finalRef = useRef('')
+  const lastChunkRef = useRef('')
+  const lastAltsRef = useRef<string[]>([])
   enabledRef.current = enabled
   onFinalRef.current = onFinal
 
@@ -83,9 +89,28 @@ export function useSpeechFill(
     }
   }
 
+  const clearStabilize = () => {
+    if (stabilizeTimerRef.current) {
+      clearTimeout(stabilizeTimerRef.current)
+      stabilizeTimerRef.current = null
+    }
+  }
+
+  const emitFinal = (settled: boolean) => {
+    const full = finalRef.current
+    if (!full.trim()) return
+    onFinalRef.current({
+      fullTranscript: full,
+      chunk: lastChunkRef.current,
+      alternatives: lastAltsRef.current,
+      settled,
+    })
+  }
+
   const halt = useCallback(() => {
     wantListenRef.current = false
     clearRestart()
+    clearStabilize()
     const rec = recRef.current
     recRef.current = null
     rec?.abort()
@@ -94,6 +119,8 @@ export function useSpeechFill(
   }, [])
 
   const stop = useCallback(() => {
+    clearStabilize()
+    emitFinal(true)
     halt()
   }, [halt])
 
@@ -109,6 +136,8 @@ export function useSpeechFill(
     setLastHeard(null)
     setIgnored(false)
     finalRef.current = ''
+    lastChunkRef.current = ''
+    lastAltsRef.current = []
     setTranscript('')
     setInterim('')
     wantListenRef.current = true
@@ -137,12 +166,28 @@ export function useSpeechFill(
         }
         const chunk = pickBestSpeechChunk(alts.length ? alts : [raw]).trim()
         if (!chunk) continue
-        const full = appendSpeechChunk(finalRef.current, chunk)
+        const prev = finalRef.current
+        const full = appendSpeechChunk(prev, chunk)
+        if (full === prev && prev) {
+          // Android Chrome often repeats the last final; keep the live transcript, do not refill.
+          setTranscript(full)
+          continue
+        }
         finalRef.current = full
+        lastChunkRef.current = chunk
+        lastAltsRef.current = alts
         setTranscript(full)
         setLastHeard(chunk)
         setIgnored(false)
-        onFinalRef.current({ fullTranscript: full, chunk, alternatives: alts })
+        const unstable = isUnstableSpeechTail(full)
+        emitFinal(!unstable)
+        clearStabilize()
+        if (unstable) {
+          stabilizeTimerRef.current = setTimeout(() => {
+            stabilizeTimerRef.current = null
+            emitFinal(true)
+          }, STABILIZE_MS)
+        }
       }
       setInterim(liveInterim.trim())
     }

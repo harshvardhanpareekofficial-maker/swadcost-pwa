@@ -49,13 +49,13 @@ function n(v: Num): number {
 
 function formatIgnored(ignored: SpeechIgnore[]): string | null {
   if (!ignored.length) return null
-  const parts = ignored.slice(0, 4).map((item) => {
+  const parts = ignored.slice(0, 2).map((item) => {
     if (item.reason === 'out-of-range' && item.fieldLabel) {
       return `“${item.text}” is outside the usual ${rangeHint(item.fieldKey ?? '').toLowerCase()} for ${item.fieldLabel}`
     }
     return `“${item.text}” was skipped`
   })
-  return parts.join('. ') + (ignored.length > 4 ? '…' : '.')
+  return parts.join('. ') + (ignored.length > 2 ? '…' : '.')
 }
 
 export function CalculatorPage({
@@ -144,10 +144,11 @@ export function CalculatorPage({
   }, [mode, single, multi, onChangeSingle, onChangeMulti])
 
   const applyTranscript = useCallback(
-    (fullTranscript: string) => {
+    (fullTranscript: string, settle = true) => {
       const catalog = fields.map((f) => ({ key: f.key, label: f.label }))
       const parsed = parseSpeechStream(fullTranscript, catalog, {
         startIndex: sessionStartIdxRef.current,
+        settle,
       })
       const baseline = baselineRef.current ?? { single, multi }
       if (mode === 'single') {
@@ -173,7 +174,7 @@ export function CalculatorPage({
 
   const onSpeech = useCallback(
     (ev: SpeechFillEvent) => {
-      applyTranscript(ev.fullTranscript)
+      applyTranscript(ev.fullTranscript, ev.settled)
     },
     [applyTranscript],
   )
@@ -284,8 +285,9 @@ export function CalculatorPage({
           </p>
           <p className="mt-1 text-xs text-plum/70">
             Chrome Web Speech on HTTPS (Android or desktop). Name the metric or say numbers in mill-sheet
-            order — reed, reedspace, L2L, counts, rates. Out-of-range tokens are skipped. Prompts stay
-            quiet so they do not talk over you.
+            order — reed, reedspace, L2L, counts, rates. Short prefixes wait until the number settles.
+            A repeated figure fills the next field only if you name that metric. Prompts stay quiet so
+            they do not talk over you.
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             {speech.listening ? (

@@ -476,6 +476,17 @@ export function isNumericSpeechToken(token: string): boolean {
   return SMALL[token] !== undefined
 }
 
+/** Bare digits as Chrome often emits while a mill number is still growing (12 → 120). */
+export function isPureDigitToken(token: string): boolean {
+  return /^\d+$/.test(token)
+}
+
+/** twenty / thirty / … / ninety — a following ones word may still arrive. */
+export function isTensSpeechToken(token: string): boolean {
+  const v = tokenValue(token)
+  return v !== null && v >= 20 && v <= 90 && v % 10 === 0 && !isPureDigitToken(token)
+}
+
 /**
  * Longest mill number at the start of a token list.
  * Stops before field names / leftover words so a stream can yield several values.
