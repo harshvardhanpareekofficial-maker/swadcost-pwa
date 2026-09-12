@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
+import { GUIDE_PAGES, GUIDES_LASTMOD } from './guides'
 import { OWNER_PATH } from './owner'
 import { STUDIO_FAQS, isOwnerVaultPath } from './seo'
 
@@ -73,8 +74,13 @@ describe('on-page SEO', () => {
         'Person',
         'FAQPage',
         'WebPage',
+        'HowTo',
       ]),
     )
+    const howto = graph['@graph'].find((node) => node['@type'] === 'HowTo') as {
+      step?: unknown[]
+    }
+    expect(howto?.step).toHaveLength(4)
     const faq = graph['@graph'].find((node) => node['@type'] === 'FAQPage') as {
       mainEntity?: Array<{ name?: string; acceptedAnswer?: { text?: string } }>
     }
@@ -97,10 +103,14 @@ describe('on-page SEO', () => {
     expect(robots).toContain(`Disallow: ${OWNER_PATH}`)
     expect(robots).toContain('Sitemap: https://harshvardhanpareek.com/sitemap.xml')
     expect(sitemap).toContain('https://harshvardhanpareek.com/')
-    expect(sitemap).toContain('<lastmod>2026-09-11T17:36:00+00:00</lastmod>')
+    expect(sitemap).toContain(`<lastmod>${GUIDES_LASTMOD}</lastmod>`)
     expect(sitemap).not.toContain('<changefreq>')
     expect(sitemap).not.toContain('<priority>')
     expect(sitemap).not.toContain(OWNER_PATH)
+    for (const guide of GUIDE_PAGES) {
+      expect(sitemap).toContain(`https://harshvardhanpareek.com${guide.path}`)
+    }
+    expect((sitemap.match(/<url>/g) ?? []).length).toBe(1 + GUIDE_PAGES.length)
 
     const render = readFileSync(join(root, 'render.yaml'), 'utf8')
     const vite = readFileSync(join(root, 'vite.config.ts'), 'utf8')
@@ -119,6 +129,7 @@ describe('on-page SEO', () => {
     expect(isOwnerVaultPath(`${OWNER_PATH}/`)).toBe(true)
     expect(isOwnerVaultPath('/')).toBe(false)
     expect(isOwnerVaultPath('/login')).toBe(false)
+    expect(isOwnerVaultPath('/guides/grey-fabric-costing')).toBe(false)
   })
 
   it('keeps FAQ copy on the public login page and documents a post-deploy recrawl', () => {
@@ -126,10 +137,12 @@ describe('on-page SEO', () => {
     const readme = readFileSync(join(root, 'README.md'), 'utf8')
     const envExample = readFileSync(join(root, '.env.example'), 'utf8')
     expect(login).toContain('StudioFaq')
+    expect(login).toContain('GuideLinks')
     expect(login).toContain('fabric cost calculator for Ichalkaranji')
     expect(readme).toMatch(/URL Inspection/)
     expect(readme).toMatch(/days to weeks/)
     expect(readme).toMatch(/cannot guarantee overnight/)
+    expect(readme).toMatch(/\/guides\//)
     expect(envExample).toMatch(/No API key required/)
     expect(envExample).toMatch(/speechSynthesis/)
   })

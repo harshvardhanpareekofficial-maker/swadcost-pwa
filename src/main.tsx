@@ -4,9 +4,11 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './index.css'
 import './pwa'
 import App from './App'
+import { DocumentSeo } from './components/DocumentSeo'
 import { purgeIdleLocalNow, purgeIdleOnLoad } from './lib/idleAccounts'
 import { OWNER_PATH } from './lib/owner'
 import { applyDocumentIndexing } from './lib/seo'
+import { GuidePage } from './pages/GuidePage'
 import { OwnerVaultPage } from './pages/OwnerVaultPage'
 
 purgeIdleLocalNow()
@@ -16,8 +18,10 @@ applyDocumentIndexing(window.location.pathname)
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
+      <DocumentSeo />
       <Routes>
         <Route path={OWNER_PATH} element={<OwnerVaultPage />} />
+        <Route path="/guides/:slug" element={<GuidePage />} />
         <Route path="/*" element={<App />} />
       </Routes>
     </BrowserRouter>

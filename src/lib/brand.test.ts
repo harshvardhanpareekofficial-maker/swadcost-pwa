@@ -11,6 +11,7 @@ function read(rel: string): string {
 
 const uiFiles = [
   'src/pages/LoginPage.tsx',
+  'src/pages/GuidePage.tsx',
   'src/pages/HomePage.tsx',
   'src/pages/InputMethodPage.tsx',
   'src/pages/CalculatorPage.tsx',
@@ -18,6 +19,7 @@ const uiFiles = [
   'src/components/StudioBar.tsx',
   'src/components/Layout.tsx',
   'src/components/Footer.tsx',
+  'src/components/GuideLinks.tsx',
   'index.html',
 ]
 
