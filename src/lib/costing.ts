@@ -358,10 +358,13 @@ export const SAMPLE_SINGLE: SingleInputs = {
 }
 
 /**
- * Live Costing.aspx sample posted 2026-09-11 → Final Cost 1698.77.
+ * Live Costing.aspx sample posted 2026-09-11 (reconfirmed POST 2026-09-18, no login)
+ * → Final Cost 1698.77. That ASP.NET engine is a length-scaled K-fit, not this notebook.
  * Majuri on that form was a rupee box (`10` = ₹10). This app stores pickRate
  * in paise, so the same trial is 1000 paise. Not a calculator prefill.
  */
+export const LIVE_DEMO_ORACLE_FINAL_COST = 1698.77
+
 export const SWADCOST_LIVE_SAMPLE: SingleInputs = {
   reed: 80,
   warpReedspace: 60,

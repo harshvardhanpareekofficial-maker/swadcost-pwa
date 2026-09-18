@@ -1,7 +1,7 @@
 # Formula cross-check: mill notebook vs SwadCost demo
 
-**Date:** 2026-09-11  
-**Live demo:** https://swadcost.pareektech.com (signed in as `rohitbohara`)  
+**Date:** 2026-09-11; live POST reconfirmed **2026-09-18** (Costing.aspx, no login)  
+**Live demo form:** https://swadcost.pareektech.com/Admin/Costing.aspx  
 **Decision:** Keep the handwritten notebook as the engine. Do **not** restore the old empirically fitted K constants (`K_SINGLE ≈ 71.59` / `K_MULTI ≈ 82.12`).
 
 ## What was posted to the live demo
@@ -24,7 +24,7 @@
 | Sizing | 5 |
 | Warping | 0 |
 
-**Live result (POST, 2026-09-11):** Final Cost **1698.77**. Markup 5% = 1783.71, 16% = 1970.57.
+**Live result:** Final Cost **1698.77**. Markup 5% = 1783.71, 16% = 1970.57. Same total on POST 2026-09-11 and again on **2026-09-18** (public Costing.aspx Calculate, Majuri box still a rupee field labeled “Majuri”).
 
 `Admin/MultiCosting.aspx` yarn-1 only (warp/weft 100% / count 40 / rates 300 & 280, yarn 2–3 zeroed, same reed / RS / L2L / pick / wastage / majuri / sizing) returned **1698.77** on this date — the same total as single. The older PWA oracle **1482.17** was a fitted `K_MULTI` scale, not what the live form returned for these inputs today.
 
@@ -108,9 +108,28 @@ Industry: yarn ₹ = weight × yarn rate; grey cost = yarn + conversion. Noteboo
 
 Web references do **not** justify restoring the old K-fit (1698.77 / 1482.17).
 
+## Load sample (locked 2026-09-18)
+
+**Load sample** is `SAMPLE_SINGLE` / `SAMPLE_MULTI` (notebook warp example + labeled weft/rates). Majuri is **50 paise** (₹0.50). Forms still start empty; this fill is explicit.
+
+| Line | Notebook |
+| --- | ---: |
+| Warp weight `(65 × 120 × 120) / (1825 × 61 × 102)` | 0.08243 |
+| Weft base `(65 × 68) / (1693.33 × 61)` | 0.042791 |
+| Weft after 5% | 0.04493 |
+| Warp × 200 | 16.4859 |
+| Weft × 180 | 8.0875 |
+| Sizing × 10 | 0.8243 |
+| Job 68 × (50 paise ÷ 100) | 34.00 |
+| **Grand** | **59.40** |
+
+Multi yarn-1 at 100% matches. Typed majuri `12` on this sheet (pick 68) → job ₹8.16, grand **33.56**.
+
+Live Costing.aspx on the same construction with Majuri `0.5` (its rupee box) returned **59.15** on 2026-09-18 — close to 59.40, still a different engine. Majuri `50` on that form returned **3425.15** (treats 50 as rupees). This app does not chase that.
+
 ## Prefills
 
-Calculator forms start at **zeros / empty**. `SWADCOST_LIVE_SAMPLE` is documentation-only. **Load sample** is an explicit fill (notebook warp example plus labeled sample rates). Load-sample majuri is **50 paise** (₹0.50), the same rupee total as the old `pickRate: 0.5` rupee storage.
+Calculator forms start at **zeros / empty**. `SWADCOST_LIVE_SAMPLE` is documentation-only (`LIVE_DEMO_ORACLE_FINAL_COST = 1698.77` is the live-form oracle, not what Calculate returns).
 
 ## Majuri unit (paise, 2026-09-18)
 

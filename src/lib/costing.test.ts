@@ -3,6 +3,7 @@ import {
   SAMPLE_MULTI,
   SAMPLE_SINGLE,
   SWADCOST_LIVE_SAMPLE,
+  LIVE_DEMO_ORACLE_FINAL_COST,
   WEFT_DENOMINATOR,
   applyWastagePct,
   calculateMulti,
@@ -97,13 +98,14 @@ describe('calculateSingle', () => {
     expect(() => calculateSingle({ ...SAMPLE_SINGLE, warpCount: 0 })).toThrow(/count/i)
   })
 
-  it('does not silently match the live SwadCost 1698.77 oracle', () => {
+  it('does not silently match the live-demo 1698.77 oracle', () => {
     const asPickRate = calculateSingle(SWADCOST_LIVE_SAMPLE)
     const noMajuri = calculateSingle({ ...SWADCOST_LIVE_SAMPLE, pickRate: 0 })
     const majuriAsFlat = calculateSingle({ ...SWADCOST_LIVE_SAMPLE, pickRate: 0, warping: 10 })
-    expect(asPickRate.grandTotal).not.toBe(1698.77)
-    expect(noMajuri.grandTotal).not.toBe(1698.77)
-    expect(majuriAsFlat.grandTotal).not.toBe(1698.77)
+    expect(LIVE_DEMO_ORACLE_FINAL_COST).toBe(1698.77)
+    expect(asPickRate.grandTotal).not.toBe(LIVE_DEMO_ORACLE_FINAL_COST)
+    expect(noMajuri.grandTotal).not.toBe(LIVE_DEMO_ORACLE_FINAL_COST)
+    expect(majuriAsFlat.grandTotal).not.toBe(LIVE_DEMO_ORACLE_FINAL_COST)
     expect(asPickRate.jobCost).toBeCloseTo(50 * 10, 4)
     expect(asPickRate.grandTotal).toBeCloseTo(1716.31, 2)
     expect(noMajuri.grandTotal).toBeCloseTo(1216.31, 2)
@@ -172,3 +174,85 @@ describe('blank form seeds', () => {
     expect(m.weftYarns).toHaveLength(3)
   })
 })
+
+describe('locked Load sample fixture (notebook)', () => {
+  it('keeps SAMPLE_SINGLE mill-sheet inputs stable', () => {
+    expect(SAMPLE_SINGLE).toEqual({
+      reed: 120,
+      warpReedspace: 65,
+      l2l: 102,
+      warpCount: 61,
+      warpRate: 200,
+      sizingRate: 10,
+      pick: 68,
+      weftReedspace: 65,
+      weftCount: 61,
+      weftRate: 180,
+      wastagePct: 5,
+      pickRate: 50,
+      warping: 0,
+    })
+  })
+
+  it('locks Load sample line items: majuri 50 paise → job ₹34, grand ₹59.40', () => {
+    const r = calculateSingle(SAMPLE_SINGLE)
+    expect(r.warpWeight).toBe(0.08243)
+    expect(r.weftWeightBase).toBe(0.042791)
+    expect(r.weftWeight).toBe(0.04493)
+    expect(r.warpCostRaw).toBe(16.4859)
+    expect(r.weftCostRaw).toBe(8.0875)
+    expect(r.sizingCost).toBe(0.8243)
+    expect(r.jobCost).toBe(34)
+    expect(r.grandTotal).toBe(59.4)
+    expect(r.jobCost).toBe(jobCostFromPickRatePaise(68, 50))
+    expect(r.warpWeight).toBeCloseTo(warpWeight(65, 120, 61, 102), 6)
+    expect(r.weftWeightBase).toBeCloseTo(weftWeightBase(65, 68, 61), 6)
+  })
+
+  it('locks SAMPLE_MULTI yarn-1 100% to the same Load sample grand', () => {
+    const s = calculateSingle(SAMPLE_SINGLE)
+    const m = calculateMulti(SAMPLE_MULTI)
+    expect(m.grandTotal).toBe(59.4)
+    expect(m.jobCost).toBe(34)
+    expect(m.grandTotal).toBe(s.grandTotal)
+  })
+})
+
+describe('locked historical live-form inputs through the notebook', () => {
+  it('keeps the documentation fixture as 1000 paise (live Majuri box ₹10)', () => {
+    expect(SWADCOST_LIVE_SAMPLE.reed).toBe(80)
+    expect(SWADCOST_LIVE_SAMPLE.warpReedspace).toBe(60)
+    expect(SWADCOST_LIVE_SAMPLE.l2l).toBe(2)
+    expect(SWADCOST_LIVE_SAMPLE.warpCount).toBe(40)
+    expect(SWADCOST_LIVE_SAMPLE.warpRate).toBe(300)
+    expect(SWADCOST_LIVE_SAMPLE.sizingRate).toBe(5)
+    expect(SWADCOST_LIVE_SAMPLE.pick).toBe(50)
+    expect(SWADCOST_LIVE_SAMPLE.weftReedspace).toBe(60)
+    expect(SWADCOST_LIVE_SAMPLE.weftCount).toBe(40)
+    expect(SWADCOST_LIVE_SAMPLE.weftRate).toBe(280)
+    expect(SWADCOST_LIVE_SAMPLE.wastagePct).toBe(5)
+    expect(SWADCOST_LIVE_SAMPLE.pickRate).toBe(1000)
+    expect(SWADCOST_LIVE_SAMPLE.warping).toBe(0)
+  })
+
+  it('locks notebook line items at grand ₹1716.31, not live-demo ₹1698.77', () => {
+    const r = calculateSingle(SWADCOST_LIVE_SAMPLE)
+    expect(r.warpWeight).toBe(3.945205)
+    expect(r.weftWeightBase).toBe(0.044291)
+    expect(r.weftWeight).toBe(0.046506)
+    expect(r.warpCostRaw).toBe(1183.5616)
+    expect(r.weftCostRaw).toBe(13.0217)
+    expect(r.sizingCost).toBe(19.726)
+    expect(r.jobCost).toBe(500)
+    expect(r.grandTotal).toBe(1716.31)
+    expect(r.grandTotal).not.toBe(LIVE_DEMO_ORACLE_FINAL_COST)
+    expect(LIVE_DEMO_ORACLE_FINAL_COST).toBe(1698.77)
+  })
+
+  it('treats a typed 10 on that sheet as 10 paise (₹5 job), not the live-form rupee box', () => {
+    const r = calculateSingle({ ...SWADCOST_LIVE_SAMPLE, pickRate: 10 })
+    expect(r.jobCost).toBe(5)
+    expect(r.grandTotal).toBe(1221.31)
+  })
+})
+
