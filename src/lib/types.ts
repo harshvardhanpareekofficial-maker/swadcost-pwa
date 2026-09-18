@@ -63,7 +63,7 @@ export function validateSingleInputs(s: SingleInputs): string | null {
     mustPositive('Weft Reedspace', s.weftReedspace) ||
     (!Number.isFinite(s.warpRate) ? 'Warp Rate must be a valid number' : null) ||
     (!Number.isFinite(s.weftRate) ? 'Weft Rate must be a valid number' : null) ||
-    (!Number.isFinite(s.pickRate) ? 'Pick rate must be a valid number' : null)
+    (!Number.isFinite(s.pickRate) ? 'Majuri / pick rate must be a valid number' : null)
   )
 }
 

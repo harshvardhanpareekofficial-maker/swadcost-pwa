@@ -34,7 +34,7 @@
 - Weft base = `(ReedSpace × Pick) / (1693.33 × WeftCount)`
 - Weft weight = base × `(1 + wastage%/100)`
 - Sizing = warp weight × sizing rate
-- Job = Pick × pick rate
+- Job / majuri = Pick × (pick rate in **paise** ÷ 100). Typed `12` = 12 paise = ₹0.12.
 - Yarn cost = weight × yarn rate
 - Grand total = warp + weft + sizing + job + warping
 
@@ -51,7 +51,7 @@ Weft after 5% = **0.046506…**
 | Warp × 300 | 1183.56 |
 | Weft × 280 | 13.02 |
 | Sizing × 5 | 19.73 |
-| Job if Majuri is pick rate (50 × 10) | 500.00 |
+| Job if Majuri is pick rate (live form ₹10 = **1000 paise**; 50 × 10) | 500.00 |
 | Grand (Majuri → pick rate) | **1716.31** |
 | Grand if Majuri is omitted (pick rate 0) | **1216.31** |
 | Grand if that ₹10 is a flat add-on (pick rate 0, warping 10) | **1226.31** |
@@ -104,13 +104,19 @@ Textile School inflates **both** warp and weft yarn indent by process wastage. T
 
 ### Cost assembly — agrees
 
-Industry: yarn ₹ = weight × yarn rate; grey cost = yarn + conversion. Notebook lists weights and rates separately; we use `warpCost = warpWeight × warpRate` (same for weft), `sizing = warpWeight × sizing rate`, `job = Pick × pick rate`, plus optional flat warping. Some published costing uses weaving ₹ = **width × pick rate**; the sheet says **Pick × pick rate**. We follow the sheet.
+Industry: yarn ₹ = weight × yarn rate; grey cost = yarn + conversion. Notebook lists weights and rates separately; we use `warpCost = warpWeight × warpRate` (same for weft), `sizing = warpWeight × sizing rate`, `job = Pick × (majuri paise / 100)`, plus optional flat warping. Some published costing uses weaving ₹ = **width × pick rate**; the sheet says **Pick × pick rate**. We follow the sheet. Majuri is quoted in **paise per pick** on the mill floor.
 
 Web references do **not** justify restoring the old K-fit (1698.77 / 1482.17).
 
 ## Prefills
 
-Calculator forms start at **zeros / empty**. `SWADCOST_LIVE_SAMPLE` is documentation-only. **Load sample** is an explicit fill (notebook warp example plus labeled sample rates).
+Calculator forms start at **zeros / empty**. `SWADCOST_LIVE_SAMPLE` is documentation-only. **Load sample** is an explicit fill (notebook warp example plus labeled sample rates). Load-sample majuri is **50 paise** (₹0.50), the same rupee total as the old `pickRate: 0.5` rupee storage.
+
+## Majuri unit (paise, 2026-09-18)
+
+`pickRate` is stored in **paise per pick**. Typed or spoken `12` is 12 paise (₹0.12), never ₹12. `jobCost` converts with `pick × (pickRate / 100)`.
+
+The live-demo Majuri box was rupees (`10` = ₹10). That trial in this app is `pickRate: 1000` paise so the 50 × ₹10 = ₹500 line still documents the old comparison. Calculator state is in-memory (not reloaded from telemetry), so old rupee values are not auto-migrated — new entry is paise going forward. Warp rate, weft rate, and sizing stay rupees.
 
 ## Why the engines differ
 

@@ -18,7 +18,11 @@ const RATE: MetricRange = { min: 0, max: 2500, prompt: 'Rate. Rupees per weight.
 const SIZING: MetricRange = { min: 0, max: 400, prompt: 'Sizing rate.' }
 const PICK: MetricRange = { min: 16, max: 160, prompt: 'Pick. Picks per inch.' }
 const WASTAGE: MetricRange = { min: 0, max: 25, prompt: 'Wastage. Percent of weft.' }
-const PICK_RATE: MetricRange = { min: 0, max: 200, prompt: 'Pick rate. Rupees per pick.' }
+const PICK_RATE: MetricRange = {
+  min: 0,
+  max: 200,
+  prompt: 'Majuri. Paise per pick, not rupees. Twelve means twelve paise.',
+}
 const WARPING: MetricRange = { min: 0, max: 5000, prompt: 'Warping. Rupees.' }
 const PCT: MetricRange = { min: 0, max: 100, prompt: 'Yarn percent.' }
 

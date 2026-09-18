@@ -7,6 +7,7 @@ import {
   applyWastagePct,
   calculateMulti,
   calculateSingle,
+  jobCostFromPickRatePaise,
   totalEnds,
   warpWeight,
   weftWeightBase,
@@ -67,7 +68,7 @@ describe('calculateSingle', () => {
     expect(r.warpWeight).toBeCloseTo(0.082, 3)
     expect(r.warpCostRaw).toBeCloseTo(r.warpWeight * SAMPLE_SINGLE.warpRate, 3)
     expect(r.sizingCost).toBeCloseTo(r.warpWeight * SAMPLE_SINGLE.sizingRate, 3)
-    expect(r.jobCost).toBeCloseTo(SAMPLE_SINGLE.pick * SAMPLE_SINGLE.pickRate, 4)
+    expect(r.jobCost).toBeCloseTo(jobCostFromPickRatePaise(SAMPLE_SINGLE.pick, SAMPLE_SINGLE.pickRate), 4)
     expect(r.totalEnds).toBe(120 * 65)
   })
 
@@ -103,6 +104,7 @@ describe('calculateSingle', () => {
     expect(asPickRate.grandTotal).not.toBe(1698.77)
     expect(noMajuri.grandTotal).not.toBe(1698.77)
     expect(majuriAsFlat.grandTotal).not.toBe(1698.77)
+    expect(asPickRate.jobCost).toBeCloseTo(50 * 10, 4)
     expect(asPickRate.grandTotal).toBeCloseTo(1716.31, 2)
     expect(noMajuri.grandTotal).toBeCloseTo(1216.31, 2)
     expect(majuriAsFlat.grandTotal).toBeCloseTo(1226.31, 2)

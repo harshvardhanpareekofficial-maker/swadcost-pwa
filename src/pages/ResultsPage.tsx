@@ -15,7 +15,7 @@ import {
 } from '../lib/costing'
 import { currentUser } from '../lib/auth'
 import { recordSuccessfulCalc } from '../lib/telemetry'
-import { DALAL_COST_LINE_LABEL, PICK_RATE_LABEL } from '../lib/labels'
+import { DALAL_COST_LINE_LABEL, PICK_RATE_HINT, PICK_RATE_LABEL, PICK_RATE_UNIT } from '../lib/labels'
 import { validateMultiInputs, validateSingleInputs, type CostMode } from '../lib/types'
 
 type Props = {
@@ -182,13 +182,17 @@ export function ResultsPage({
                   ['weftCount', 'Weft Count', single.weftCount],
                   ['weftRate', 'Weft Rate', single.weftRate],
                   ['wastagePct', 'Wastage %', single.wastagePct],
-                  ['pickRate', PICK_RATE_LABEL, single.pickRate],
+                  ['pickRate', PICK_RATE_LABEL, single.pickRate, PICK_RATE_UNIT, PICK_RATE_HINT],
                   ['warping', 'Warping', single.warping],
-                ] as const
-              ).map(([key, label, val]) => (
+                ] satisfies Array<
+                  [keyof SingleInputs, string, number, string?, string?]
+                >
+              ).map(([key, label, val, unit, hint]) => (
                 <NumberField
                   key={key}
                   label={label}
+                  unit={unit}
+                  hint={hint}
                   value={val || ''}
                   onChange={(v) =>
                     onChangeSingle({ ...single, [key]: v === '' ? 0 : v })
@@ -212,13 +216,17 @@ export function ResultsPage({
                   ['pick', 'Pick', multi.pick],
                   ['weftReedspace', 'Weft RS', multi.weftReedspace],
                   ['wastagePct', 'Wastage %', multi.wastagePct],
-                  ['pickRate', PICK_RATE_LABEL, multi.pickRate],
+                  ['pickRate', PICK_RATE_LABEL, multi.pickRate, PICK_RATE_UNIT, PICK_RATE_HINT],
                   ['warping', 'Warping', multi.warping],
-                ] as const
-              ).map(([key, label, val]) => (
+                ] satisfies Array<
+                  [keyof MultiInputs, string, number, string?, string?]
+                >
+              ).map(([key, label, val, unit, hint]) => (
                 <NumberField
                   key={key}
                   label={label}
+                  unit={unit}
+                  hint={hint}
                   value={val || ''}
                   onChange={(v) =>
                     onChangeMulti({ ...multi, [key]: v === '' ? 0 : v })
