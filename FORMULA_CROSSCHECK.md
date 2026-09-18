@@ -1,7 +1,7 @@
 # Formula cross-check: mill notebook vs SwadCost demo
 
-**Date:** 2026-09-11  
-**Live demo:** https://swadcost.pareektech.com (signed in as `rohitbohara`)  
+**Date:** 2026-09-11; live POST reconfirmed **2026-09-18** (Costing.aspx, no login)  
+**Live demo form:** https://swadcost.pareektech.com/Admin/Costing.aspx  
 **Decision:** Keep the handwritten notebook as the engine. Do **not** restore the old empirically fitted K constants (`K_SINGLE ≈ 71.59` / `K_MULTI ≈ 82.12`).
 
 ## What was posted to the live demo
@@ -24,7 +24,7 @@
 | Sizing | 5 |
 | Warping | 0 |
 
-**Live result (POST, 2026-09-11):** Final Cost **1698.77**. Markup 5% = 1783.71, 16% = 1970.57.
+**Live result:** Final Cost **1698.77**. Markup 5% = 1783.71, 16% = 1970.57. Same total on POST 2026-09-11 and again on **2026-09-18** (public Costing.aspx Calculate, Majuri box still a rupee field labeled “Majuri”).
 
 `Admin/MultiCosting.aspx` yarn-1 only (warp/weft 100% / count 40 / rates 300 & 280, yarn 2–3 zeroed, same reed / RS / L2L / pick / wastage / majuri / sizing) returned **1698.77** on this date — the same total as single. The older PWA oracle **1482.17** was a fitted `K_MULTI` scale, not what the live form returned for these inputs today.
 
@@ -34,7 +34,7 @@
 - Weft base = `(ReedSpace × Pick) / (1693.33 × WeftCount)`
 - Weft weight = base × `(1 + wastage%/100)`
 - Sizing = warp weight × sizing rate
-- Job = Pick × pick rate
+- Job / majuri = Pick × (pick rate in **paise** ÷ 100). Typed `12` = 12 paise = ₹0.12.
 - Yarn cost = weight × yarn rate
 - Grand total = warp + weft + sizing + job + warping
 
@@ -51,7 +51,7 @@ Weft after 5% = **0.046506…**
 | Warp × 300 | 1183.56 |
 | Weft × 280 | 13.02 |
 | Sizing × 5 | 19.73 |
-| Job if Majuri is pick rate (50 × 10) | 500.00 |
+| Job if Majuri is pick rate (live form ₹10 = **1000 paise**; 50 × 10) | 500.00 |
 | Grand (Majuri → pick rate) | **1716.31** |
 | Grand if Majuri is omitted (pick rate 0) | **1216.31** |
 | Grand if that ₹10 is a flat add-on (pick rate 0, warping 10) | **1226.31** |
@@ -104,13 +104,38 @@ Textile School inflates **both** warp and weft yarn indent by process wastage. T
 
 ### Cost assembly — agrees
 
-Industry: yarn ₹ = weight × yarn rate; grey cost = yarn + conversion. Notebook lists weights and rates separately; we use `warpCost = warpWeight × warpRate` (same for weft), `sizing = warpWeight × sizing rate`, `job = Pick × pick rate`, plus optional flat warping. Some published costing uses weaving ₹ = **width × pick rate**; the sheet says **Pick × pick rate**. We follow the sheet.
+Industry: yarn ₹ = weight × yarn rate; grey cost = yarn + conversion. Notebook lists weights and rates separately; we use `warpCost = warpWeight × warpRate` (same for weft), `sizing = warpWeight × sizing rate`, `job = Pick × (majuri paise / 100)`, plus optional flat warping. Some published costing uses weaving ₹ = **width × pick rate**; the sheet says **Pick × pick rate**. We follow the sheet. Majuri is quoted in **paise per pick** on the mill floor.
 
 Web references do **not** justify restoring the old K-fit (1698.77 / 1482.17).
 
+## Load sample (locked 2026-09-18)
+
+**Load sample** is `SAMPLE_SINGLE` / `SAMPLE_MULTI` (notebook warp example + labeled weft/rates). Majuri is **50 paise** (₹0.50). Forms still start empty; this fill is explicit.
+
+| Line | Notebook |
+| --- | ---: |
+| Warp weight `(65 × 120 × 120) / (1825 × 61 × 102)` | 0.08243 |
+| Weft base `(65 × 68) / (1693.33 × 61)` | 0.042791 |
+| Weft after 5% | 0.04493 |
+| Warp × 200 | 16.4859 |
+| Weft × 180 | 8.0875 |
+| Sizing × 10 | 0.8243 |
+| Job 68 × (50 paise ÷ 100) | 34.00 |
+| **Grand** | **59.40** |
+
+Multi yarn-1 at 100% matches. Typed majuri `12` on this sheet (pick 68) → job ₹8.16, grand **33.56**.
+
+Live Costing.aspx on the same construction with Majuri `0.5` (its rupee box) returned **59.15** on 2026-09-18 — close to 59.40, still a different engine. Majuri `50` on that form returned **3425.15** (treats 50 as rupees). This app does not chase that.
+
 ## Prefills
 
-Calculator forms start at **zeros / empty**. `SWADCOST_LIVE_SAMPLE` is documentation-only. **Load sample** is an explicit fill (notebook warp example plus labeled sample rates).
+Calculator forms start at **zeros / empty**. `SWADCOST_LIVE_SAMPLE` is documentation-only (`LIVE_DEMO_ORACLE_FINAL_COST = 1698.77` is the live-form oracle, not what Calculate returns).
+
+## Majuri unit (paise, 2026-09-18)
+
+`pickRate` is stored in **paise per pick**. Typed or spoken `12` is 12 paise (₹0.12), never ₹12. `jobCost` converts with `pick × (pickRate / 100)`.
+
+The live-demo Majuri box was rupees (`10` = ₹10). That trial in this app is `pickRate: 1000` paise so the 50 × ₹10 = ₹500 line still documents the old comparison. Calculator state is in-memory (not reloaded from telemetry), so old rupee values are not auto-migrated — new entry is paise going forward. Warp rate, weft rate, and sizing stay rupees.
 
 ## Why the engines differ
 

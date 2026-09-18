@@ -28,7 +28,7 @@ const SINGLE_FIELDS: SpeechField[] = [
   { key: 'weftCount', label: 'Weft Count' },
   { key: 'weftRate', label: 'Weft Rate' },
   { key: 'wastagePct', label: 'Wastage' },
-  { key: 'pickRate', label: 'Pick rate / Dalal rate' },
+  { key: 'pickRate', label: 'Majuri / Pick rate / Dalal rate' },
   { key: 'warping', label: 'Warping' },
 ]
 
@@ -72,7 +72,7 @@ describe('speech stream parse', () => {
 
   it('maps spoken metric names onto the matching calculator fields', () => {
     const parsed = parseSpeechStream(
-      'reed 80 warp count 40 pick 68 wastage 5 pick rate 0.5',
+      'reed 80 warp count 40 pick 68 wastage 5 pick rate 12',
       SINGLE_FIELDS,
     )
     expect(parsed.fills.map((f) => [f.key, f.value, f.source])).toEqual([
@@ -80,7 +80,7 @@ describe('speech stream parse', () => {
       ['warpCount', 40, 'named'],
       ['pick', 68, 'named'],
       ['wastagePct', 5, 'named'],
-      ['pickRate', 0.5, 'named'],
+      ['pickRate', 12, 'named'],
     ])
   })
 

@@ -7,7 +7,7 @@ import { SectionLabel } from '../components/SectionLabel'
 import { StudioSheet } from '../components/StudioSheet'
 import { useSpeechFill, type SpeechFillEvent } from '../hooks/useSpeechFill'
 import { SAMPLE_MULTI, SAMPLE_SINGLE, type MultiInputs, type SingleInputs } from '../lib/costing'
-import { DALAL_SECTION_LABEL, PICK_RATE_HINT, PICK_RATE_LABEL } from '../lib/labels'
+import { DALAL_SECTION_LABEL, PICK_RATE_HINT, PICK_RATE_LABEL, PICK_RATE_UNIT } from '../lib/labels'
 import { rangeHint } from '../lib/metricRanges'
 import { cancelSpeak } from '../lib/speakPrompt'
 import {
@@ -94,7 +94,7 @@ export function CalculatorPage({
         { key: 'weftCount', label: 'Weft Count', unit: 'Ne', get: () => s.weftCount || '', set: (v) => set({ weftCount: n(v) }) },
         { key: 'weftRate', label: 'Weft Rate', unit: '₹ / weight', get: () => s.weftRate || '', set: (v) => set({ weftRate: n(v) }) },
         { key: 'wastagePct', label: 'Wastage', unit: '% of weft', hint: 'Added only to weft weight: base × (1 + %/100)', get: () => s.wastagePct || '', set: (v) => set({ wastagePct: n(v) }) },
-        { key: 'pickRate', label: PICK_RATE_LABEL, unit: '₹ per pick', hint: PICK_RATE_HINT, get: () => s.pickRate || '', set: (v) => set({ pickRate: n(v) }) },
+        { key: 'pickRate', label: PICK_RATE_LABEL, unit: PICK_RATE_UNIT, hint: PICK_RATE_HINT, get: () => s.pickRate || '', set: (v) => set({ pickRate: n(v) }) },
         { key: 'warping', label: 'Warping', unit: '₹', hint: 'Optional flat add-on — not on the mill sheet', get: () => s.warping || '', set: (v) => set({ warping: n(v) }) },
       ]
     }
@@ -137,7 +137,7 @@ export function CalculatorPage({
       )
     }
     list.push(
-      { key: 'pickRate', label: PICK_RATE_LABEL, unit: '₹ per pick', hint: PICK_RATE_HINT, get: () => m.pickRate || '', set: (v) => setM({ pickRate: n(v) }) },
+      { key: 'pickRate', label: PICK_RATE_LABEL, unit: PICK_RATE_UNIT, hint: PICK_RATE_HINT, get: () => m.pickRate || '', set: (v) => setM({ pickRate: n(v) }) },
       { key: 'warping', label: 'Warping', unit: '₹', get: () => m.warping || '', set: (v) => setM({ warping: n(v) }) },
     )
     return list

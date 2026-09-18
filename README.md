@@ -44,7 +44,7 @@ Mill-sheet notebook (owner handwritten):
   - Example: 65 × 120 × 120 / (1825 × 61 × 102) = **0.082**
 - **Weft weight** = `(ReedSpace × Pick) / (1693.33 × WeftCount)` × `(1 + wastage%/100)`
 - **Sizing** = warp weight × sizing rate
-- **Job rate** = Pick × pick rate
+- **Majuri / job rate** = Pick × (pick rate in **paise** ÷ 100). Typed or spoken `12` is 12 paise (₹0.12), never ₹12.
 
 See [`FORMULA_CROSSCHECK.md`](FORMULA_CROSSCHECK.md) for the live SwadCost demo comparison (1698.77). The mill notebook is the engine; the old K-fit is not restored.
 

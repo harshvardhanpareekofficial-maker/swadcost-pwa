@@ -20,13 +20,15 @@
  *
  * 3) Sizing = Warp weight × Sizing Rate
  *
- * 4) Job rate = Pick × Pick rate  (maps to the old flat majuri field)
+ * 4) Job / majuri = Pick × (pickRate paise ÷ 100)
+ *    The mill sheet quotes majuri in paise per pick. Typed or spoken `12` is
+ *    12 paise (₹0.12), never ₹12. Convert to rupees only in this line.
  *
  * Cost assembly (matches mill listing of weights × rates; see FORMULA_CROSSCHECK.md):
  *   warpCost    = warpWeight × warpRate
  *   weftCost    = weftWeight × weftRate
  *   sizingCost  = warpWeight × sizingRate
- *   jobCost     = pick × pickRate
+ *   jobCost     = pick × (pickRate paise / 100)
  *   grandTotal  = warpCost + weftCost + sizingCost + jobCost + warping
  *
  * Further assumptions (not on the sheet — labeled):
@@ -43,6 +45,18 @@
 export const WARP_NUMERATOR = 120
 export const WARP_DENOMINATOR = 1825
 export const WEFT_DENOMINATOR = 1693.33
+/** Majuri / pick rate is stored in paise. Notebook job ₹ uses this divisor. */
+export const PAISE_PER_RUPEE = 100
+
+/** Typed/spoken majuri `12` → ₹0.12. Never treat the field as rupees. */
+export function pickRatePaiseToRupees(pickRatePaise: number): number {
+  return pickRatePaise / PAISE_PER_RUPEE
+}
+
+/** jobCost ₹ = Pick × (majuri paise ÷ 100). */
+export function jobCostFromPickRatePaise(pick: number, pickRatePaise: number): number {
+  return pick * pickRatePaiseToRupees(pickRatePaise)
+}
 
 export const MARKUP_PCTS = [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16] as const
 
@@ -59,7 +73,7 @@ export type SingleInputs = {
   weftCount: number
   weftRate: number
   wastagePct: number
-  /** ₹ per pick — jobCost = pick × pickRate (notebook “Job rate”). */
+  /** Paise per pick — jobCost ₹ = pick × (pickRate / 100). Typed `12` = 12 paise. */
   pickRate: number
   warping: number
 }
@@ -182,7 +196,7 @@ export function calculateSingle(input: SingleInputs): CostBreakdown {
   const warpCostRaw = warpWt * input.warpRate
   const weftCostRaw = weftWt * input.weftRate
   const sizingCost = warpWt * input.sizingRate
-  const jobCost = input.pick * input.pickRate
+  const jobCost = jobCostFromPickRatePaise(input.pick, input.pickRate)
   const grandTotal = warpCostRaw + weftCostRaw + sizingCost + jobCost + input.warping
 
   return {
@@ -291,7 +305,7 @@ export function calculateMulti(input: MultiInputs): CostBreakdown {
   const warpCostRaw = warpLines.reduce((s, l) => s + l.yarnCostRaw, 0)
   const weftCostRaw = weftLines.reduce((s, l) => s + l.yarnCostRaw, 0)
   const sizingCost = warpLines.reduce((s, l) => s + (l.sizingCost ?? 0), 0)
-  const jobCost = input.pick * input.pickRate
+  const jobCost = jobCostFromPickRatePaise(input.pick, input.pickRate)
   const grandTotal = warpCostRaw + weftCostRaw + sizingCost + jobCost + input.warping
 
   return {
@@ -338,15 +352,19 @@ export const SAMPLE_SINGLE: SingleInputs = {
   weftCount: 61,
   weftRate: 180,
   wastagePct: 5,
-  pickRate: 0.5,
+  /** 50 paise per pick = ₹0.50 (the old rupee sample was 0.5). */
+  pickRate: 50,
   warping: 0,
 }
 
 /**
- * Live Costing.aspx sample posted 2026-09-11 → Final Cost 1698.77.
- * Majuri on that form is a rupee box; mapping it to pickRate is a labeled trial
- * in FORMULA_CROSSCHECK.md — not a form prefill.
+ * Live Costing.aspx sample posted 2026-09-11 (reconfirmed POST 2026-09-18, no login)
+ * → Final Cost 1698.77. That ASP.NET engine is a length-scaled K-fit, not this notebook.
+ * Majuri on that form was a rupee box (`10` = ₹10). This app stores pickRate
+ * in paise, so the same trial is 1000 paise. Not a calculator prefill.
  */
+export const LIVE_DEMO_ORACLE_FINAL_COST = 1698.77
+
 export const SWADCOST_LIVE_SAMPLE: SingleInputs = {
   reed: 80,
   warpReedspace: 60,
@@ -359,7 +377,7 @@ export const SWADCOST_LIVE_SAMPLE: SingleInputs = {
   weftCount: 40,
   weftRate: 280,
   wastagePct: 5,
-  pickRate: 10,
+  pickRate: 1000,
   warping: 0,
 }
 
