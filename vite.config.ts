@@ -14,6 +14,7 @@ export default defineConfig({
         'favicon.svg',
         'robots.txt',
         'sitemap.xml',
+        '210b711dd38b6f0a04fa5d4fa18030da.txt',
         'e792e9188ca94764b14f9524069ecac1.txt',
         'icons/*.svg',
         'icons/*.png',

@@ -19,18 +19,25 @@ const HOST = 'harshvardhanpareek.com'
 const ENDPOINT = 'https://api.indexnow.org/indexnow'
 const HOMEPAGE = `https://${HOST}/`
 const KEY_RE = /^[a-zA-Z0-9-]{8,128}$/
+/** Key used in IndexNow pings. Hosted at /{key}.txt (legacy key files may also remain). */
+const CANONICAL_KEY = '210b711dd38b6f0a04fa5d4fa18030da'
 
 function loadIndexNowKey(publicDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'public')) {
   const matches = readdirSync(publicDir).filter((name) => {
     if (!name.endsWith('.txt') || name === 'robots.txt') return false
     return KEY_RE.test(name.slice(0, -4))
   })
-  if (matches.length !== 1) {
+  const preferred = `${CANONICAL_KEY}.txt`
+  const filename = matches.includes(preferred)
+    ? preferred
+    : matches.length === 1
+      ? matches[0]
+      : null
+  if (!filename) {
     throw new Error(
-      `Expected exactly one IndexNow key file in public/, found: ${matches.join(', ') || '(none)'}`,
+      `Expected canonical IndexNow key ${preferred} (or exactly one key file), found: ${matches.join(', ') || '(none)'}`,
     )
   }
-  const filename = matches[0]
   const key = filename.slice(0, -4)
   const body = readFileSync(join(publicDir, filename), 'utf8').replace(/^\uFEFF/, '').replace(/\r?\n$/, '')
   if (body !== key) {

@@ -44,9 +44,11 @@ function escapeText(value) {
   return value.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
 }
 
-function replaceMeta(html, attr, key, content) {
-  const re = new RegExp(`(<meta\\s+${attr}="${key}"\\s+content=")([^"]*)(")`, 'i')
-  return html.replace(re, `$1${escapeAttr(content)}$3`)
+function upsertMeta(html, attr, key, content) {
+  const compact = `<meta ${attr}="${key}" content="${escapeAttr(content)}" />`
+  const re = new RegExp(`<meta\\s+${attr}="${key}"[\\s\\S]*?>`, 'i')
+  if (re.test(html)) return html.replace(re, compact)
+  return html.replace('</head>', `    ${compact}\n  </head>`)
 }
 
 function replaceHref(html, rel, hrefLang, href) {
@@ -132,13 +134,13 @@ export function applyPublicDocument(html, guide, catalog = loadGuideCatalog()) {
   const url = `${origin}${path}`
   let out = html
   out = out.replace(/<title>[^<]*<\/title>/, `<title>${escapeText(guide.title)}</title>`)
-  out = replaceMeta(out, 'name', 'description', guide.description)
-  out = replaceMeta(out, 'name', 'keywords', guide.keywords)
-  out = replaceMeta(out, 'property', 'og:url', url)
-  out = replaceMeta(out, 'property', 'og:title', guide.ogTitle)
-  out = replaceMeta(out, 'property', 'og:description', guide.description)
-  out = replaceMeta(out, 'name', 'twitter:title', guide.ogTitle)
-  out = replaceMeta(out, 'name', 'twitter:description', guide.description)
+  out = upsertMeta(out, 'name', 'description', guide.description)
+  out = upsertMeta(out, 'name', 'keywords', guide.keywords)
+  out = upsertMeta(out, 'property', 'og:url', url)
+  out = upsertMeta(out, 'property', 'og:title', guide.ogTitle)
+  out = upsertMeta(out, 'property', 'og:description', guide.description)
+  out = upsertMeta(out, 'name', 'twitter:title', guide.ogTitle)
+  out = upsertMeta(out, 'name', 'twitter:description', guide.description)
   out = replaceHref(out, 'canonical', '', url)
   out = replaceHref(out, 'alternate', 'en-IN', url)
   out = replaceHref(out, 'alternate', 'hi-IN', url)

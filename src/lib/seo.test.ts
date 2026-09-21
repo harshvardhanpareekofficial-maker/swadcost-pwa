@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 import { GUIDE_PAGES, GUIDES_LASTMOD } from './guides'
 import { OWNER_PATH } from './owner'
-import { STUDIO_FAQS, isOwnerVaultPath } from './seo'
+import { HOME_SEO, STUDIO_FAQS, isOwnerVaultPath } from './seo'
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '../..')
 
@@ -32,6 +32,19 @@ describe('on-page SEO', () => {
     expect(html).toMatch(/Harshvardhan Pareek maker/)
     expect(html).toContain('rel="alternate" hrefLang="en-IN"')
     expect(html).toContain('rel="alternate" hrefLang="x-default"')
+  })
+
+  it('ships a crawler-visible meta description on the homepage', () => {
+    const match = html.match(/<meta name="description" content="([^"]+)"/i)
+    expect(match?.[1]).toBe(HOME_SEO.description)
+    expect(match![1].length).toBeGreaterThan(110)
+    expect(match![1].length).toBeLessThan(220)
+    expect(match![1]).toMatch(/fabric cost calculator/i)
+    expect(match![1]).toMatch(/Harshvardhan Pareek/)
+    expect(match![1]).toMatch(/Ichalkaranji|powerloom|grey fabric/i)
+    expect(html).not.toMatch(/SwadCost|swadcost/)
+    expect(html).toContain(`<meta property="og:description" content="${HOME_SEO.ogDescription}" />`)
+    expect(html).toContain(`<meta name="twitter:description" content="${HOME_SEO.twitterDescription}" />`)
   })
 
   it('completes Open Graph and Twitter tags', () => {

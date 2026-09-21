@@ -24,6 +24,12 @@ services:
         source: /robots.txt
         destination: /robots.txt
       - type: rewrite
+        source: /210b711dd38b6f0a04fa5d4fa18030da.txt
+        destination: /210b711dd38b6f0a04fa5d4fa18030da.txt
+      - type: rewrite
+        source: /e792e9188ca94764b14f9524069ecac1.txt
+        destination: /e792e9188ca94764b14f9524069ecac1.txt
+      - type: rewrite
         source: /*
         destination: /index.html
     headers:
