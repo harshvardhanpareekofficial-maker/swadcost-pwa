@@ -76,9 +76,9 @@ The build also copies `index.html` into known client-route folders in `dist/` so
 
 Vite copies everything in `public/` to the site root, so the ownership key is served at:
 
-`https://harshvardhanpareek.com/e792e9188ca94764b14f9524069ecac1.txt`
+`https://harshvardhanpareek.com/210b711dd38b6f0a04fa5d4fa18030da.txt`
 
-The file body is that same key on one line.
+The file body is that same key on one line. Pings use this key as `keyLocation`. A legacy key file (`e792e9188ca94764b14f9524069ecac1.txt`) may also remain at the root so earlier submissions still verify.
 
 After the key is live on production, notify Bing/Yandex (and other IndexNow engines) of the homepage:
 
@@ -93,8 +93,8 @@ That POSTs to `https://api.indexnow.org/indexnow` with:
 ```json
 {
   "host": "harshvardhanpareek.com",
-  "key": "e792e9188ca94764b14f9524069ecac1",
-  "keyLocation": "https://harshvardhanpareek.com/e792e9188ca94764b14f9524069ecac1.txt",
+  "key": "210b711dd38b6f0a04fa5d4fa18030da",
+  "keyLocation": "https://harshvardhanpareek.com/210b711dd38b6f0a04fa5d4fa18030da.txt",
   "urlList": ["https://harshvardhanpareek.com/"]
 }
 ```
