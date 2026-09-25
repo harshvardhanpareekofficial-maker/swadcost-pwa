@@ -103,7 +103,7 @@ input:focus {border-color:#546ace;box-shadow:0 0 0 3px #2436a80c;}
 .final-cost-panel>p:first-child {color:#c4d0ff;}
 .final-cost-panel>p:nth-child(2) {font-size:64px;letter-spacing:-3px;}
 .owner-workspace {max-width:1280px;}
-.owner-workspace>div:first-child {padding:20px 0;}
+
 .owner-workspace h1 {font-size:48px;line-height:1.15;}
 .owner-workspace table th {background:#edf1fc;color:#64718b;font-size:10px;letter-spacing:1px;padding-block:14px;}
 .owner-workspace table td {padding-block:16px;}
