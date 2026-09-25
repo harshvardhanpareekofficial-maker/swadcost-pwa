@@ -1,0 +1,311 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-25T18:10:11.545756+00:00",
+  "title": "Design System: fabriccost STUDIO",
+  "extensions": {
+    "colorMeta": {
+      "deep-teal": {
+        "role": "primary",
+        "displayName": "Deep Teal",
+        "tonalRamp": [
+          "oklch(15% 0.09 195)",
+          "oklch(27% 0.09 195)",
+          "oklch(39% 0.09 195)",
+          "oklch(51% 0.09 195)",
+          "oklch(63% 0.09 195)",
+          "oklch(75% 0.09 195)",
+          "oklch(87% 0.09 195)",
+          "oklch(95% 0.09 195)"
+        ]
+      },
+      "forest": {
+        "role": "primary",
+        "displayName": "Forest",
+        "tonalRamp": [
+          "oklch(15% 0.09 164)",
+          "oklch(27% 0.09 164)",
+          "oklch(39% 0.09 164)",
+          "oklch(51% 0.09 164)",
+          "oklch(63% 0.09 164)",
+          "oklch(75% 0.09 164)",
+          "oklch(87% 0.09 164)",
+          "oklch(95% 0.09 164)"
+        ]
+      },
+      "lime": {
+        "role": "primary",
+        "displayName": "Lime",
+        "tonalRamp": [
+          "oklch(15% 0.09 127)",
+          "oklch(27% 0.09 127)",
+          "oklch(39% 0.09 127)",
+          "oklch(51% 0.09 127)",
+          "oklch(63% 0.09 127)",
+          "oklch(75% 0.09 127)",
+          "oklch(87% 0.09 127)",
+          "oklch(95% 0.09 127)"
+        ]
+      },
+      "sage": {
+        "role": "secondary",
+        "displayName": "Sage",
+        "tonalRamp": [
+          "oklch(15% 0.09 151)",
+          "oklch(27% 0.09 151)",
+          "oklch(39% 0.09 151)",
+          "oklch(51% 0.09 151)",
+          "oklch(63% 0.09 151)",
+          "oklch(75% 0.09 151)",
+          "oklch(87% 0.09 151)",
+          "oklch(95% 0.09 151)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% 0.035 170)",
+          "oklch(27% 0.035 170)",
+          "oklch(39% 0.035 170)",
+          "oklch(51% 0.035 170)",
+          "oklch(63% 0.035 170)",
+          "oklch(75% 0.035 170)",
+          "oklch(87% 0.035 170)",
+          "oklch(95% 0.035 170)"
+        ]
+      },
+      "ivory": {
+        "role": "neutral",
+        "displayName": "Ivory",
+        "tonalRamp": [
+          "oklch(15% 0.035 135)",
+          "oklch(27% 0.035 135)",
+          "oklch(39% 0.035 135)",
+          "oklch(51% 0.035 135)",
+          "oklch(63% 0.035 135)",
+          "oklch(75% 0.035 135)",
+          "oklch(87% 0.035 135)",
+          "oklch(95% 0.035 135)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Paper",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(27% 0 0)",
+          "oklch(39% 0 0)",
+          "oklch(51% 0 0)",
+          "oklch(63% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(87% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "cream": {
+        "role": "neutral",
+        "displayName": "Cream",
+        "tonalRamp": [
+          "oklch(15% 0.035 128)",
+          "oklch(27% 0.035 128)",
+          "oklch(39% 0.035 128)",
+          "oklch(51% 0.035 128)",
+          "oklch(63% 0.035 128)",
+          "oklch(75% 0.035 128)",
+          "oklch(87% 0.035 128)",
+          "oklch(95% 0.035 128)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "tonalRamp": [
+          "oklch(15% 0.035 155)",
+          "oklch(27% 0.035 155)",
+          "oklch(39% 0.035 155)",
+          "oklch(51% 0.035 155)",
+          "oklch(63% 0.035 155)",
+          "oklch(75% 0.035 155)",
+          "oklch(87% 0.035 155)",
+          "oklch(95% 0.035 155)"
+        ]
+      },
+      "divider": {
+        "role": "neutral",
+        "displayName": "Divider",
+        "tonalRamp": [
+          "oklch(15% 0.035 130)",
+          "oklch(27% 0.035 130)",
+          "oklch(39% 0.035 130)",
+          "oklch(51% 0.035 130)",
+          "oklch(63% 0.035 130)",
+          "oklch(75% 0.035 130)",
+          "oklch(87% 0.035 130)",
+          "oklch(95% 0.035 130)"
+        ]
+      },
+      "rose": {
+        "role": "secondary",
+        "displayName": "Rose",
+        "tonalRamp": [
+          "oklch(15% 0.09 18)",
+          "oklch(27% 0.09 18)",
+          "oklch(39% 0.09 18)",
+          "oklch(51% 0.09 18)",
+          "oklch(63% 0.09 18)",
+          "oklch(75% 0.09 18)",
+          "oklch(87% 0.09 18)",
+          "oklch(95% 0.09 18)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Entrance headline."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Workspace headings."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Entrance explanatory copy; operational copy uses smaller local sizes."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Compact shared form labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "install-help",
+        "value": "0 12px 30px #102d2920",
+        "purpose": "Temporary install guidance."
+      },
+      {
+        "name": "sticky-action",
+        "value": "0 -6px 20px #102d2905",
+        "purpose": "Separate bottom actions from scrolling work."
+      }
+    ],
+    "motion": [
+      {
+        "name": "field-state",
+        "value": "160ms",
+        "purpose": "Border and background state feedback."
+      },
+      {
+        "name": "workspace-arrival",
+        "value": "220ms ease-out",
+        "purpose": "Opacity only, disabled for reduced motion."
+      },
+      {
+        "name": "fallback-crossfade",
+        "value": "400ms",
+        "purpose": "Existing cloth fallback opacity handoff; reduced motion disables it."
+      },
+      {
+        "name": "scene-idle",
+        "value": "bounded rotation and vertical drift",
+        "purpose": "Only the cloth; paused offscreen, hidden, user-paused or under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone-max",
+        "value": "760px"
+      },
+      {
+        "name": "paired-fields-min",
+        "value": "1000px"
+      },
+      {
+        "name": "compact-desktop-max",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Calculate button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Shared primary operative button; page contexts may use pill corners.",
+      "html": "<button class=\"ds-button-primary\">Calculate</button>",
+      "css": ".ds-button-primary{font-family:var(--font-sans,\"Archivo Variable\",\"Segoe UI\",sans-serif);background:var(--color-plum,#174e43);color:var(--color-ivory,#f4f7f2);border:0;padding:12px 16px;min-height:44px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;}.ds-button-primary:hover{background:var(--color-plum-deep,#062c2d);}.ds-button-primary:focus-visible{outline:3px solid #8baf49;outline-offset:4px;}"
+    },
+    {
+      "name": "Cancel button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Shared secondary operative button; page contexts may use pill corners.",
+      "html": "<button class=\"ds-button-secondary\">Cancel</button>",
+      "css": ".ds-button-secondary{font-family:var(--font-sans,\"Archivo Variable\",\"Segoe UI\",sans-serif);background:#ffffffcc;color:var(--color-plum,#174e43);border:1px solid #174e4326;padding:12px 16px;min-height:44px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;}.ds-button-secondary:hover{border-color:#174e4359;}.ds-button-secondary:focus-visible{outline:3px solid #8baf49;outline-offset:4px;}"
+    },
+    {
+      "name": "Back to studio button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Shared ghost operative button; page contexts may use pill corners.",
+      "html": "<button class=\"ds-button-ghost\">Back to studio</button>",
+      "css": ".ds-button-ghost{font-family:var(--font-sans,\"Archivo Variable\",\"Segoe UI\",sans-serif);background:transparent;color:var(--color-muted,#52695f);border:0;padding:12px 16px;min-height:44px;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;}.ds-button-ghost:hover{color:var(--color-plum,#174e43);}.ds-button-ghost:focus-visible{outline:3px solid #8baf49;outline-offset:4px;}"
+    },
+    {
+      "name": "Entrance action",
+      "kind": "button",
+      "refersTo": "hero-action",
+      "description": "Lime entrance call to action.",
+      "html": "<a class=\"ds-hero\" href=\"#studio\">Start a cost sheet</a>",
+      "css": ".ds-hero{font-family:var(--font-sans,\"Archivo Variable\",\"Segoe UI\",sans-serif);display:inline-flex;align-items:center;min-height:50px;padding:14px 24px;border-radius:40px;background:var(--color-accent,#c4ec77);color:var(--color-plum-deep,#062c2d);font-size:12px;font-weight:600;text-decoration:none;transition:background .2s;}.ds-hero:hover{background:#d6f7a1;}.ds-hero:focus-visible{outline:3px solid #8baf49;outline-offset:4px;}@media(prefers-reduced-motion:reduce){.ds-hero{transition:none;}}"
+    },
+    {
+      "name": "Numeric field",
+      "kind": "input",
+      "refersTo": "numeric-input",
+      "description": "Large tabular numeric input; units remain visible in the actual form.",
+      "html": "<label class=\"ds-field\">YARN RATE <input type=\"number\" value=\"240\" aria-label=\"Yarn rate\"></label>",
+      "css": ".ds-field{font-family:var(--font-sans,\"Archivo Variable\",\"Segoe UI\",sans-serif);display:grid;gap:8px;font-size:10px;color:#315647;letter-spacing:.07em;}.ds-field input{font-family:var(--font-sans,\"Archivo Variable\",\"Segoe UI\",sans-serif);padding:12px 14px;min-height:52px;border:1px solid #c6d3c8;border-radius:7px;background:#fafcf8;color:var(--color-ink,#102d29);font-size:20px;font-variant-numeric:tabular-nums;}.ds-field input:hover{border-color:#426b59;}.ds-field input:focus{border-color:#426b59;}.ds-field input:focus-visible{outline:3px solid #8baf49;outline-offset:4px;}"
+    },
+    {
+      "name": "Yarn section",
+      "kind": "card",
+      "refersTo": "sheet",
+      "description": "Stable, flat working section; this static container has no interaction state.",
+      "html": "<section class=\"ds-sheet\"><h2>WARP YARN</h2><p>Construction and yarn rates</p></section>",
+      "css": ".ds-sheet{font-family:var(--font-sans,\"Archivo Variable\",\"Segoe UI\",sans-serif);padding:28px;border:1px solid #d3dfd2;border-radius:10px;background:var(--color-paper,#fff);color:var(--color-ink,#102d29);}.ds-sheet h2{font-size:14px;letter-spacing:.08em;color:var(--color-plum,#174e43);padding-bottom:16px;border-bottom:1px solid #d3dfd2;}.ds-sheet p{font-size:13px;color:var(--color-muted,#52695f);}"
+    },
+    {
+      "name": "Entrance navigation",
+      "kind": "nav",
+      "refersTo": "hero-action",
+      "description": "Sparse entrance navigation with a clear studio destination.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Studio\"><a href=\"#method\">How it works</a><a href=\"#studio\">Open studio</a></nav>",
+      "css": ".ds-nav{font-family:var(--font-sans,\"Archivo Variable\",\"Segoe UI\",sans-serif);display:flex;gap:32px;align-items:center;padding:16px;background:var(--color-plum-deep,#062c2d);}.ds-nav a{display:inline-flex;align-items:center;min-height:44px;font-size:12px;color:var(--color-ivory,#f4f7f2);text-decoration:none;}.ds-nav a:last-child{padding:8px 24px;background:var(--color-accent,#c4ec77);border-radius:40px;color:var(--color-plum-deep,#062c2d);}.ds-nav a:hover{text-decoration:underline;}.ds-nav a:focus-visible{outline:3px solid #8baf49;outline-offset:4px;}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Fabric / Form",
+    "overview": "A considered textile studio: strong Archivo typography, deep teal framing, lime emphasis and a pale sage working canvas. Kailash Urja supplies the editorial scale and spacing; the super-dynamic direction supplies one real cloth study. The user explicitly asked for simple, restrained motion, not movement everywhere or an over-engineered interface.\n\nThe entrance introduces the material and the task; calculator, results and private owner ledger prioritize readable numbers and stable controls. This is one responsive web PWA, also bundled in a Capacitor APK wrapper. The wrapper does not introduce a separate native visual system.",
+    "keyCharacteristics": [
+      "Editorial headings with clear numeric hierarchy.",
+      "Open working surfaces and fine dividers instead of nested cards.",
+      "One interactive fabric study with a static fallback.",
+      "Touch-friendly controls and operating-system reduced-motion support."
+    ],
+    "rules": [],
+    "dos": [
+      "Do keep calculation fields stable and labels legible on small screens.",
+      "Do retain visible keyboard focus, accessible labels and meaningful error recovery.",
+      "Do preserve formulas, units, rounding, account behavior and the authenticated private owner dashboard.",
+      "Do keep fabriccost branding and the Made by Harshvardhan Pareek footer.",
+      "Do treat the fabric study as illustrative, independent of calculation inputs."
+    ],
+    "donts": [
+      "Don't spread scene motion into calculator controls or add scroll-driven choreography.",
+      "Don't revive the obsolete indigo/orange palette or Space Grotesk/Manrope type system.",
+      "Don't add generic SaaS purple gradients, nested gray cards or unrelated biogas imagery.",
+      "Don't expose the owner dashboard through public navigation or change access controls during visual work."
+    ]
+  }
+}

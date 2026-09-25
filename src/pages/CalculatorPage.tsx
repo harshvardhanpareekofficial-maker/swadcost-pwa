@@ -198,7 +198,7 @@ export function CalculatorPage({
   }, [speech])
 
   useEffect(() => {
-    fieldRefs.current[focusIdx]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    if (focusIdx > 0) fieldRefs.current[focusIdx]?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'center' })
   }, [focusIdx])
 
   useEffect(() => () => { cancelSpeak() }, [])

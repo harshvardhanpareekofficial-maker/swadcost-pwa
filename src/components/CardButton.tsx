@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { IconArrow } from './Icons'
 
 type Props = {
   title: string
@@ -22,7 +23,7 @@ export function CardButton({ title, description, icon, onClick }: Props) {
       <span className="min-w-0 flex-1">
         <h2 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink sm:text-xl">{title}</h2>
         <p className="mt-1 text-sm leading-relaxed text-plum/75">{description}</p>
-      </span><span className="card-arrow" aria-hidden="true">↗</span>
+      </span><span className="card-arrow" aria-hidden="true"><IconArrow className="h-5 w-5"/></span>
     </button>
   )
 }

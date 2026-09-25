@@ -264,7 +264,6 @@ export function OwnerVaultPage() {
 
       <main className="owner-workspace mx-auto w-full min-w-0 flex-1 space-y-4 px-4 py-4 sm:space-y-6 sm:px-8 sm:py-8">
         <div className="ledger-heading">
-          <Eyebrow>Owner vault · {sourceLabel}</Eyebrow>
           <h1 className="font-display mt-1.5 text-[1.65rem] font-semibold tracking-[-0.03em] text-ink sm:mt-2 sm:text-[1.85rem]">
             Usage ledger
           </h1>
@@ -297,7 +296,7 @@ export function OwnerVaultPage() {
           <button onClick={()=>exportCsv(calcs)} disabled={!calcs.length}>Export CSV ↗</button>
         </div>
         {error?<p className="ledger-message" role="alert">{error}</p>:null}
-        <p className="text-xs text-plum/65">Showing {calcs.length} of {allCalcs.length} recorded calculations. Rankings use the filtered records. Quality means reed × pick.</p>
+        <p className="text-xs text-plum/65">Showing {calcs.length} of {allCalcs.length} recorded calculations. Rankings use the filtered records. Quality means reed × pick. Source: {sourceLabel}.</p>
         <div className="ledger-top"><MostUsedQuality quality={report.topQuality} /><QualityRankList items={report.rankedQualities} /></div>
 
 

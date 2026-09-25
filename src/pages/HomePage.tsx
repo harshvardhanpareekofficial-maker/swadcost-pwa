@@ -1,7 +1,7 @@
 import { Layout } from '../components/Layout'
 import { CardButton } from '../components/CardButton'
 import { MakerNote } from '../components/Footer'
-import { LoomVisual } from '../components/LoomVisual'
+import { FabricStage } from '../components/FabricStage'
 import { IconWarp, IconWeave } from '../components/Icons'
 import { SectionLabel } from '../components/SectionLabel'
 import { studioFieldClass, studioLabelClass } from '../components/studio'
@@ -23,7 +23,7 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
       subtitle="A new quality starts with a clear cost. Choose your construction and build your next mill sheet."
       onLogout={onLogout}
     >
-      <div className="construction-banner"><div><span>FROM YOUR LOOM TO YOUR LEDGER</span><h2>Know your fabric.<br/><em>Own your numbers.</em></h2><p>Yarn, sizing and making. One complete cost sheet.</p></div><LoomVisual compact/></div>
+      <div className="construction-banner"><div><h2>A new weave.<br/><em>A clear beginning.</em></h2><p>Start with your yarn construction. Every detail has its place.</p></div><FabricStage compact/></div>
       <div className="job-setup">
       <label className="mb-4 block sm:mb-6">
         <span className={`mb-1.5 block ${studioLabelClass}`}>{DALAL_NAME_LABEL}</span>

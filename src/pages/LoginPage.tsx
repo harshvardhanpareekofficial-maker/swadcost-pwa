@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { boundUsername, MIN_PASSWORD_LENGTH } from '../lib/auth'
 import { IconArrow } from '../components/Icons'
-import { LoomVisual } from '../components/LoomVisual'
+import { FabricStage } from '../components/FabricStage'
 import { Footer } from '../components/Footer'
 import { GuideLinks } from '../components/GuideLinks'
 import { StudioFaq } from '../components/StudioFaq'
@@ -241,21 +241,19 @@ export function LoginPage({ onSuccess }: Props) {
         : 'Creating account…'
 
   return (
-    <div className="studio-atmosphere flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">
-      <StudioBar />
+    <div className="studio-atmosphere landing-page flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">
+      <StudioBar landing />
 
       <main className="entrance">
-        <section className="entrance-story">
-          <span className="story-kicker"><i/> THE TEXTILE COSTING STUDIO</span>
-          <h2>From yarn.<br/>To your <em>next quote.</em></h2>
-          <p>A clear view of every thread, every process, and every rupee that goes into your fabric.</p>
-          <LoomVisual/>
-          <div className="story-foot"><span>WARP · WEFT · COST</span><span>ICHALKARANJI, INDIA ↗</span></div>
+        <section className="landing-hero" aria-labelledby="hero-title">
+          <div className="hero-copy"><h1 id="hero-title">Know the fabric.<br/>Know the <span>cost.</span></h1><p>From warp and weft to your final quote. A considered costing studio for the people who make fabric.</p><div className="hero-actions"><a className="hero-primary" href="#studio">Start a cost sheet <IconArrow/></a><a className="hero-secondary" href="#method">Explore the process <IconArrow/></a></div></div>
+          <div className="hero-object"><span className="hero-wordmark" aria-hidden="true">FABRIC</span><FabricStage/></div>
+          <div className="hero-foot"><span>Built for Ichalkaranji’s loom floor</span><span>Single yarn. Multiple possibilities.</span><a href="#studio">Scroll to your studio <IconArrow/></a></div>
         </section>
-        <section className="entrance-form">
-          <div className="entrance-form-inner">
-            <span className="access-tag">YOUR DAILY MILL WORKSPACE</span>
-            <h1 className="font-display">{readyName ? 'Your studio account is ready.' : heading}</h1>
+        <section className="studio-entry">
+          <div className="entry-story"><h2>Your craft.<br/>A clearer calculation.</h2><p>You know the cloth. Bring the reed, pick, yarn counts and rates. We’ll bring every component together in one readable cost sheet.</p><div className="entry-spec"><span>WARP + WEFT</span><span>SIZING + MAKING</span><span>YOUR FINAL COST</span></div><p className="entry-note">Your existing account works here. Sign in to begin.</p></div>
+          <section className="entrance-form" id="studio" aria-label="Studio account"><div className="entrance-form-inner">
+            <h2 className="font-display">{readyName ? 'Your studio account is ready.' : heading}</h2>
             <p className="entrance-blurb">{readyName ? `Keep ${readyName} and your password somewhere you can find them.` : blurb}</p>
             {readyName ? (
               <div className="mt-4 space-y-4 lg:mt-6">
@@ -376,6 +374,8 @@ export function LoginPage({ onSuccess }: Props) {
           </div>
         </section>
 
+        </section>
+        <section className="process-section" id="method"><div className="process-heading"><h2>From the first thread<br/>to the final figure.</h2><p>A familiar mill sheet. A more complete view.</p></div><ol className="process-steps"><li><span>01</span><h3>Define the construction.</h3><p>Choose single or multiple yarns. Enter reed, pick, counts and reedspace.</p></li><li><span>02</span><h3>Account for the work.</h3><p>Add yarn rates, sizing, weft wastage and making charges in paise per pick.</p></li><li><span>03</span><h3>Make the quote yours.</h3><p>Read the breakdown, compare markups, edit inputs, and print your cost sheet.</p></li></ol></section>
         <details className="entrance-about">
           <summary className="flex min-h-11 cursor-pointer list-none items-center text-sm font-semibold text-plum [&::-webkit-details-marker]:hidden">
             About the studio

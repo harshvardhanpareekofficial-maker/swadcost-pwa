@@ -18,14 +18,15 @@ export default defineConfig({
         'e792e9188ca94764b14f9524069ecac1.txt',
         'icons/*.svg',
         'icons/*.png',
+        'models/*.glb',
       ],
       manifest: {
         name: 'fabriccost STUDIO — Fabric Cost Calculator',
         short_name: 'fabriccost STUDIO',
         description:
           'Fabric cost calculator for Indian powerloom grey fabric: warp, weft, sizing and job rate. Speak or type mill-sheet inputs.',
-        theme_color: '#2436a8',
-        background_color: '#f2f5fc',
+        theme_color: '#062c2d',
+        background_color: '#f4f7f2',
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/',
@@ -48,7 +49,7 @@ export default defineConfig({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,glb}'],
         navigateFallback: '/index.html',
         // Keep IndexNow / robots / sitemap as real files, not the SPA shell.
         navigateFallbackDenylist: [/\.txt$/, /\.xml$/, /\/sitemap\.xml$/, /^\/owner-vault-/],

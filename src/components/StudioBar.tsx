@@ -1,17 +1,19 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { InstallButton } from './InstallButton'
 import { pendingCount } from '../lib/pendingSync'
+import { IconArrow } from './Icons'
 import { Mark } from './Mark'
 import { studioQuietBtnClass } from './studio'
 
 interface StudioBarProps {
+  landing?: boolean
   trailing?: ReactNode
   onBack?: () => void
   backLabel?: string
   onLogout?: () => void
 }
 
-export function StudioBar({ trailing, onBack, backLabel = 'Back', onLogout }: StudioBarProps) {
+export function StudioBar({ landing = false, trailing, onBack, backLabel = 'Back', onLogout }: StudioBarProps) {
   const [online,setOnline]=useState(navigator.onLine)
   const [pending,setPending]=useState(pendingCount)
   useEffect(()=>{const update=()=>setPending(pendingCount());window.addEventListener('fabriccost-sync',update);return ()=>window.removeEventListener('fabriccost-sync',update)},[])
@@ -29,6 +31,7 @@ export function StudioBar({ trailing, onBack, backLabel = 'Back', onLogout }: St
           </span>
         </span>
       </p>
+      {landing ? <nav className="landing-nav" aria-label="Main navigation"><a href="#method">The process</a><a href="#studio">Open studio <IconArrow/></a></nav> : null}
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
         {onBack ? (
           <StudioBarAction onClick={onBack}>{backLabel}</StudioBarAction>

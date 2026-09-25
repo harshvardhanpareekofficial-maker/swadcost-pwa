@@ -38,3 +38,6 @@ android/app/src/main/assets/capacitor.config.json
 android/app/src/main/assets/capacitor.plugins.json
 *.jks
 *.keystore
+
+# Local review evidence may include private ledger data
+.impeccable/review/
