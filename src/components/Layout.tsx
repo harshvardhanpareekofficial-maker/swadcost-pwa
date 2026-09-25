@@ -2,49 +2,22 @@ import type { ReactNode } from 'react'
 import { Footer } from './Footer'
 import { Eyebrow } from './SectionLabel'
 import { StudioBar } from './StudioBar'
-
-type Props = {
-  children: ReactNode
-  eyebrow?: string
-  title?: string
-  subtitle?: string
-  onLogout?: () => void
-  onBack?: () => void
-  backLabel?: string
-  stickyFooter?: ReactNode
-}
-
-export function Layout({
-  children,
-  eyebrow,
-  title,
-  subtitle,
-  onLogout,
-  onBack,
-  backLabel,
-  stickyFooter,
-}: Props) {
-  return (
-    <div className="studio-atmosphere flex h-dvh min-h-0 min-w-0 flex-col overflow-hidden text-ink">
-      <StudioBar onBack={onBack} backLabel={backLabel} onLogout={onLogout} />
-      <main className="mx-auto flex w-full min-h-0 min-w-0 max-w-lg flex-1 flex-col overflow-y-auto px-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3.5 sm:max-w-xl sm:px-8 sm:pt-8">
-        {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
-        {title ? (
-          <h1
-            className={`font-display text-[1.55rem] font-semibold leading-[1.12] tracking-[-0.03em] text-ink sm:text-[2rem] ${eyebrow ? 'mt-1.5' : ''}`}
-          >
-            {title}
-          </h1>
-        ) : null}
-        {subtitle ? (
-          <p className="mt-1.5 max-w-[42ch] text-sm leading-relaxed text-plum/75 sm:mt-2 sm:text-[0.95rem]">
-            {subtitle}
-          </p>
-        ) : null}
-        <div className={title || eyebrow ? 'mt-4 min-w-0 flex-1 sm:mt-7' : 'min-w-0 flex-1'}>{children}</div>
-        <Footer className="mt-8 pt-4 sm:mt-12 sm:pt-5" />
-      </main>
-      {stickyFooter}
-    </div>
-  )
+import { WeaveGraphic } from './WeaveGraphic'
+type Props={children:ReactNode;eyebrow?:string;title?:string;subtitle?:string;onLogout?:()=>void;onBack?:()=>void;backLabel?:string;stickyFooter?:ReactNode}
+export function Layout({children,eyebrow,title,subtitle,onLogout,onBack,backLabel,stickyFooter}:Props) {
+  return <div className="studio-atmosphere workspace-shell text-ink">
+    <StudioBar onBack={onBack} backLabel={backLabel} onLogout={onLogout}/>
+    <div className="workspace-body">
+      <aside className="workspace-rail" aria-label="About your costing workspace">
+        <div><span className="rail-caption">THE MILL WORKSPACE</span><h2>Good fabric.<br/>Clear numbers.</h2><p>From the first thread to the final quote. Your mill sheet, with every cost accounted for.</p></div>
+        <WeaveGraphic compact className="rail-weave"/>
+        <dl className="rail-notes"><div><dt>01 / CONSTRUCTION</dt><dd>Reed, pick & yarn counts</dd></div><div><dt>02 / CONVERSION</dt><dd>Yarn, sizing & making</dd></div><div><dt>03 / COST SHEET</dt><dd>A clear price to work with</dd></div></dl>
+        <p className="rail-bottom">DESIGNED FOR THE LOOM FLOOR<br/><strong>Ichalkaranji, India</strong></p>
+      </aside>
+      <div className="workspace-scroll"><main className="workspace-main" id="main-content">
+        <header className="page-heading">{eyebrow?<Eyebrow>{eyebrow}</Eyebrow>:null}{title?<h1 className="font-display">{title}</h1>:null}{subtitle?<p>{subtitle}</p>:null}</header>
+        <div className="workspace-content">{children}</div><Footer className="mt-10 pt-5"/>
+      </main></div>
+    </div>{stickyFooter}
+  </div>
 }

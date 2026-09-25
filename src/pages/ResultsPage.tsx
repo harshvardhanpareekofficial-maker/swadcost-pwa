@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Capacitor, registerPlugin } from '@capacitor/core'
 import { Layout } from '../components/Layout'
 import { Stepper } from '../components/Stepper'
 import { NumberField } from '../components/NumberField'
@@ -80,9 +81,9 @@ export function ResultsPage({
       onBack={onBackEdit}
       onLogout={onLogout}
     >
-      <Stepper step={3} />
+      <Stepper step={3} /><div className="result-actions"><button onClick={async()=>{try {if(Capacitor.isNativePlatform()) await registerPlugin<{print:()=>Promise<void>}>('StudioPrint').print();else window.print()}catch{setError('Could not open print. Please retry.')}}}>Print / Save PDF ↗</button><span>Amounts in Indian rupees</span></div><div className="cost-sheet-grid">
 
-      <StudioSheet className="mb-4 overflow-hidden sm:mb-6">
+      <StudioSheet className="final-cost-panel mb-4 overflow-hidden sm:mb-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/55">Final cost</p>
         <p className="font-display mt-1 break-words text-[2.1rem] font-semibold tabular-nums tracking-[-0.03em] text-ink sm:text-5xl">
           {formatInr(result.grandTotal)}
@@ -164,6 +165,7 @@ export function ResultsPage({
         </div>
       </StudioSheet>
 
+      </div>
       {editing ? (
         <section className="mb-5 space-y-3">
           <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink">Edit inputs & recalculate</h3>

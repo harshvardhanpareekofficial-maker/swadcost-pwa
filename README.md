@@ -55,7 +55,6 @@ See [`FORMULA_CROSSCHECK.md`](FORMULA_CROSSCHECK.md) for the live SwadCost demo 
    - **Build command:** `npm ci && npm run build`
    - **Publish directory:** `dist`
 3. Env vars (baked in at **build** time — a Dashboard-only save without rebuild will not update the bundle):
-   - `VITE_OWNER_GATE` (optional)
    - `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (**required** for Finish setup / studio-list lookup). Set them on the Render static site, then rebuild. Do not commit the anon key. Without them, Sign in shows a connection/config error instead of pretending the username is new.
    - `VITE_ELEVENLABS_API_KEY` / `VITE_ELEVENLABS_VOICE_ID` (optional paid Speak TTS; omit — the default — to use free `speechSynthesis`. No key is required for spoken prompts.)
 4. Custom domain: add `harshvardhanpareek.com` in Render → Domains, then point DNS:

@@ -20,15 +20,14 @@ A textile-first costing studio, not a generic SaaS calculator. The mechanism is 
 
 ## Operating Context
 
-Static site on Render. Client-side accounts in localStorage. Optional Supabase analytics for account metadata and calculate events. Shop lighting, one-handed phone use, and rupee-denominated rates are the real scene.
+Static site on Render. Client-side accounts in localStorage. Supabase stores account metadata and calculation events through a gateway. Owner reads require a server-verified password. Shop lighting, one-handed phone use, and rupee-denominated rates are the real scene.
 
 ## Capabilities and Constraints
 
 - Sign in / Create account only (hashed passwords, empty local store — no demo seed). No guest / “explore first” path.
 - Costing math follows the owner mill notebook (warp weight example 0.082). Do not reintroduce the old K-constant SwadCost fit.
-- Secret owner vault (not `/admin`) gated by `VITE_OWNER_GATE`.
 - Analytics tables keep backend names `swadcost_accounts` / `swadcost_calcs`; never surface that brand in UI.
-- No backend auth. Filesystem is ephemeral.
+- User sign-in remains device-local. The owner ledger is authenticated server-side through a dedicated gateway; no public read access to analytics tables.
 
 ## Brand Commitments
 

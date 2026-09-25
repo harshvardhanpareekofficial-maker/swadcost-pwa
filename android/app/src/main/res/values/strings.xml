@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">fabriccost STUDIO</string>
+    <string name="title_activity_main">fabriccost STUDIO</string>
+    <string name="package_name">com.harshvardhanpareek.fabriccost</string>
+    <string name="custom_url_scheme">com.harshvardhanpareek.fabriccost</string>
+</resources>

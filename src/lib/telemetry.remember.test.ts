@@ -33,20 +33,8 @@ describe('accountRememberedElsewhere', () => {
   })
 
   it('treats a Supabase username_norm hit as remembered', async () => {
-    vi.doMock('./supabase', () => ({
-      getSupabase: () => ({
-        from: () => ({
-          select: () => ({
-            eq: () => ({
-              limit: async () => ({ data: [{ username: 'Harshvardhan Pareek' }], error: null }),
-            }),
-            ilike: () => ({
-              limit: async () => ({ data: [], error: null }),
-            }),
-          }),
-        }),
-      }),
-    }))
+    vi.doMock('./supabase',()=>({getSupabase:()=>({}),isSupabaseConfigured:()=>true}))
+    vi.doMock('./gateway',()=>({gateway:async()=>({status:'found',username:'Harshvardhan Pareek',usernameNorm:'harshvardhan pareek'})}))
     const { accountRememberedElsewhere } = await import('./telemetry')
     await expect(accountRememberedElsewhere('harshvardhan pareek')).resolves.toBe(true)
   })

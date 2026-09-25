@@ -113,7 +113,8 @@ describe('on-page SEO', () => {
 
   it('allows the site and disallows the owner vault', () => {
     expect(robots).toMatch(/Allow:\s*\//)
-    expect(robots).toContain(`Disallow: ${OWNER_PATH}`)
+    expect(robots).toContain('Disallow: /owner-vault-')
+    expect(robots).not.toContain(OWNER_PATH)
     expect(robots).toContain('Sitemap: https://harshvardhanpareek.com/sitemap.xml')
     expect(sitemap).toContain('https://harshvardhanpareek.com/')
     expect(sitemap).toContain(`<lastmod>${GUIDES_LASTMOD}</lastmod>`)

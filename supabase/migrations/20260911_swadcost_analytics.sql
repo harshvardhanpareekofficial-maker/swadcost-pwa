@@ -25,7 +25,6 @@ create table if not exists public.swadcost_calcs (
 alter table public.swadcost_accounts enable row level security;
 alter table public.swadcost_calcs enable row level security;
 
--- Owner protection is a secret URL + VITE_OWNER_GATE. Anon may insert/select metadata only (no passwords).
 drop policy if exists swadcost_accounts_insert on public.swadcost_accounts;
 drop policy if exists swadcost_accounts_select on public.swadcost_accounts;
 drop policy if exists swadcost_calcs_insert on public.swadcost_calcs;

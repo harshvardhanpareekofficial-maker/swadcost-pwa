@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import './index.css'
 import './pwa'
+import { flushPending } from './lib/pendingSync'
 import App from './App'
 import { DocumentSeo } from './components/DocumentSeo'
 import { purgeIdleLocalNow, purgeIdleOnLoad } from './lib/idleAccounts'
@@ -14,6 +15,8 @@ import { OwnerVaultPage } from './pages/OwnerVaultPage'
 purgeIdleLocalNow()
 void purgeIdleOnLoad()
 applyDocumentIndexing(window.location.pathname)
+void flushPending()
+window.addEventListener('online',()=>void flushPending())
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

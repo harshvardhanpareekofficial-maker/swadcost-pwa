@@ -1,10 +1,13 @@
 import { touchAccountLastActive } from './auth'
 import { usernameNorm } from './usernames'
 import type { CostBreakdown, MultiInputs, SingleInputs } from './costing'
-import { idleCutoffIso, isIdleTimestamp, parseIsoMillis } from './idle'
+import { isIdleTimestamp, parseIsoMillis } from './idle'
 import { rankQualities, type RankedQuality } from './qualities'
 import { ACCOUNT_META_KEY, CALC_EVENTS_KEY, migrateTelemetryStorage } from './storage'
-import { getSupabase } from './supabase'
+import { gateway } from './gateway'
+import { queueCalculation } from './pendingSync'
+import { ownerCredential } from './owner'
+import { lookupCloudAccount, upsertCloudAccount } from './cloudAccounts'
 import type { CostMode } from './types'
 
 migrateTelemetryStorage()
@@ -153,33 +156,10 @@ export async function accountRememberedElsewhere(username: string): Promise<bool
   if (!key) return false
   if (loadLocalAccounts().some((row) => usernameNorm(row.username) === key)) return true
 
-  const client = getSupabase()
-  if (!client) return false
-  try {
-    const byNorm = await client.from('swadcost_accounts').select('username').eq('username_norm', key).limit(1)
-    if (!byNorm.error && Array.isArray(byNorm.data) && byNorm.data.length > 0) return true
-    if (byNorm.error && !looksMissingColumn(byNorm.error.message, 'username_norm')) return false
-    const byName = await client.from('swadcost_accounts').select('username').ilike('username', key).limit(1)
-    return !byName.error && Array.isArray(byName.data) && byName.data.length > 0
-  } catch {
-    return false
-  }
+  return (await lookupCloudAccount(username)).status === 'found'
 }
-
-async function syncLastActiveRemote(username: string, atIso: string): Promise<void> {
-  const client = getSupabase()
-  if (!client) return
-  try {
-    const withStamp = await client.from('swadcost_accounts').upsert(
-      { username, last_active_at: atIso },
-      { onConflict: 'username_norm' },
-    )
-    if (withStamp.error) {
-      await client.from('swadcost_accounts').upsert({ username }, { onConflict: 'username_norm' })
-    }
-  } catch {
-    /* network — local copy already saved */
-  }
+async function syncLastActiveRemote(username: string, _atIso: string): Promise<void> {
+  await upsertCloudAccount(username)
 }
 
 /** Record (or refresh) an account and stamp last_active_at. Never sends a password. */
@@ -233,23 +213,8 @@ export async function recordCalc(event: Omit<CalcEvent, 'id' | 'createdAt'> & { 
   events.unshift(row)
   saveLocalCalcs(events.slice(0, 400))
 
-  const client = getSupabase()
-  if (!client) return
-  try {
-    await client.from('swadcost_calcs').insert({
-      username: row.username,
-      fabric_name: row.fabricName,
-      mode: row.mode,
-      reed: row.reed,
-      pick: row.pick,
-      warp_rs: row.warpRs,
-      quality_label: row.qualityLabel || null,
-      final_cost: row.finalCost,
-      payload: row.payload,
-    })
-  } catch {
-    /* local copy already saved */
-  }
+  try { queueCalculation(row) }
+  catch { /* Storage is full; the local recent-history copy is already retained. */ }
 }
 
 export function recordSuccessfulCalc(args: {
@@ -264,28 +229,7 @@ export function recordSuccessfulCalc(args: {
   const reed = input.reed
   const pick = input.pick
   const warpRs = input.warpReedspace
-  const payload =
-    args.mode === 'single'
-      ? {
-          l2l: args.single.l2l,
-          warpCount: args.single.warpCount,
-          weftCount: args.single.weftCount,
-          weftReedspace: args.single.weftReedspace,
-          wastagePct: args.single.wastagePct,
-          pickRate: args.single.pickRate,
-          pickRateUnit: 'paise',
-          warping: args.single.warping,
-        }
-      : {
-          l2l: args.multi.l2l,
-          weftReedspace: args.multi.weftReedspace,
-          wastagePct: args.multi.wastagePct,
-          pickRate: args.multi.pickRate,
-          pickRateUnit: 'paise',
-          warping: args.multi.warping,
-          warpYarns: args.multi.warpYarns.map((y) => ({ pct: y.pct, count: y.count })),
-          weftYarns: args.multi.weftYarns.map((y) => ({ pct: y.pct, count: y.count })),
-        }
+  const payload = { ...input, pickRateUnit: 'paise', result: args.result }
 
   const username = args.username?.trim() || 'unknown'
   if (args.username?.trim()) void markAccountActive(args.username)
@@ -334,12 +278,6 @@ function mapRemoteCalc(row: Record<string, unknown>): CalcEvent | null {
   }
 }
 
-function mergeById<T extends { id: string; createdAt: string }>(remote: T[], local: T[]): T[] {
-  const map = new Map<string, T>()
-  for (const row of [...local, ...remote]) map.set(row.id, row)
-  return [...map.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-}
-
 function laterIso(a: string, b: string): string {
   return a > b ? a : b
 }
@@ -380,105 +318,14 @@ export function purgeIdleLocalTelemetry(now = Date.now()): string[] {
   return names
 }
 
-function looksMissingColumn(message: string | undefined, column: string): boolean {
-  if (!message) return false
-  return message.toLowerCase().includes(column.toLowerCase())
-}
+/** Remote retention is not run by untrusted browsers. Existing data is preserved. */
+export async function purgeIdleSupabase(_now = Date.now()): Promise<number> { return 0 }
 
-/** Delete idle rows from swadcost_accounts + matching swadcost_calcs. RLS only allows idle rows. */
-export async function purgeIdleSupabase(now = Date.now()): Promise<number> {
-  const client = getSupabase()
-  if (!client) return 0
-  const cutoff = idleCutoffIso(now)
-
-  try {
-    const listed = await client
-      .from('swadcost_accounts')
-      .select('username, last_active_at, created_at')
-      .or(`last_active_at.lt.${cutoff},and(last_active_at.is.null,created_at.lt.${cutoff})`)
-
-    let idleNames: string[] = []
-    if (listed.error && looksMissingColumn(listed.error.message, 'last_active_at')) {
-      const fallback = await client
-        .from('swadcost_accounts')
-        .select('username, created_at')
-        .lt('created_at', cutoff)
-      if (fallback.error || !Array.isArray(fallback.data)) return 0
-      idleNames = fallback.data
-        .map((row) => (typeof row.username === 'string' ? row.username : ''))
-        .filter(Boolean)
-    } else if (listed.error || !Array.isArray(listed.data)) {
-      return 0
-    } else {
-      idleNames = listed.data
-        .map((row) => (typeof row.username === 'string' ? row.username : ''))
-        .filter(Boolean)
-    }
-
-    if (idleNames.length === 0) return 0
-
-    for (const name of idleNames) {
-      await client.from('swadcost_calcs').delete().ilike('username', name)
-    }
-
-    const byStamp = await client.from('swadcost_accounts').delete().lt('last_active_at', cutoff)
-    if (byStamp.error && looksMissingColumn(byStamp.error.message, 'last_active_at')) {
-      await client.from('swadcost_accounts').delete().lt('created_at', cutoff)
-    }
-
-    purgeLocalTelemetryForUsers(idleNames)
-    return idleNames.length
-  } catch {
-    return 0
-  }
-}
-
-export async function loadOwnerSnapshot(): Promise<{
-  accounts: AccountMeta[]
-  calcs: CalcEvent[]
-  source: 'supabase' | 'local' | 'mixed'
-}> {
-  const localAccounts = loadLocalAccounts()
-  const localCalcs = loadLocalCalcs()
-  const client = getSupabase()
-  if (!client) {
-    return { accounts: localAccounts, calcs: localCalcs, source: 'local' }
-  }
-
-  try {
-    const withStamp = await client
-      .from('swadcost_accounts')
-      .select('id, username, created_at, last_active_at')
-      .order('created_at', { ascending: false })
-    const accountsRes =
-      withStamp.error && looksMissingColumn(withStamp.error.message, 'last_active_at')
-        ? await client
-            .from('swadcost_accounts')
-            .select('id, username, created_at')
-            .order('created_at', { ascending: false })
-        : withStamp
-
-    const calcsRes = await client
-      .from('swadcost_calcs')
-      .select('id, username, fabric_name, mode, reed, pick, warp_rs, quality_label, final_cost, payload, created_at')
-      .order('created_at', { ascending: false })
-      .limit(500)
-
-    const remoteAccounts = Array.isArray(accountsRes.data)
-      ? accountsRes.data
-          .map((row) => mapRemoteAccount(row as Record<string, unknown>))
-          .filter((row): row is AccountMeta => Boolean(row))
-      : []
-    const remoteCalcs = Array.isArray(calcsRes.data)
-      ? calcsRes.data.map((row) => mapRemoteCalc(row as Record<string, unknown>)).filter((row): row is CalcEvent => Boolean(row))
-      : []
-
-    const failed = Boolean(accountsRes.error || calcsRes.error)
-    const accounts = mergeAccountsByUsername(remoteAccounts, localAccounts)
-    const calcs = mergeById(remoteCalcs, localCalcs)
-    const source = failed || remoteAccounts.length + remoteCalcs.length === 0 ? 'mixed' : 'supabase'
-    return { accounts, calcs, source }
-  } catch {
-    return { accounts: localAccounts, calcs: localCalcs, source: 'local' }
+export async function loadOwnerSnapshot(): Promise<{accounts:AccountMeta[];calcs:CalcEvent[];source:'supabase'}> {
+  const snap=await gateway<{accounts:Record<string,unknown>[];calcs:Record<string,unknown>[]}>({action:'owner'},ownerCredential())
+  return {
+    accounts:snap.accounts.map(mapRemoteAccount).filter((r):r is AccountMeta=>!!r),
+    calcs:snap.calcs.map(mapRemoteCalc).filter((r):r is CalcEvent=>!!r),
+    source:'supabase',
   }
 }

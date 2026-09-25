@@ -174,7 +174,7 @@ export function writeSpaShellPages({
     const dest = join(distDir, pathname.replace(/^\//, ''), 'index.html')
     mkdirSync(dirname(dest), { recursive: true })
     const guide = guidesByPath.get(pathname)
-    const html = guide ? applyPublicDocument(raw, guide, catalog) : raw
+    const html = guide ? applyPublicDocument(raw, guide, catalog) : pathname.startsWith('/owner-vault-') ? raw.replace(/<title>[^<]*<\/title>/, '<title>Owner ledger</title>').replace(/<meta name="robots"[^>]*>/, '<meta name="robots" content="noindex, nofollow, noarchive" />') : raw
     writeFileSync(dest, html)
     written.push(dest)
   }

@@ -1,4 +1,6 @@
-import type { ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
+import { InstallButton } from './InstallButton'
+import { pendingCount } from '../lib/pendingSync'
 import { Mark } from './Mark'
 import { studioQuietBtnClass } from './studio'
 
@@ -10,6 +12,10 @@ interface StudioBarProps {
 }
 
 export function StudioBar({ trailing, onBack, backLabel = 'Back', onLogout }: StudioBarProps) {
+  const [online,setOnline]=useState(navigator.onLine)
+  const [pending,setPending]=useState(pendingCount)
+  useEffect(()=>{const update=()=>setPending(pendingCount());window.addEventListener('fabriccost-sync',update);return ()=>window.removeEventListener('fabriccost-sync',update)},[])
+  useEffect(()=>{const update=()=>setOnline(navigator.onLine);window.addEventListener("online",update);window.addEventListener("offline",update);return ()=>{window.removeEventListener("online",update);window.removeEventListener("offline",update)}},[])
   return (
     <header className="studio-bar flex min-h-14 items-center justify-between gap-2 px-[max(1rem,env(safe-area-inset-left))] py-2.5 pr-[max(1rem,env(safe-area-inset-right))] pt-[max(0.65rem,env(safe-area-inset-top))] sm:gap-3 sm:px-8 sm:py-3">
       <p className="flex min-w-0 items-center gap-2.5">
@@ -30,12 +36,13 @@ export function StudioBar({ trailing, onBack, backLabel = 'Back', onLogout }: St
         {onLogout ? (
           <StudioBarAction onClick={onLogout}>Log out</StudioBarAction>
         ) : null}
+        <InstallButton/>
         {trailing}
         <p
           className={`${onBack || onLogout || trailing ? 'hidden sm:flex' : 'flex'} items-center gap-1.5 text-[11px] font-medium text-plum/70`}
         >
           <span className="h-2 w-2 rounded-full bg-ready" />
-          <span className="hidden sm:inline">Workspace ready</span>
+          <span className="hidden sm:inline">{!online ? "Working offline" : pending ? `${pending} awaiting sync` : "Workspace ready"}</span>
         </p>
       </div>
     </header>

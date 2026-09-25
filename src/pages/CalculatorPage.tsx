@@ -338,24 +338,24 @@ export function CalculatorPage({
         </StudioSheet>
       ) : null}
 
-      <div className="grid grid-cols-1 gap-2.5 pb-2 sm:gap-3 sm:pb-4">
+      <div className="mill-fields grid grid-cols-1 gap-2.5 pb-2 sm:gap-3 sm:pb-4">
         {mode === 'single' ? (
           <>
-            <SectionLabel>Warp</SectionLabel>
+            <section className="yarn-section warp-section"><SectionLabel>Warp</SectionLabel>
             {pair(0, 1)}
             {renderField(2)}
             {pair(3, 4)}
             {renderField(5)}
-            <SectionLabel className="pt-1.5 sm:pt-2">Weft</SectionLabel>
+            </section><section className="yarn-section weft-section"><SectionLabel>Weft</SectionLabel>
             {pair(6, 7)}
             {pair(8, 9)}
             {renderField(10)}
-            <SectionLabel className="pt-1.5 sm:pt-2">{DALAL_SECTION_LABEL}</SectionLabel>
-            {pair(11, 12)}
+            </section><section className="yarn-section charges-section"><SectionLabel>{DALAL_SECTION_LABEL}</SectionLabel>
+            {pair(11, 12)}</section>
           </>
         ) : (
           <>
-            <SectionLabel>Warp</SectionLabel>
+            <section className="yarn-section warp-section"><SectionLabel>Warp</SectionLabel>
             {pair(0, 1)}
             {renderField(2)}
             {[0, 1, 2].map((yarn) => {
@@ -369,7 +369,7 @@ export function CalculatorPage({
                 </div>
               )
             })}
-            <SectionLabel className="pt-1.5 sm:pt-2">Weft</SectionLabel>
+            </section><section className="yarn-section weft-section"><SectionLabel>Weft</SectionLabel>
             {pair(15, 16)}
             {renderField(17)}
             {[0, 1, 2].map((yarn) => {
@@ -382,8 +382,8 @@ export function CalculatorPage({
                 </div>
               )
             })}
-            <SectionLabel className="pt-1.5 sm:pt-2">{DALAL_SECTION_LABEL}</SectionLabel>
-            {pair(fields.length - 2, fields.length - 1)}
+            </section><section className="yarn-section charges-section"><SectionLabel>{DALAL_SECTION_LABEL}</SectionLabel>
+            {pair(fields.length - 2, fields.length - 1)}</section>
           </>
         )}
       </div>

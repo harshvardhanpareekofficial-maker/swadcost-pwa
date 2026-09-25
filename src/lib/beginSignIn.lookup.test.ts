@@ -35,23 +35,8 @@ describe('beginSignIn default cloud lookup', () => {
   })
 
   it('cloud hit → finish-setup for case variants', async () => {
-    vi.doMock('./supabase', () => ({
-      getSupabase: () => ({
-        from: () => ({
-          select: () => ({
-            eq: (_col: string, norm: string) => ({
-              limit: async () =>
-                norm === 'harshvardhan'
-                  ? { data: [{ username: 'Harshvardhan' }], error: null }
-                  : { data: [], error: null },
-            }),
-            ilike: () => ({
-              limit: async () => ({ data: [], error: null }),
-            }),
-          }),
-        }),
-      }),
-    }))
+    vi.doMock('./supabase',()=>({getSupabase:()=>({}),isSupabaseConfigured:()=>true}))
+    vi.doMock('./gateway',()=>({gateway:async()=>({status:'found',username:'Harshvardhan',usernameNorm:'harshvardhan'})}))
     const { beginSignIn } = await import('./studioAuth')
     for (const name of ['Harshvardhan', 'harshvardhan', 'HARSHVARDHAN']) {
       await expect(beginSignIn(name, 'x')).resolves.toEqual({

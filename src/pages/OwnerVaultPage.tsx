@@ -6,7 +6,6 @@ import { StudioBar, StudioBarAction } from '../components/StudioBar'
 import { StudioSheet } from '../components/StudioSheet'
 import { studioFieldClass, studioLabelClass } from '../components/studio'
 import { formatInr } from '../lib/costing'
-import { IDLE_TTL_DAYS } from '../lib/idle'
 import {
   checkOwnerPin,
   isOwnerUnlocked,
@@ -115,7 +114,7 @@ function QualityRankList({ items }: { items: RankedQuality[] }) {
     <StudioSheet>
       <SectionLabel>Top qualities</SectionLabel>
       <p className="mt-1.5 text-xs leading-relaxed text-plum/60">
-        Ranked by how often the same reed, warp / pick, and quality label are run.
+        Ranked by reed × pick construction. Count and width details are shown where recorded.
       </p>
       {items.length === 0 ? (
         <EmptyHint>No calculations yet. Ranked qualities will list here with counts.</EmptyHint>
@@ -125,7 +124,7 @@ function QualityRankList({ items }: { items: RankedQuality[] }) {
             <li key={`${item.label}-${index}`} className="flex items-baseline justify-between gap-3 text-sm">
               <span className="min-w-0 break-words text-ink">
                 <span className="mr-2 text-plum/40">{index + 1}.</span>
-                <span className="font-medium">{item.label}</span>
+                <span className="font-medium">{item.label}</span><span className="rank-track" aria-hidden="true"><span style={{width:`${100*item.count/Math.max(1,items[0]?.count||1)}%`}}/></span>
                 {qualityMeta(item) ? (
                   <span className="mt-0.5 block pl-5 text-xs text-plum/60">{qualityMeta(item)}</span>
                 ) : null}
@@ -144,7 +143,15 @@ export function OwnerVaultPage() {
   const [error, setError] = useState<string | null>(null)
   const [unlocked, setUnlocked] = useState(() => isOwnerUnlocked())
   const [accounts, setAccounts] = useState<AccountMeta[]>([])
-  const [calcs, setCalcs] = useState<CalcEvent[]>([])
+  const [allCalcs, setCalcs] = useState<CalcEvent[]>([])
+  const [query,setQuery]=useState('')
+  const [period,setPeriod]=useState('all')
+  const [hideChecks,setHideChecks]=useState(true)
+  const calcs=useMemo(()=>allCalcs.filter(row=>{
+    const within=period==='all'||Date.parse(row.createdAt)>=Date.now()-Number(period)*86400000
+    const match=`${row.username} ${row.fabricName} ${row.qualityLabel}`.toLowerCase().includes(query.toLowerCase())
+    return within&&match&&(!hideChecks||!/^codex /i.test(row.username))
+  }),[allCalcs,period,query,hideChecks])
   const [source, setSource] = useState<'supabase' | 'local' | 'mixed'>('local')
   const [loading, setLoading] = useState(false)
 
@@ -167,6 +174,10 @@ export function OwnerVaultPage() {
       setAccounts(snap.accounts)
       setCalcs(snap.calcs)
       setSource(snap.source)
+      setError(null)
+    } catch(e) {
+      setError(e instanceof Error ? e.message : "Could not refresh the ledger.")
+      if(!isOwnerUnlocked()) { setUnlocked(false); setAccounts([]); setCalcs([]) }
     } finally {
       setLoading(false)
     }
@@ -174,18 +185,19 @@ export function OwnerVaultPage() {
 
   useEffect(() => {
     if (unlocked) void refresh()
+    if (!unlocked) return
+    const timer=window.setInterval(()=>{if(!isOwnerUnlocked()){lockOwner();setUnlocked(false);setAccounts([]);setCalcs([]);setError('Your session expired. Unlock the ledger again.')}},1000)
+    return ()=>window.clearInterval(timer)
   }, [unlocked])
 
-  function submitPin(e: FormEvent) {
+  async function submitPin(e: FormEvent) {
     e.preventDefault()
-    if (!checkOwnerPin(pin)) {
-      setError('That gate code is not right.')
-      return
-    }
-    unlockOwner()
-    setError(null)
-    setPin('')
-    setUnlocked(true)
+    setLoading(true)
+    try {
+      await checkOwnerPin(pin)
+      unlockOwner(); setError(null); setPin(''); setUnlocked(true)
+    } catch(e) { setError(e instanceof Error ? e.message : 'Could not unlock the ledger.') }
+    finally { setLoading(false) }
   }
 
   if (!unlocked) {
@@ -217,7 +229,7 @@ export function OwnerVaultPage() {
                   {error}
                 </p>
               ) : null}
-              <PrimaryButton type="submit">Unlock</PrimaryButton>
+              <PrimaryButton type="submit" disabled={loading}>{loading ? "Checking…" : "Unlock ledger"}</PrimaryButton>
             </form>
           </StudioSheet>
         </main>
@@ -241,7 +253,7 @@ export function OwnerVaultPage() {
               variant="plum"
               onClick={() => {
                 lockOwner()
-                setUnlocked(false)
+                setUnlocked(false); setAccounts([]); setCalcs([]); setError(null)
               }}
             >
               Lock
@@ -257,14 +269,19 @@ export function OwnerVaultPage() {
             Usage ledger
           </h1>
           <p className="mt-1.5 max-w-[46ch] text-sm leading-relaxed text-plum/75 sm:text-[0.95rem]">
-            Most-used quality sits at the top. Passwords never appear here. Idle accounts auto-delete
-            after {IDLE_TTL_DAYS} days without a sign-in or Calculate.
+            See the qualities your users calculate most, account activity, and every recorded cost sheet.
           </p>
         </div>
 
-        <MostUsedQuality quality={report.topQuality} />
-
-        <QualityRankList items={report.rankedQualities} />
+        <div className="ledger-filters">
+          <label>SEARCH RECORDS<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Quality, broker or user"/></label>
+          <label>PERIOD<select value={period} onChange={e=>setPeriod(e.target.value)}><option value="all">All recorded time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></label>
+          <label className="check-label"><input type="checkbox" checked={hideChecks} onChange={e=>setHideChecks(e.target.checked)}/>Hide Codex verification entries</label>
+          <button onClick={()=>exportCsv(calcs)} disabled={!calcs.length}>Export CSV ↗</button>
+        </div>
+        {error?<p className="ledger-message" role="alert">{error}</p>:null}
+        <p className="text-xs text-plum/65">Showing {calcs.length} of {allCalcs.length} recorded calculations. Rankings use the filtered records. Quality means reed × pick.</p>
+        <div className="ledger-top"><MostUsedQuality quality={report.topQuality} /><QualityRankList items={report.rankedQualities} /></div>
 
         <section className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">
           <StudioSheet>
@@ -283,13 +300,12 @@ export function OwnerVaultPage() {
           </StudioSheet>
         </section>
 
-        <RankList title="Most-used fabric names" items={report.topFabrics} />
+        <RankList title="Most-used broker / sheet names" items={report.topFabrics} />
 
         <StudioSheet>
           <SectionLabel>Accounts</SectionLabel>
           <p className="mt-1.5 text-xs leading-relaxed text-plum/60">
-            Last active updates on successful sign-in and Calculate. Unused accounts are removed after{' '}
-            {IDLE_TTL_DAYS} days.
+            Last active updates on successful sign-in and Calculate. Account passwords are never shown.
           </p>
           {accounts.length === 0 ? (
             <EmptyHint>No accounts recorded yet. Fresh studios start empty.</EmptyHint>
@@ -389,4 +405,11 @@ export function OwnerVaultPage() {
       <Footer className="px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-8" />
     </div>
   )
+}
+
+function exportCsv(rows:CalcEvent[]) {
+  const cell=(value:unknown)=>{let s=String(value??'');if(/^[=+@\-\t\r]/.test(s)) s="'"+s;return '"'+s.replaceAll('"','""')+'"'}
+  const data=[['Date','User','Broker / sheet','Mode','Reed','Pick','Warp width','Quality','Final INR'],...rows.map(r=>[r.createdAt,r.username,r.fabricName,r.mode,r.reed,r.pick,r.warpRs,r.qualityLabel,r.finalCost.toFixed(2)])]
+  const url=URL.createObjectURL(new Blob(['\ufeff'+data.map(row=>row.map(cell).join(',')).join('\r\n')],{type:'text/csv;charset=utf-8'}))
+  const a=document.createElement('a');a.href=url;a.download='fabriccost-usage.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)
 }

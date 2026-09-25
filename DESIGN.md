@@ -119,3 +119,9 @@ fabriccost STUDIO is a mill-office on warm paper: ivory canvas, plum ink, saffro
 - Don't introduce a second dark theme, teal/navy, or nested gray cards.
 - Don't print SwadCost anywhere a person can read it.
 - Don't use emoji as icons.
+
+## September 25 refinement
+
+Selected skills: website-style-library -> frontend-design. Preserve the recorded plum/paper direction; adapt Kailash-style editorial hierarchy without copying its energy-company content, teal identity or marketing-page rhythm. Users are mill operators making cost sheets. The signature is a woven plum workbench rail on desktop; it disappears on phones to preserve input space. Desktop uses paired warp/weft sections, mobile keeps the same field order in one column. Fraunces is retained for headings, IBM Plex Sans for input and data. Color tokens remain the existing plum, saffron, ink and warm paper. No external photos or generated assets. The existing geometric weaving graphic is retained.
+
+Layout alternatives considered: full marketing hero delays repeat entry; a wide workbench keeps daily calculations primary. Success: unchanged formula results, no horizontal overflow at 360px, legible inputs, complete keyboard flow, private owner records, and installable PWA/Android packaging.

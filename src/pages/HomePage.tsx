@@ -19,11 +19,11 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
   return (
     <Layout
       eyebrow="Costing studio"
-      title="New grey fabric costing"
-      subtitle="Name the dalal / broker, then choose single or multiple warp and weft yarns for powerloom grey fabric costing — mill-sheet math from Ichalkaranji."
+      title="Every costing starts here."
+      subtitle="Build a cost sheet for your next grey fabric quality. Choose your yarn construction to begin."
       onLogout={onLogout}
     >
-      <Stepper step={0} />
+      <Stepper step={0} /><div className="home-intro"><span>YOUR NEXT MILL SHEET</span><p>One quality. Every cost, accounted for.</p><div className="thread-lines" aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/></div></div>
       <label className="mb-4 block sm:mb-6">
         <span className={`mb-1.5 block ${studioLabelClass}`}>{DALAL_NAME_LABEL}</span>
         <input
@@ -38,7 +38,7 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
           </p>
         ) : null}
       </label>
-      <div className="space-y-2.5 sm:space-y-3">
+      <div className="home-choices space-y-2.5 sm:space-y-3">
         <SectionLabel>Costing mode</SectionLabel>
         <CardButton
           title="Single Warp"
