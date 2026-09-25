@@ -24,8 +24,8 @@ export default defineConfig({
         short_name: 'fabriccost STUDIO',
         description:
           'Fabric cost calculator for Indian powerloom grey fabric: warp, weft, sizing and job rate. Speak or type mill-sheet inputs.',
-        theme_color: '#3B1F4A',
-        background_color: '#F7F1E8',
+        theme_color: '#2436a8',
+        background_color: '#f2f5fc',
         display: 'standalone',
         orientation: 'portrait-primary',
         start_url: '/',

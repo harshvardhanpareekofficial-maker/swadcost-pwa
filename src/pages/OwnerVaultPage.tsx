@@ -262,8 +262,8 @@ export function OwnerVaultPage() {
         }
       />
 
-      <main className="mx-auto w-full min-w-0 max-w-5xl flex-1 space-y-4 px-4 py-4 sm:space-y-6 sm:px-8 sm:py-8">
-        <div>
+      <main className="owner-workspace mx-auto w-full min-w-0 flex-1 space-y-4 px-4 py-4 sm:space-y-6 sm:px-8 sm:py-8">
+        <div className="ledger-heading">
           <Eyebrow>Owner vault · {sourceLabel}</Eyebrow>
           <h1 className="font-display mt-1.5 text-[1.65rem] font-semibold tracking-[-0.03em] text-ink sm:mt-2 sm:text-[1.85rem]">
             Usage ledger
@@ -272,16 +272,6 @@ export function OwnerVaultPage() {
             See the qualities your users calculate most, account activity, and every recorded cost sheet.
           </p>
         </div>
-
-        <div className="ledger-filters">
-          <label>SEARCH RECORDS<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Quality, broker or user"/></label>
-          <label>PERIOD<select value={period} onChange={e=>setPeriod(e.target.value)}><option value="all">All recorded time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></label>
-          <label className="check-label"><input type="checkbox" checked={hideChecks} onChange={e=>setHideChecks(e.target.checked)}/>Hide Codex verification entries</label>
-          <button onClick={()=>exportCsv(calcs)} disabled={!calcs.length}>Export CSV ↗</button>
-        </div>
-        {error?<p className="ledger-message" role="alert">{error}</p>:null}
-        <p className="text-xs text-plum/65">Showing {calcs.length} of {allCalcs.length} recorded calculations. Rankings use the filtered records. Quality means reed × pick.</p>
-        <div className="ledger-top"><MostUsedQuality quality={report.topQuality} /><QualityRankList items={report.rankedQualities} /></div>
 
         <section className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">
           <StudioSheet>
@@ -299,6 +289,18 @@ export function OwnerVaultPage() {
             </p>
           </StudioSheet>
         </section>
+
+        <div className="ledger-filters">
+          <label>SEARCH RECORDS<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Quality, broker or user"/></label>
+          <label>PERIOD<select value={period} onChange={e=>setPeriod(e.target.value)}><option value="all">All recorded time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></label>
+          <label className="check-label"><input type="checkbox" checked={hideChecks} onChange={e=>setHideChecks(e.target.checked)}/>Hide Codex verification entries</label>
+          <button onClick={()=>exportCsv(calcs)} disabled={!calcs.length}>Export CSV ↗</button>
+        </div>
+        {error?<p className="ledger-message" role="alert">{error}</p>:null}
+        <p className="text-xs text-plum/65">Showing {calcs.length} of {allCalcs.length} recorded calculations. Rankings use the filtered records. Quality means reed × pick.</p>
+        <div className="ledger-top"><MostUsedQuality quality={report.topQuality} /><QualityRankList items={report.rankedQualities} /></div>
+
+
 
         <RankList title="Most-used broker / sheet names" items={report.topFabrics} />
 

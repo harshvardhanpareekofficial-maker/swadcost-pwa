@@ -1,7 +1,7 @@
 import { Layout } from '../components/Layout'
 import { CardButton } from '../components/CardButton'
 import { MakerNote } from '../components/Footer'
-import { Stepper } from '../components/Stepper'
+import { LoomVisual } from '../components/LoomVisual'
 import { IconWarp, IconWeave } from '../components/Icons'
 import { SectionLabel } from '../components/SectionLabel'
 import { studioFieldClass, studioLabelClass } from '../components/studio'
@@ -19,11 +19,12 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
   return (
     <Layout
       eyebrow="Costing studio"
-      title="Every costing starts here."
-      subtitle="Build a cost sheet for your next grey fabric quality. Choose your yarn construction to begin."
+      title="What are we weaving today?"
+      subtitle="A new quality starts with a clear cost. Choose your construction and build your next mill sheet."
       onLogout={onLogout}
     >
-      <Stepper step={0} /><div className="home-intro"><span>YOUR NEXT MILL SHEET</span><p>One quality. Every cost, accounted for.</p><div className="thread-lines" aria-hidden="true"><i/><i/><i/><i/><i/><i/><i/></div></div>
+      <div className="construction-banner"><div><span>FROM YOUR LOOM TO YOUR LEDGER</span><h2>Know your fabric.<br/><em>Own your numbers.</em></h2><p>Yarn, sizing and making. One complete cost sheet.</p></div><LoomVisual compact/></div>
+      <div className="job-setup">
       <label className="mb-4 block sm:mb-6">
         <span className={`mb-1.5 block ${studioLabelClass}`}>{DALAL_NAME_LABEL}</span>
         <input
@@ -53,7 +54,7 @@ export function HomePage({ fabricName, onFabricName, onChooseMode, onLogout }: P
           onClick={() => onChooseMode('multi')}
         />
       </div>
-      <MakerNote className="mt-8" />
+      </div><MakerNote className="mt-8" />
     </Layout>
   )
 }
