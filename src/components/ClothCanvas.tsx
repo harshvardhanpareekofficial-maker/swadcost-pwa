@@ -36,8 +36,12 @@ export default function ClothCanvas({ color, paused, rotation, onReady }: Props)
       ctx.fillRect(x + 1, y + 1, over ? 6 : 7, over ? 7 : 6)
       ctx.fillStyle = '#ffffff30'; ctx.fillRect(x + 2, y + 2, over ? 1 : 4, over ? 4 : 1)
     }
+    // Overlapping dyed warp and weft bands form a woven gingham check.
+    ctx.fillStyle = 'rgba(24, 65, 54, .36)'
+    ctx.fillRect(0, 0, 64, 128)
+    ctx.fillRect(0, 0, 128, 64)
     const texture = new THREE.CanvasTexture(textureCanvas)
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(12, 9)
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(6, 4.5)
     texture.colorSpace = THREE.SRGBColorSpace
     texture.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy())
     const material = new THREE.MeshStandardMaterial({ color: inputs.current.color, map: texture, bumpMap: texture, bumpScale: .025, roughness: .9, side: THREE.DoubleSide })
@@ -64,7 +68,7 @@ export default function ClothCanvas({ color, paused, rotation, onReady }: Props)
       previous = state; dirty = false
       const delta = Math.min((stamp - last) / 1000, .05); last = stamp
       if (!inputs.current.paused && !reduced.matches && downX === null) time += delta
-      cloth.rotation.set(-.1 + Math.sin(time * .3) * .055, -.38 + Math.sin(time * .25) * .16 + inputs.current.rotation + dragX, -.24)
+      cloth.rotation.set(-.1 + Math.sin(time * .6) * .055, -.38 + Math.sin(time * .5) * .16 + inputs.current.rotation + dragX, -.24)
       cloth.position.y = Math.sin(time * .35) * .055
       material.color.set(inputs.current.color)
       renderer.render(scene, camera)
