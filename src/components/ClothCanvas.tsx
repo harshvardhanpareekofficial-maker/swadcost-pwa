@@ -68,7 +68,7 @@ export default function ClothCanvas({ color, paused, rotation, onReady }: Props)
       previous = state; dirty = false
       const delta = Math.min((stamp - last) / 1000, .05); last = stamp
       if (!inputs.current.paused && !reduced.matches && downX === null) time += delta
-      cloth.rotation.set(-.1 + Math.sin(time * .6) * .055, -.38 + Math.sin(time * .5) * .16 + inputs.current.rotation + dragX, -.24)
+      cloth.rotation.set(-.1 + Math.sin(time * 1.2) * .055, -.38 + Math.sin(time) * .16 + inputs.current.rotation + dragX, -.24)
       cloth.position.y = Math.sin(time * .35) * .055
       material.color.set(inputs.current.color)
       renderer.render(scene, camera)
