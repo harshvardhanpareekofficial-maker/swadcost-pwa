@@ -111,12 +111,12 @@ export function LoginPage({ onSuccess }: Props) {
     if (next === 'signup' && location.pathname !== CREATE_ACCOUNT_PATH) {
       navigate(CREATE_ACCOUNT_PATH)
     } else if (next === 'signin' && location.pathname === CREATE_ACCOUNT_PATH) {
-      navigate('/')
+      navigate('/calculator')
     }
   }
 
   function enterStudio() {
-    if (location.pathname !== '/') navigate('/')
+    if (location.pathname !== '/calculator') navigate('/calculator')
     onSuccess()
   }
 
@@ -143,7 +143,7 @@ export function LoginPage({ onSuccess }: Props) {
     setPendingCloud(null)
     setReadyName(null)
     setMode('signin')
-    if (location.pathname === CREATE_ACCOUNT_PATH) navigate('/')
+    if (location.pathname === CREATE_ACCOUNT_PATH) navigate('/calculator')
   }
 
   async function completeOk(name: string, showStoreNote = false) {

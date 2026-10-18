@@ -14,6 +14,8 @@ import { fileURLToPath } from 'node:url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 
 export const CREATE_ACCOUNT_PATH = '/create-account'
+const toolPages = JSON.parse(readFileSync(join(root, 'src/lib/tool-pages.json'), 'utf8'))
+const calculatorSchema = JSON.parse(readFileSync(join(root, 'src/lib/calculator-schema.json'), 'utf8'))
 
 export function loadGuideCatalog(catalogSource) {
   const catalog =
@@ -29,7 +31,7 @@ export function guidePaths(catalog = loadGuideCatalog()) {
 export function clientShellPaths(ownerSource, catalog = loadGuideCatalog()) {
   const match = ownerSource.match(/export const OWNER_PATH = '(\/[^']+)'/)
   if (!match) throw new Error('OWNER_PATH export not found in src/lib/owner.ts')
-  return [...guidePaths(catalog), CREATE_ACCOUNT_PATH, match[1]]
+  return [...guidePaths(catalog), '/calculator', '/cctv-counter', CREATE_ACCOUNT_PATH, match[1]]
 }
 
 function escapeAttr(value) {
@@ -70,7 +72,7 @@ function pageStructuredData(guide, origin, lastmod) {
         name: guide.h1,
         description: guide.description,
         inLanguage: 'en-IN',
-        isPartOf: { '@id': `${origin}/#app` },
+        isPartOf: { '@id': `${origin}/calculator#app` },
         author: { '@id': `${origin}/#person` },
         creator: { '@id': `${origin}/#person` },
         dateModified: lastmod.slice(0, 10),
@@ -122,7 +124,7 @@ function noscriptArticle(guide, origin) {
         <h1>${escapeText(guide.h1)}</h1>
         <p>${escapeText(guide.lead)}</p>
         ${sections}
-        <p>Open the fabric cost calculator at ${origin}/ — Made by Harshvardhan Pareek.</p>
+        <p>Open the fabric cost calculator at ${origin}/calculator — Made by Harshvardhan Pareek.</p>
       </article>
     </noscript>`
 }
@@ -174,11 +176,38 @@ export function writeSpaShellPages({
     const dest = join(distDir, pathname.replace(/^\//, ''), 'index.html')
     mkdirSync(dirname(dest), { recursive: true })
     const guide = guidesByPath.get(pathname)
-    const html = guide ? applyPublicDocument(raw, guide, catalog) : pathname.startsWith('/owner-vault-') ? raw.replace(/<title>[^<]*<\/title>/, '<title>Owner ledger</title>').replace(/<meta name="robots"[^>]*>/, '<meta name="robots" content="noindex, nofollow, noarchive" />') : raw
+    const html = guide ? applyPublicDocument(applyToolDocument(raw, '/calculator', catalog.siteOrigin), guide, catalog) : pathname.startsWith('/owner-vault-') ? raw.replace(/<title>[^<]*<\/title>/, '<title>Owner ledger</title>').replace(/<meta name="robots"[^>]*>/, '<meta name="robots" content="noindex, nofollow, noarchive" />') : applyToolDocument(raw, pathname, catalog.siteOrigin)
     writeFileSync(dest, html)
     written.push(dest)
   }
+  writeFileSync(indexHtml, applyToolDocument(raw, '/', catalog.siteOrigin))
   return { indexHtml, written, bytes: Buffer.byteLength(raw) }
+}
+
+export function applyToolDocument(html, pathname, origin = loadGuideCatalog().siteOrigin) {
+  if (!html.includes('</head>')) return html
+  const url = `${origin}${pathname}`
+  let out = replaceHref(html, 'canonical', '', url)
+  for (const lang of ['en-IN', 'hi-IN', 'x-default']) out = replaceHref(out, 'alternate', lang, url)
+  out = upsertMeta(out, 'property', 'og:url', url)
+  if (pathname === '/calculator') {
+    out = out.replace(/<script type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/g, '')
+    return out.replace('</head>', `<script type="application/ld+json" id="calculator-jsonld">${JSON.stringify(calculatorSchema, null, 2)}</script>\n</head>`)
+  }
+  const page = toolPages[pathname]
+  if (!page) return out
+  out = out.replace(/<title>[^<]*<\/title>/, `<title>${escapeText(page.title)}</title>`)
+  out = upsertMeta(out, 'name', 'description', page.description)
+  out = upsertMeta(out, 'name', 'keywords', 'Harshvardhan Pareek, Gate Desk, CCTV counter, fabric cost calculator')
+  for (const [attr, prefix] of [['property', 'og'], ['name', 'twitter']]) {
+    out = upsertMeta(out, attr, `${prefix}:title`, page.title)
+    out = upsertMeta(out, attr, `${prefix}:description`, page.description)
+  }
+  out = out.replace(/<script type="application\/ld\+json"[^>]*>[\s\S]*?<\/script>/g, '')
+  const data = { '@context': 'https://schema.org', '@type': 'WebPage', url, name: page.title, description: page.description }
+  out = out.replace('</head>', `<script type="application/ld+json" id="page-jsonld">${JSON.stringify(data)}</script>\n</head>`)
+  out = out.replace(/<noscript>[\s\S]*?<\/noscript>/, `<noscript><h1>${escapeText(page.heading)}</h1><p>${escapeText(page.description)}</p><p><a href="/cctv-counter">CCTV Counter</a> · <a href="/calculator">Fabric cost calculator</a></p><p>Enable JavaScript to use these tools and see the latest downloads.</p></noscript>`)
+  return out
 }
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]

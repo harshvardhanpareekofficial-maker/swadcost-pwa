@@ -73,7 +73,7 @@ export function pageStructuredData(guide: GuidePage): Record<string, unknown> {
         name: guide.h1,
         description: guide.description,
         inLanguage: 'en-IN',
-        isPartOf: { '@id': `${SITE_ORIGIN}/#app` },
+        isPartOf: { '@id': `${SITE_ORIGIN}/calculator#app` },
         author: { '@id': `${SITE_ORIGIN}/#person` },
         creator: { '@id': `${SITE_ORIGIN}/#person` },
         dateModified: GUIDES_LASTMOD.slice(0, 10),

@@ -1,5 +1,7 @@
 import { OWNER_PATH } from './owner'
 import { SITE_ORIGIN, guideByPath, pageStructuredData } from './guides'
+import toolPages from './tool-pages.json'
+import calculatorSchema from './calculator-schema.json'
 
 export const PUBLIC_ROBOTS = 'index, follow'
 export const VAULT_ROBOTS = 'noindex, nofollow'
@@ -16,7 +18,7 @@ export const HOME_SEO = {
     'Harshvardhan Pareek’s fabric cost calculator for Ichalkaranji powerloom mills — grey fabric costing: warp, weft, sizing and job rate. Speak or type. Installable PWA.',
   twitterDescription:
     'Harshvardhan Pareek — fabric cost calculator for Ichalkaranji. Powerloom grey fabric costing: warp, weft, sizing and job rate.',
-  path: '/',
+  path: '/calculator',
 } as const
 
 /** Visible + JSON-LD FAQs. Keep answers honest — no ranking guarantees. */
@@ -88,13 +90,14 @@ function applyHomeDocument(): void {
   document.title = HOME_SEO.title
   setMeta('name', 'description', HOME_SEO.description)
   setMeta('name', 'keywords', HOME_SEO.keywords)
-  setMeta('property', 'og:url', `${SITE_ORIGIN}/`)
+  setMeta('property', 'og:url', `${SITE_ORIGIN}/calculator`)
   setMeta('property', 'og:title', HOME_SEO.ogTitle)
   setMeta('property', 'og:description', HOME_SEO.ogDescription)
   setMeta('name', 'twitter:title', HOME_SEO.ogTitle)
   setMeta('name', 'twitter:description', HOME_SEO.twitterDescription)
-  setCanonicalAndAlternates(`${SITE_ORIGIN}/`)
-  upsertPageJsonLd(null)
+  setCanonicalAndAlternates(`${SITE_ORIGIN}/calculator`)
+  document.querySelectorAll('script[type="application/ld+json"]').forEach(el => el.remove())
+  upsertPageJsonLd(calculatorSchema)
 }
 
 /** Apply indexing rules as soon as the route is known (before React paint). */
@@ -106,6 +109,24 @@ export function applyDocumentIndexing(pathname: string): void {
     return
   }
   robots?.setAttribute('content', PUBLIC_ROBOTS)
+  const toolPage = toolPages[pathname as keyof typeof toolPages]
+  if (toolPage) {
+    const url = `${SITE_ORIGIN}${pathname}`
+    document.title = toolPage.title
+    setMeta('name', 'description', toolPage.description)
+    setMeta('name', 'keywords', 'Harshvardhan Pareek, Gate Desk, CCTV counter, fabric cost calculator')
+    setMeta('property', 'og:url', url)
+    setMeta('property', 'og:title', toolPage.title)
+    setMeta('property', 'og:description', toolPage.description)
+    setMeta('name', 'twitter:title', toolPage.title)
+    setMeta('name', 'twitter:description', toolPage.description)
+    setCanonicalAndAlternates(url)
+    // The source shell is the legacy calculator template. Do not describe
+    // that application as the current page after moving to the tool hub.
+    document.querySelectorAll('script[type="application/ld+json"]').forEach(el => el.remove())
+    upsertPageJsonLd({ '@context': 'https://schema.org', '@type': 'WebPage', url, name: toolPage.title, description: toolPage.description })
+    return
+  }
   const guide = guideByPath(pathname)
   if (!guide) {
     applyHomeDocument()

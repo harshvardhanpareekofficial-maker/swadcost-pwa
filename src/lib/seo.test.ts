@@ -124,7 +124,7 @@ describe('on-page SEO', () => {
     for (const guide of GUIDE_PAGES) {
       expect(sitemap).toContain(`https://harshvardhanpareek.com${guide.path}`)
     }
-    expect((sitemap.match(/<url>/g) ?? []).length).toBe(1 + GUIDE_PAGES.length)
+    expect((sitemap.match(/<url>/g) ?? []).length).toBe(3 + GUIDE_PAGES.length)
 
     const render = readFileSync(join(root, 'render.yaml'), 'utf8')
     const vite = readFileSync(join(root, 'vite.config.ts'), 'utf8')

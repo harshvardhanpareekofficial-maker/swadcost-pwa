@@ -33,7 +33,7 @@ describe('mill guide catalog', () => {
     const page = readFileSync(join(root, 'src/pages/GuidePage.tsx'), 'utf8')
     expect(json).not.toMatch(/SwadCost|swadcost/)
     expect(page).not.toMatch(/SwadCost|swadcost/)
-    expect(page).toContain('to="/"')
+    expect(page).toContain('to="/calculator"')
     expect(page).toContain('Open the fabric cost calculator')
     expect(page).toContain('MakerNote')
 

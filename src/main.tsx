@@ -12,6 +12,8 @@ import { OWNER_PATH } from './lib/owner'
 import { applyDocumentIndexing } from './lib/seo'
 import { GuidePage } from './pages/GuidePage'
 import { OwnerVaultPage } from './pages/OwnerVaultPage'
+import { ToolsPage } from './pages/ToolsPage'
+import { CounterDownloadsPage } from './pages/CounterDownloadsPage'
 
 purgeIdleLocalNow()
 void purgeIdleOnLoad()
@@ -24,6 +26,8 @@ createRoot(document.getElementById('root')!).render(
     <BrowserRouter>
       <DocumentSeo />
       <Routes>
+        <Route path="/" element={<ToolsPage />} />
+        <Route path="/cctv-counter" element={<CounterDownloadsPage />} />
         <Route path={OWNER_PATH} element={<OwnerVaultPage />} />
         <Route path="/guides/:slug" element={<GuidePage />} />
         <Route path="/*" element={<App />} />

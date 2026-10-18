@@ -1,0 +1,204 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": [
+        "SoftwareApplication",
+        "WebApplication"
+      ],
+      "@id": "https://harshvardhanpareek.com/calculator#app",
+      "name": "fabriccost STUDIO",
+      "alternateName": "Fabric Cost Calculator",
+      "url": "https://harshvardhanpareek.com/calculator",
+      "applicationCategory": "BusinessApplication",
+      "applicationSubCategory": "Textile costing",
+      "operatingSystem": "Web",
+      "browserRequirements": "Requires JavaScript",
+      "inLanguage": "en-IN",
+      "description": "Fabric cost calculator for Ichalkaranji powerloom grey fabric costing: warp, weft, reed, pick, sizing and job rate. Created by Harshvardhan Pareek.",
+      "keywords": "fabric cost calculator, fabric cost calculator Ichalkaranji, powerloom grey fabric costing, textile costing, powerloom, warp weft, grey fabric, India, Ichalkaranji, Harshvardhan Pareek maker",
+      "dateModified": "2026-09-12",
+      "featureList": [
+        "Single and multiple warp/weft yarn costing",
+        "Speak or type mill-sheet inputs",
+        "Warp, weft, sizing and job-rate breakdown",
+        "Installable progressive web app"
+      ],
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "INR"
+      },
+      "author": {
+        "@id": "https://harshvardhanpareek.com/#person"
+      },
+      "creator": {
+        "@id": "https://harshvardhanpareek.com/#person"
+      },
+      "copyrightHolder": {
+        "@id": "https://harshvardhanpareek.com/#person"
+      },
+      "publisher": {
+        "@id": "https://harshvardhanpareek.com/#org"
+      },
+      "image": "https://harshvardhanpareek.com/icons/icon-512.png"
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://harshvardhanpareek.com/#org",
+      "name": "Harshvardhan Pareek",
+      "legalName": "Harshvardhan Pareek",
+      "alternateName": "Pareektech",
+      "url": "https://harshvardhanpareek.com/",
+      "sameAs": [
+        "https://github.com/harshvardhanpareekofficial-maker",
+        "https://harshvardhanpareek.com/"
+      ],
+      "logo": "https://harshvardhanpareek.com/icons/icon-512.png",
+      "brand": {
+        "@type": "Brand",
+        "name": "fabriccost STUDIO"
+      },
+      "founder": {
+        "@id": "https://harshvardhanpareek.com/#person"
+      },
+      "areaServed": [
+        "IN",
+        "Ichalkaranji"
+      ],
+      "description": "Maker studio of Harshvardhan Pareek, creator of fabriccost STUDIO for Indian powerloom textile costing."
+    },
+    {
+      "@type": "Person",
+      "@id": "https://harshvardhanpareek.com/#person",
+      "name": "Harshvardhan Pareek",
+      "alternateName": "harshvardhan pareek",
+      "url": "https://harshvardhanpareek.com/",
+      "jobTitle": "Maker of fabriccost STUDIO",
+      "description": "Harshvardhan Pareek is the maker of fabriccost STUDIO, a fabric cost calculator for Indian powerloom textile costing, based in Ichalkaranji, India.",
+      "sameAs": [
+        "https://github.com/harshvardhanpareekofficial-maker",
+        "https://harshvardhanpareek.com/"
+      ],
+      "homeLocation": {
+        "@type": "Place",
+        "name": "Ichalkaranji, India",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Ichalkaranji",
+          "addressRegion": "Maharashtra",
+          "addressCountry": "IN"
+        }
+      },
+      "knowsAbout": [
+        "textile costing",
+        "powerloom",
+        "grey fabric",
+        "fabric cost calculator"
+      ],
+      "affiliation": {
+        "@id": "https://harshvardhanpareek.com/#org"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://harshvardhanpareek.com/calculator#webpage",
+      "url": "https://harshvardhanpareek.com/calculator",
+      "name": "fabriccost STUDIO — fabric cost calculator for Ichalkaranji",
+      "description": "Powerloom grey fabric costing by Harshvardhan Pareek. Warp, weft, reed, pick, sizing and job rate.",
+      "inLanguage": [
+        "en-IN",
+        "hi-IN"
+      ],
+      "isPartOf": {
+        "@id": "https://harshvardhanpareek.com/calculator#app"
+      },
+      "about": {
+        "@id": "https://harshvardhanpareek.com/#person"
+      },
+      "primaryImageOfPage": "https://harshvardhanpareek.com/icons/icon-512.png",
+      "dateModified": "2026-09-12"
+    },
+    {
+      "@type": "HowTo",
+      "@id": "https://harshvardhanpareek.com/calculator#howto",
+      "name": "How to cost powerloom grey fabric",
+      "description": "Work out warp, weft, sizing and dalal cost from mill-sheet values in fabriccost STUDIO.",
+      "inLanguage": "en-IN",
+      "step": [
+        {
+          "@type": "HowToStep",
+          "position": 1,
+          "name": "Sign in and name the dalal",
+          "text": "Open fabriccost STUDIO, sign in, and name the dalal or broker for the grey fabric job."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 2,
+          "name": "Choose single or multiple yarns",
+          "text": "Pick Single Warp for one warp and one weft, or Multiple Warp / Weft when yarns split by percentage."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 3,
+          "name": "Enter reed, pick, counts and rates",
+          "text": "Speak or type reed, reed space, L2L, warp count, pick, weft count, wastage, yarn rates, sizing rate and pick / dalal rate."
+        },
+        {
+          "@type": "HowToStep",
+          "position": 4,
+          "name": "Read the rupee breakdown",
+          "text": "Calculate to see warp weight (1825), weft weight (1693.33), sizing, dalal line and total. Edit any field and recalculate."
+        }
+      ]
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://harshvardhanpareek.com/calculator#faq",
+      "url": "https://harshvardhanpareek.com/calculator#about",
+      "inLanguage": "en-IN",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is fabriccost STUDIO?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A free fabric cost calculator for Indian powerloom grey fabric costing. It works out warp, weft, reed, pick, sizing and job rate from mill-sheet values."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is this a fabric cost calculator for Ichalkaranji mills?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Harshvardhan Pareek built fabriccost STUDIO in Ichalkaranji for local powerloom mills. The same grey-fabric formulas are used across India."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How does powerloom grey fabric costing work here?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Sign in, name the dalal or broker, choose Single Warp or Multiple Warp / Weft, then speak or type reed, pick, counts and rates. Warp weight uses 1825; weft weight uses 1693.33."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Who is Harshvardhan Pareek, the maker?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Harshvardhan Pareek is the maker of fabriccost STUDIO (Pareektech), based in Ichalkaranji, Maharashtra."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do spoken field prompts need a paid API key?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Speak mode uses free Chrome Web Speech for continuous dictation. Browser speechSynthesis voices (Google, Microsoft or Apple) are optional and stay quiet while you talk. An ElevenLabs key is optional and not required."
+          }
+        }
+      ]
+    }
+  ]
+}

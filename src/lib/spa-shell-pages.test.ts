@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import {
   CREATE_ACCOUNT_PATH,
   applyPublicDocument,
+  applyToolDocument,
   clientShellPaths,
   guidePaths,
   writeSpaShellPages,
@@ -26,6 +27,8 @@ describe('spa shell pages', () => {
     expect(CREATE_ACCOUNT_PATH).toBe(AUTH_CREATE_PATH)
     expect(clientShellPaths(`export const OWNER_PATH = '${OWNER_PATH}'`)).toEqual([
       ...GUIDE_PAGES.map((guide) => guide.path),
+      '/calculator',
+      '/cctv-counter',
       CREATE_ACCOUNT_PATH,
       OWNER_PATH,
     ])
@@ -49,7 +52,22 @@ describe('spa shell pages', () => {
         '<html>shell</html>',
       )
     }
-    expect(result.written).toHaveLength(GUIDE_PAGES.length + 2)
+    expect(result.written).toHaveLength(GUIDE_PAGES.length + 4)
+  })
+
+  it('separates tool hub, download page and calculator crawler documents', () => {
+    const source = readFileSync(join(root, 'index.html'), 'utf8')
+    const hub = applyToolDocument(source, '/')
+    const counter = applyToolDocument(source, '/cctv-counter')
+    const calculator = applyToolDocument(source, '/calculator')
+    expect(hub).toContain('Two tools. Your factory.')
+    expect(hub).not.toContain('"@type": "FAQPage"')
+    expect(counter).toContain('counting accuracy is not yet accepted')
+    expect(counter).toContain('rel="canonical" href="https://harshvardhanpareek.com/cctv-counter"')
+    expect(calculator).toContain('rel="canonical" href="https://harshvardhanpareek.com/calculator"')
+    expect(calculator).toContain('"@type": "FAQPage"')
+    expect(calculator).toContain('https://harshvardhanpareek.com/calculator#app')
+    expect(calculator).not.toContain('https://harshvardhanpareek.com/#app')
   })
 
   it('rewrites title, canonical, HowTo JSON-LD and noscript on guide shells', () => {

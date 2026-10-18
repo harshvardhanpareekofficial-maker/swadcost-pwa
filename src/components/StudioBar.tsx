@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { InstallButton } from './InstallButton'
 import { pendingCount } from '../lib/pendingSync'
 import { IconArrow } from './Icons'
@@ -31,7 +32,7 @@ export function StudioBar({ landing = false, trailing, onBack, backLabel = 'Back
           </span>
         </span>
       </p>
-      {landing ? <nav className="landing-nav" aria-label="Main navigation"><a href="#method">The process</a><a href="#studio">Open studio <IconArrow/></a></nav> : null}
+      {landing ? <nav className="landing-nav" aria-label="Main navigation"><Link to="/">All tools</Link><a href="#studio">Open studio <IconArrow/></a></nav> : null}
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
         {onBack ? (
           <StudioBarAction onClick={onBack}>{backLabel}</StudioBarAction>
