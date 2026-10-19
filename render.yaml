@@ -33,6 +33,10 @@ services:
         source: /*
         destination: /index.html
     headers:
+      # Mirror this rule in Settings > Headers for dashboard-managed sites.
+      - path: /downloads/*
+        name: Content-Disposition
+        value: attachment
       - path: /*
         name: X-Frame-Options
         value: DENY

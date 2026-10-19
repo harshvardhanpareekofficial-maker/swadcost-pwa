@@ -6,8 +6,11 @@ type Release = { title: string; platform: string; status: string; description: s
 
 function PlatformDownload({ release }: { release: Release }) {
   const available = !!release.url && release.url.startsWith('https://') && /^[a-f0-9]{64}$/.test(release.sha256 ?? '')
+  const file = available ? new URL(release.url!) : null
+  // Keep our hosted files same-origin on both the custom domain and previews.
+  const href = file?.origin === 'https://harshvardhanpareek.com' ? file.pathname : release.url!
   return <article className="platform-download"><div className="platform-heading"><h2>{release.title}</h2><span>{release.platform}</span></div><p className="release-status">{release.status}</p><p className="release-description">{release.description}</p>
-    {available ? <a className="download-action" href={release.url!}>{release.button} <span aria-hidden>↓</span></a> : <button className="download-action" type="button" disabled>Download not available yet</button>}
+    {available ? <a className="download-action" href={href} download={file!.pathname.split('/').pop()}>{release.button} <span aria-hidden>↓</span></a> : <button className="download-action" type="button" disabled>Download not available yet</button>}
     <p className="download-detail">{available ? `${release.size} · Setup preview` : 'A download will appear here when the package is prepared.'}</p>
     {available && <details className="download-checksum"><summary>Verify your download</summary><p>SHA-256</p><code>{release.sha256}</code></details>}
   </article>

@@ -52,8 +52,8 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,glb}'],
         navigateFallback: '/index.html',
-        // Keep IndexNow / robots / sitemap as real files, not the SPA shell.
-        navigateFallbackDenylist: [/\.txt$/, /\.xml$/, /\/sitemap\.xml$/, /^\/owner-vault-/],
+        // File downloads must reach the server, never the cached calculator shell.
+        navigateFallbackDenylist: [/^\/downloads\//, /\.txt$/, /\.xml$/, /\/sitemap\.xml$/, /^\/owner-vault-/],
       },
     }),
   ],
