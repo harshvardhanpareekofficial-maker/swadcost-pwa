@@ -41,3 +41,7 @@ android/app/src/main/assets/capacitor.plugins.json
 
 # Local review evidence may include private ledger data
 .impeccable/review/
+
+# Local bounded UI check output
+qa/test-results.json
+qa/screenshots/

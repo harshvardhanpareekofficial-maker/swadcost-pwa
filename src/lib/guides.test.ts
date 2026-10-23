@@ -34,8 +34,8 @@ describe('mill guide catalog', () => {
     expect(json).not.toMatch(/SwadCost|swadcost/)
     expect(page).not.toMatch(/SwadCost|swadcost/)
     expect(page).toContain('to="/calculator"')
-    expect(page).toContain('Open the fabric cost calculator')
-    expect(page).toContain('MakerNote')
+    expect(page).toContain('Open calculator')
+    expect(page).toContain('ToolFrame')
 
     for (const guide of GUIDE_PAGES) {
       expect(guide.title.length).toBeGreaterThan(40)

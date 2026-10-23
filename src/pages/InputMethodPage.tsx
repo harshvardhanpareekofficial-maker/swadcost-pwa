@@ -17,7 +17,7 @@ export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack, onLog
   return (
     <Layout
       eyebrow="Input"
-      title="How will you enter values?"
+      title="Enter your values."
       subtitle={`${fabricName || 'Untitled'} · ${modeLabel}`}
       onBack={onBack}
       onLogout={onLogout}
@@ -27,13 +27,13 @@ export function InputMethodPage({ fabricName, modeLabel, onChoose, onBack, onLog
         <SectionLabel>Speak or type</SectionLabel>
         <CardButton
           title="Speak"
-          description="Chrome Web Speech. Keep talking — name metrics or say numbers in mill-sheet order. Fields fill as they are recognized."
+          description="Name a field, then its value. Requires a compatible browser and microphone."
           icon={<IconMic />}
           onClick={() => onChoose('speak')}
         />
         <CardButton
           title="Type"
-          description="Tap fields and enter numbers on the keypad. Microphone stays off."
+          description="Enter numbers with the keypad."
           icon={<IconKeys />}
           onClick={() => onChoose('type')}
         />

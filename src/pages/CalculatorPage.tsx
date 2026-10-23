@@ -3,11 +3,11 @@ import { Layout } from '../components/Layout'
 import { Stepper } from '../components/Stepper'
 import { NumberField } from '../components/NumberField'
 import { PrimaryButton } from '../components/PrimaryButton'
-import { SectionLabel } from '../components/SectionLabel'
-import { StudioSheet } from '../components/StudioSheet'
+import { PageControls } from '../components/PageControls'
+
 import { useSpeechFill, type SpeechFillEvent } from '../hooks/useSpeechFill'
 import { SAMPLE_MULTI, SAMPLE_SINGLE, type MultiInputs, type SingleInputs } from '../lib/costing'
-import { DALAL_SECTION_LABEL, PICK_RATE_HINT, PICK_RATE_LABEL, PICK_RATE_UNIT } from '../lib/labels'
+import { PICK_RATE_HINT, PICK_RATE_LABEL, PICK_RATE_UNIT } from '../lib/labels'
 import { rangeHint } from '../lib/metricRanges'
 import { cancelSpeak } from '../lib/speakPrompt'
 import {
@@ -71,6 +71,8 @@ export function CalculatorPage({
   onLogout,
 }: Props) {
   const [focusIdx, setFocusIdx] = useState(0)
+  const [page, setPage] = useState(0)
+  const pageSize = 4
   const [rangeNote, setRangeNote] = useState<string | null>(null)
   const [voiceFills, setVoiceFills] = useState<SpeechFill[]>([])
   const fieldRefs = useRef<(HTMLInputElement | null)[]>([])
@@ -180,7 +182,6 @@ export function CalculatorPage({
   )
 
   const speech = useSpeechFill(inputMethod === 'speak', onSpeech)
-  const activeKey = fields[focusIdx]?.key
   const voiceFilledKeys = useMemo(() => new Set(voiceFills.map((f) => f.key)), [voiceFills])
 
   const startMic = useCallback(() => {
@@ -198,8 +199,8 @@ export function CalculatorPage({
   }, [speech])
 
   useEffect(() => {
-    if (focusIdx > 0) fieldRefs.current[focusIdx]?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'center' })
-  }, [focusIdx])
+    if (inputMethod === 'speak' && speech.listening) setPage(Math.floor(focusIdx / pageSize))
+  }, [focusIdx, inputMethod, speech.listening])
 
   useEffect(() => () => { cancelSpeak() }, [])
 
@@ -212,7 +213,7 @@ export function CalculatorPage({
         ref={(el) => { fieldRefs.current[i] = el }}
         label={f.label}
         unit={f.unit}
-        hint={f.hint}
+        hint={f.key === "pickRate" ? f.hint : undefined}
         value={f.get()}
         onChange={(v) => {
           f.set(v)
@@ -225,15 +226,6 @@ export function CalculatorPage({
     )
   }
 
-  const pair = (a: number, b: number) => (
-    <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
-      {renderField(a)}
-      {renderField(b)}
-    </div>
-  )
-
-  const millBlank = fields.every((f) => f.get() === '' || f.get() === 0)
-
   return (
     <Layout
       eyebrow="Mill sheet"
@@ -244,7 +236,7 @@ export function CalculatorPage({
       stickyFooter={
         <div className="studio-sticky z-20 shrink-0 px-[max(1rem,env(safe-area-inset-left))] py-2.5 pr-[max(1rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-3">
           <div className="mx-auto max-w-lg sm:max-w-xl">
-            <PrimaryButton onClick={onCalculate}>Calculate</PrimaryButton>
+            <PrimaryButton onClick={page === Math.ceil(fields.length/pageSize)-1 ? onCalculate : () => setPage(p=>p+1)}>{page === Math.ceil(fields.length/pageSize)-1 ? "Calculate" : "Continue →"}</PrimaryButton>
             <button
               type="button"
               onClick={() => {
@@ -266,127 +258,15 @@ export function CalculatorPage({
     >
       <Stepper step={2} />
 
-      {millBlank ? (
-        <p className="mb-3 rounded-[14px] border border-dashed border-plum/15 bg-paper/40 px-3.5 py-3 text-sm leading-relaxed text-plum/70">
-          The mill sheet starts blank. Enter reed, counts and rates — or load a sample under Calculate.
-        </p>
-      ) : null}
-
-      {inputMethod === 'speak' ? (
-        <StudioSheet className="mb-3 sm:mb-4">
-          <p className="text-sm text-ink">
-            {speech.listening ? 'Listening — keep talking.' : 'Speak a stream of mill values.'}
-            {activeKey ? (
-              <span className="text-plum/60">
-                {' '}
-                Next: <strong className="text-ink">{fields[focusIdx]?.label}</strong> · {rangeHint(activeKey)}
-              </span>
-            ) : null}
-          </p>
-          <p className="mt-1 text-xs text-plum/70">
-            Chrome Web Speech on HTTPS (Android or desktop). Name the metric or say numbers in mill-sheet
-            order — reed, reedspace, L2L, counts, rates. Short prefixes wait until the number settles.
-            A repeated figure fills the next field only if you name that metric. Prompts stay quiet so
-            they do not talk over you.
-          </p>
-          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-            {speech.listening ? (
-              <PrimaryButton variant="secondary" onClick={stopMic}>
-                Stop mic
-              </PrimaryButton>
-            ) : (
-              <PrimaryButton onClick={startMic} disabled={!speech.supported}>
-                {speech.supported ? 'Start mic' : 'Mic unavailable'}
-              </PrimaryButton>
-            )}
-          </div>
-          <div className="mt-3 rounded-[12px] border border-plum/10 bg-paper/50 px-3 py-2.5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-plum/50">Live transcript</p>
-            <p className="mt-1 min-h-6 text-sm leading-relaxed text-ink">
-              {speech.transcript ? <span>{speech.transcript}</span> : null}
-              {speech.interim ? (
-                <span className="text-plum/45">{speech.transcript ? ' ' : ''}{speech.interim}</span>
-              ) : null}
-              {!speech.transcript && !speech.interim
-                ? speech.listening
-                  ? 'Listening…'
-                  : 'Tap Start mic, then keep speaking.'
-                : null}
-            </p>
-          </div>
-          {voiceFills.length ? (
-            <p className="mt-2 text-xs text-plum/80">
-              Filled:{' '}
-              {voiceFills.map((f, i) => (
-                <span key={`${f.key}-${i}`}>
-                  {i ? ' · ' : null}
-                  <strong>{f.label}</strong> {f.value}
-                </span>
-              ))}
-            </p>
-          ) : null}
-          {!speech.supported ? (
-            <p className="mt-2 text-xs text-plum/70">
-              This browser has no speech engine. Use Type, or Chrome on Android / desktop over HTTPS.
-            </p>
-          ) : null}
-          {speech.error ? <p className="mt-2 text-xs text-rose">{speech.error}</p> : null}
-          {speech.lastHeard && speech.ignored ? (
-            <p className="mt-2 text-xs text-plum/70">Heard “{speech.lastHeard}” — not confident enough, ignored.</p>
-          ) : null}
-          {rangeNote ? <p className="mt-2 text-xs text-rose">{rangeNote}</p> : null}
-        </StudioSheet>
-      ) : null}
-
-      <div className="mill-fields grid grid-cols-1 gap-2.5 pb-2 sm:gap-3 sm:pb-4">
-        {mode === 'single' ? (
-          <>
-            <section className="yarn-section warp-section"><SectionLabel>Warp</SectionLabel>
-            {pair(0, 1)}
-            {renderField(2)}
-            {pair(3, 4)}
-            {renderField(5)}
-            </section><section className="yarn-section weft-section"><SectionLabel>Weft</SectionLabel>
-            {pair(6, 7)}
-            {pair(8, 9)}
-            {renderField(10)}
-            </section><section className="yarn-section charges-section"><SectionLabel>{DALAL_SECTION_LABEL}</SectionLabel>
-            {pair(11, 12)}</section>
-          </>
-        ) : (
-          <>
-            <section className="yarn-section warp-section"><SectionLabel>Warp</SectionLabel>
-            {pair(0, 1)}
-            {renderField(2)}
-            {[0, 1, 2].map((yarn) => {
-              const base = 3 + yarn * 4
-              return (
-                <div key={`warp-yarn-${yarn}`} className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
-                  {renderField(base)}
-                  {renderField(base + 1)}
-                  {renderField(base + 2)}
-                  {renderField(base + 3)}
-                </div>
-              )
-            })}
-            </section><section className="yarn-section weft-section"><SectionLabel>Weft</SectionLabel>
-            {pair(15, 16)}
-            {renderField(17)}
-            {[0, 1, 2].map((yarn) => {
-              const base = 18 + yarn * 3
-              return (
-                <div key={`weft-yarn-${yarn}`} className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
-                  {renderField(base)}
-                  {renderField(base + 1)}
-                  <div className="sm:col-span-2">{renderField(base + 2)}</div>
-                </div>
-              )
-            })}
-            </section><section className="yarn-section charges-section"><SectionLabel>{DALAL_SECTION_LABEL}</SectionLabel>
-            {pair(fields.length - 2, fields.length - 1)}</section>
-          </>
-        )}
+      {inputMethod === 'speak' ? <section className="voice-bar" aria-label="Voice entry">
+        <button type="button" onClick={speech.listening?stopMic:startMic} disabled={!speech.supported}>{speech.listening?'Stop mic':speech.supported?'Start mic':'Mic unavailable'}</button>
+        <p aria-live="polite">{speech.error || rangeNote || (speech.listening?`Listening · ${fields[focusIdx]?.label}`:'Name a metric, then its value.')}</p>
+        <span className="voice-transcript">{speech.interim || speech.transcript}</span>
+      </section> : null}
+      <div className="field-screen"><div className="field-screen-label"><span>{mode === 'single'?'SINGLE YARN':'MULTIPLE YARNS'}</span><span>{Math.min(page*pageSize+1,fields.length)}–{Math.min((page+1)*pageSize,fields.length)} of {fields.length} fields</span></div>
+        <div className="field-grid">{fields.slice(page*pageSize,(page+1)*pageSize).map((_,i)=>renderField(page*pageSize+i))}</div>
       </div>
+      <PageControls page={page} count={Math.ceil(fields.length/pageSize)} onChange={setPage} label="Step"/>
 
     </Layout>
   )

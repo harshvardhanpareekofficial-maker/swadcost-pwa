@@ -146,13 +146,12 @@ describe('on-page SEO', () => {
     expect(isOwnerVaultPath('/guides/grey-fabric-costing')).toBe(false)
   })
 
-  it('keeps FAQ copy on the public login page and documents a post-deploy recrawl', () => {
+  it('keeps help reachable and documents a post-deploy recrawl', () => {
     const login = readFileSync(join(root, 'src/pages/LoginPage.tsx'), 'utf8')
     const readme = readFileSync(join(root, 'README.md'), 'utf8')
     const envExample = readFileSync(join(root, '.env.example'), 'utf8')
-    expect(login).toContain('StudioFaq')
-    expect(login).toContain('GuideLinks')
-    expect(login).toContain('fabric cost calculator for Ichalkaranji')
+    expect(login).toContain('<StudioBar landing')
+    expect(readFileSync(join(root,'src/components/StudioBar.tsx'),'utf8')).toContain('/guides/grey-fabric-costing')
     expect(readme).toMatch(/URL Inspection/)
     expect(readme).toMatch(/days to weeks/)
     expect(readme).toMatch(/cannot guarantee overnight/)

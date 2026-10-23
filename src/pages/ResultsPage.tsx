@@ -1,24 +1,10 @@
 import { useState } from 'react'
 import { Capacitor, registerPlugin } from '@capacitor/core'
 import { Layout } from '../components/Layout'
-import { Stepper } from '../components/Stepper'
-import { NumberField } from '../components/NumberField'
-import { PrimaryButton } from '../components/PrimaryButton'
-import { SectionLabel } from '../components/SectionLabel'
-import { StudioSheet } from '../components/StudioSheet'
-import {
-  calculateMulti,
-  calculateSingle,
-  formatInr,
-  type CostBreakdown,
-  type MultiInputs,
-  type SingleInputs,
-} from '../lib/costing'
-import { currentUser } from '../lib/auth'
-import { recordSuccessfulCalc } from '../lib/telemetry'
-import { DALAL_COST_LINE_LABEL, PICK_RATE_HINT, PICK_RATE_LABEL, PICK_RATE_UNIT } from '../lib/labels'
-import { validateMultiInputs, validateSingleInputs, type CostMode } from '../lib/types'
-
+import { PageControls } from '../components/PageControls'
+import { formatInr, type CostBreakdown, type MultiInputs, type SingleInputs } from '../lib/costing'
+import type { CostMode } from '../lib/types'
+import { DALAL_COST_LINE_LABEL } from '../lib/labels'
 type Props = {
   fabricName: string
   mode: CostMode
@@ -33,240 +19,19 @@ type Props = {
   onLogout: () => void
 }
 
-export function ResultsPage({
-  fabricName,
-  mode,
-  single,
-  multi,
-  result,
-  onChangeSingle,
-  onChangeMulti,
-  onResult,
-  onHome,
-  onBackEdit,
-  onLogout,
-}: Props) {
-  const [editing, setEditing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  function recalculate() {
-    try {
-      setError(null)
-      const err = mode === 'single' ? validateSingleInputs(single) : validateMultiInputs(multi)
-      if (err) {
-        setError(err)
-        return
-      }
-      const r = mode === 'single' ? calculateSingle(single) : calculateMulti(multi)
-      recordSuccessfulCalc({
-        username: currentUser(),
-        fabricName,
-        mode,
-        single,
-        multi,
-        result: r,
-      })
-      onResult(r)
-      setEditing(false)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Calculation failed')
-    }
-  }
-
-  return (
-    <Layout
-      eyebrow="Cost sheet"
-      title="Cost breakdown"
-      subtitle={fabricName || 'Untitled fabric'}
-      onBack={onBackEdit}
-      onLogout={onLogout}
-    >
-      <Stepper step={3} /><div className="result-actions"><button onClick={async()=>{try {if(Capacitor.isNativePlatform()) await registerPlugin<{print:()=>Promise<void>}>('StudioPrint').print();else window.print()}catch{setError('Could not open print. Please retry.')}}}>Print / Save PDF ↗</button><span>Amounts in Indian rupees</span></div><div className="cost-sheet-grid">
-
-      <StudioSheet className="final-cost-panel mb-4 overflow-hidden sm:mb-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/55">Final cost</p>
-        <p className="font-display mt-1 break-words text-[2.1rem] font-semibold tabular-nums tracking-[-0.03em] text-ink sm:text-5xl">
-          {formatInr(result.grandTotal)}
-        </p>
-        {result.length > 0 ? (
-          <p className="mt-2 text-xs text-plum/55">
-            {formatInr(result.costPerUnitLength)} ÷ L2L (derived, not on the mill sheet)
-          </p>
-        ) : null}
-      </StudioSheet>
-
-      <StudioSheet className="mb-4 sm:mb-5">
-        <SectionLabel>Summary</SectionLabel>
-        <div className="mt-3 space-y-2">
-          <Row label="Total ends (Reed × RS)" value={String(result.totalEnds)} />
-          <Row label="Warp weight" value={String(result.warpWeight)} />
-          <Row label="Weft weight (base)" value={String(result.weftWeightBase)} />
-          <Row label="Weft weight (after wastage)" value={String(result.weftWeight)} />
-          <Row label="Warp cost" value={formatInr(result.warpCostRaw)} />
-          <Row label="Weft cost" value={formatInr(result.weftCostRaw)} />
-          <Row label="Sizing" value={formatInr(result.sizingCost)} />
-          <Row label={DALAL_COST_LINE_LABEL} value={formatInr(result.jobCost)} />
-          <Row label="Warping" value={formatInr(result.warping)} />
-        </div>
-      </StudioSheet>
-
-      <StudioSheet className="mb-4 sm:mb-5">
-        <SectionLabel>Warp yarns</SectionLabel>
-        {result.warpLines.length === 0 ? (
-          <p className="mt-3 text-sm text-plum/55">No warp lines on this sheet.</p>
-        ) : (
-          <div className="mt-1">
-            {result.warpLines.map((l) => (
-              <div key={l.label} className="border-t border-plum/10 py-2.5 text-sm first:border-t-0">
-                <div className="flex min-w-0 justify-between gap-2">
-                  <span className="min-w-0 break-words text-ink">{l.label}</span>
-                  <span className="shrink-0 tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
-                </div>
-                <p className="text-xs text-plum/60">
-                  {l.pct}% · Ne {l.count} · wt {l.weight} · rate {l.rate}
-                  {l.sizingCost != null ? ` · sizing ${formatInr(l.sizingCost)}` : ''}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </StudioSheet>
-
-      <StudioSheet className="mb-4 sm:mb-5">
-        <SectionLabel>Weft yarns</SectionLabel>
-        {result.weftLines.length === 0 ? (
-          <p className="mt-3 text-sm text-plum/55">No weft lines on this sheet.</p>
-        ) : (
-          <div className="mt-1">
-            {result.weftLines.map((l) => (
-              <div key={l.label} className="border-t border-plum/10 py-2.5 text-sm first:border-t-0">
-                <div className="flex min-w-0 justify-between gap-2">
-                  <span className="min-w-0 break-words text-ink">{l.label}</span>
-                  <span className="shrink-0 tabular-nums font-semibold text-plum">{formatInr(l.yarnCostRaw)}</span>
-                </div>
-                <p className="text-xs text-plum/60">
-                  {l.pct}% · Ne {l.count} · wt {l.weight} · rate {l.rate}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
-      </StudioSheet>
-
-      <StudioSheet className="mb-5 sm:mb-6">
-        <SectionLabel>Markups on final</SectionLabel>
-        <div className="mt-3 grid grid-cols-3 gap-x-2 gap-y-3 sm:grid-cols-4">
-          {result.markups.map((m) => (
-            <div key={m.pct} className="min-w-0 text-center">
-              <p className="text-[11px] text-plum/55">+{m.pct}%</p>
-              <p className="break-words text-xs font-semibold tabular-nums text-ink">{formatInr(m.amount)}</p>
-            </div>
-          ))}
-        </div>
-      </StudioSheet>
-
-      </div>
-      {editing ? (
-        <section className="mb-5 space-y-3">
-          <h3 className="font-display text-lg font-semibold tracking-[-0.02em] text-ink">Edit inputs & recalculate</h3>
-          {mode === 'single' ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {(
-                [
-                  ['reed', 'Reed', single.reed],
-                  ['warpReedspace', 'Warp RS', single.warpReedspace],
-                  ['l2l', 'L2L', single.l2l],
-                  ['warpCount', 'Warp Count', single.warpCount],
-                  ['warpRate', 'Warp Rate', single.warpRate],
-                  ['sizingRate', 'Sizing', single.sizingRate],
-                  ['pick', 'Pick', single.pick],
-                  ['weftReedspace', 'Weft RS', single.weftReedspace],
-                  ['weftCount', 'Weft Count', single.weftCount],
-                  ['weftRate', 'Weft Rate', single.weftRate],
-                  ['wastagePct', 'Wastage %', single.wastagePct],
-                  ['pickRate', PICK_RATE_LABEL, single.pickRate, PICK_RATE_UNIT, PICK_RATE_HINT],
-                  ['warping', 'Warping', single.warping],
-                ] satisfies Array<
-                  [keyof SingleInputs, string, number, string?, string?]
-                >
-              ).map(([key, label, val, unit, hint]) => (
-                <NumberField
-                  key={key}
-                  label={label}
-                  unit={unit}
-                  hint={hint}
-                  value={val || ''}
-                  onChange={(v) =>
-                    onChangeSingle({ ...single, [key]: v === '' ? 0 : v })
-                  }
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-plum/70">
-              For multi-yarn edits, go back to the fields step for full yarn % / count / rate controls, or tweak
-              shared values below.
-            </p>
-          )}
-          {mode === 'multi' ? (
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {(
-                [
-                  ['reed', 'Reed', multi.reed],
-                  ['warpReedspace', 'Warp RS', multi.warpReedspace],
-                  ['l2l', 'L2L', multi.l2l],
-                  ['pick', 'Pick', multi.pick],
-                  ['weftReedspace', 'Weft RS', multi.weftReedspace],
-                  ['wastagePct', 'Wastage %', multi.wastagePct],
-                  ['pickRate', PICK_RATE_LABEL, multi.pickRate, PICK_RATE_UNIT, PICK_RATE_HINT],
-                  ['warping', 'Warping', multi.warping],
-                ] satisfies Array<
-                  [keyof MultiInputs, string, number, string?, string?]
-                >
-              ).map(([key, label, val, unit, hint]) => (
-                <NumberField
-                  key={key}
-                  label={label}
-                  unit={unit}
-                  hint={hint}
-                  value={val || ''}
-                  onChange={(v) =>
-                    onChangeMulti({ ...multi, [key]: v === '' ? 0 : v })
-                  }
-                />
-              ))}
-            </div>
-          ) : null}
-          {error ? (
-            <p className="rounded-[14px] border border-rose/30 bg-rose/10 px-3.5 py-2.5 text-sm text-rose">{error}</p>
-          ) : null}
-          <PrimaryButton onClick={recalculate}>Recalculate</PrimaryButton>
-          <PrimaryButton variant="secondary" onClick={() => setEditing(false)}>
-            Cancel
-          </PrimaryButton>
-        </section>
-      ) : null}
-
-      <div className="space-y-3">
-        {!editing ? (
-          <PrimaryButton onClick={() => setEditing(true)}>Edit inputs</PrimaryButton>
-        ) : null}
-        <PrimaryButton variant="ghost" onClick={onHome}>
-          New costing
-        </PrimaryButton>
-      </div>
-    </Layout>
-  )
-}
-
-function Row({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
-  return (
-    <div className="flex min-w-0 items-baseline gap-3 text-sm">
-      <span className={`min-w-0 break-words ${muted ? 'text-plum/50' : 'text-plum/70'}`}>{label}</span>
-      <span className="min-w-4 flex-1 border-b border-dotted border-plum/20" aria-hidden />
-      <span className={`max-w-[48%] shrink-0 text-right tabular-nums ${muted ? 'text-plum/50' : 'font-semibold text-ink'}`}>
-        {value}
-      </span>
-    </div>
-  )
+export function ResultsPage({fabricName,result,onHome,onBackEdit,onLogout}:Props) {
+ const [page,setPage]=useState(0),[error,setError]=useState('')
+ const summary=[['Total ends',String(result.totalEnds)],['Warp weight',String(result.warpWeight)],['Weft weight (base)',String(result.weftWeightBase)],['Weft with wastage',String(result.weftWeight)],['Warp cost',formatInr(result.warpCostRaw)],['Weft cost',formatInr(result.weftCostRaw)],['Sizing',formatInr(result.sizingCost)],[DALAL_COST_LINE_LABEL,formatInr(result.jobCost)],['Warping',formatInr(result.warping)]]
+ const yarns=[...result.warpLines,...result.weftLines].map(l=>[`${l.label} · ${l.pct}% · Ne ${l.count}`,`${formatInr(l.yarnCostRaw)} · wt ${l.weight} · rate ${l.rate}${l.sizingCost!=null?' · sizing '+formatInr(l.sizingCost):''}`])
+ const markups=result.markups.map(m=>[`+${m.pct}%`,formatInr(m.amount)])
+ const pages=[{title:'Construction',rows:summary.slice(0,4)},{title:'Costs',rows:summary.slice(4)},...Array.from({length:Math.max(1,Math.ceil(yarns.length/3))},(_,i)=>({title:'Yarn details',rows:yarns.slice(i*3,i*3+3)})),...Array.from({length:Math.ceil(markups.length/6)},(_,i)=>({title:'Markups',rows:markups.slice(i*6,i*6+6)}))]
+ const current=pages[Math.min(page,pages.length-1)]
+ return <Layout title="Cost sheet." subtitle={fabricName || 'Untitled'} onBack={onBackEdit} onLogout={onLogout}>
+ <div className="result-total"><span>FINAL COST</span><strong>{formatInr(result.grandTotal)}</strong>{result.length>0&&<small>Total ÷ L2L: {formatInr(result.costPerUnitLength)}</small>}</div>
+ <section className="result-page"><h2>{current.title}</h2><dl>{current.rows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>
+ <PageControls page={page} count={pages.length} onChange={setPage}/>
+ {error&&<p role="alert">{error}</p>}
+ <div className="result-buttons"><button onClick={onBackEdit}>Edit inputs</button><button onClick={onHome}>New costing</button><button onClick={async()=>{try{if(Capacitor.isNativePlatform())await registerPlugin<{print:()=>Promise<void>}>('StudioPrint').print();else window.print()}catch{setError('Could not open print. Please retry.')}}}>Print / PDF ↗</button></div>
+ <div className="print-cost-sheet">{pages.map((part,i)=><section key={i}><h2>{part.title}</h2><dl>{part.rows.map(([label,value])=><div key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></section>)}</div>
+ </Layout>
 }

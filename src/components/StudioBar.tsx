@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { InstallButton } from './InstallButton'
 import { pendingCount } from '../lib/pendingSync'
-import { IconArrow } from './Icons'
+
 import { Mark } from './Mark'
 import { studioQuietBtnClass } from './studio'
 
@@ -32,7 +32,7 @@ export function StudioBar({ landing = false, trailing, onBack, backLabel = 'Back
           </span>
         </span>
       </p>
-      {landing ? <nav className="landing-nav" aria-label="Main navigation"><Link to="/">All tools</Link><a href="#studio">Open studio <IconArrow/></a></nav> : null}
+      {landing ? <nav className="landing-nav" aria-label="Main navigation"><Link to="/">All tools</Link><Link to="/guides/grey-fabric-costing">Help</Link></nav> : null}
       <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
         {onBack ? (
           <StudioBarAction onClick={onBack}>{backLabel}</StudioBarAction>
@@ -42,12 +42,12 @@ export function StudioBar({ landing = false, trailing, onBack, backLabel = 'Back
         ) : null}
         <InstallButton/>
         {trailing}
-        <p
+        {(!online || pending > 0) && <p
           className={`${onBack || onLogout || trailing ? 'hidden sm:flex' : 'flex'} items-center gap-1.5 text-[11px] font-medium text-plum/70`}
         >
           <span className="h-2 w-2 rounded-full bg-ready" />
-          <span className="hidden sm:inline">{!online ? "Working offline" : pending ? `${pending} awaiting sync` : "Workspace ready"}</span>
-        </p>
+          <span className="sync-status">{!online ? "Offline" : pending ? `${pending} awaiting sync` : "Workspace ready"}</span>
+        </p>}
       </div>
     </header>
   )

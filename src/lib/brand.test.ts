@@ -33,10 +33,10 @@ describe('studio chrome', () => {
   const results = read('src/pages/ResultsPage.tsx')
   const ui = uiFiles.map(read).join('\n')
 
-  it('keeps the mockup welcome line and omits explore/guest', () => {
-    expect(login).toContain('Welcome to the studio.')
-    expect(login).toContain('Sign in to keep your cost sheets together.')
-    expect(login).toMatch(/Every thread/)
+  it('keeps concise sign-in copy and omits explore/guest', () => {
+    expect(login).toContain('Sign in.')
+    expect(login).toContain('Your fabric cost calculator.')
+    expect(login).not.toMatch(/Every thread/)
     expect(login).not.toMatch(/explore first/i)
     expect(login).not.toMatch(/temporary workspace/i)
   })
@@ -97,7 +97,6 @@ describe('studio chrome', () => {
     expect(studioAuth).toContain('switchStudioAccount')
     expect(studioAuth).toContain('USERNAME_TAKEN_CLOUD')
     expect(studioAuth).toContain('This username is already taken')
-    expect(login).toContain('rahul_loom / rahul2')
   })
 
   it('reminds new accounts to store ID and password before they leave the form', () => {
@@ -136,11 +135,9 @@ describe('studio chrome', () => {
     expect(calc).toContain('PICK_RATE_UNIT')
     expect(calc).toContain('PICK_RATE_HINT')
     expect(calc).not.toMatch(/₹ per pick/)
-    expect(calc).toContain('DALAL_SECTION_LABEL')
     expect(calc).not.toMatch(/Job rate/)
     expect(calc).not.toMatch(/Job & other/)
     expect(results).toContain('DALAL_COST_LINE_LABEL')
-    expect(results).toContain('PICK_RATE_LABEL')
     expect(results).not.toMatch(/Job \(pick/)
     expect(results).not.toMatch(/Job rate/)
   })

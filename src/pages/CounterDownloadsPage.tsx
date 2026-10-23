@@ -1,29 +1,19 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
 import releases from '../lib/desktop-releases.json'
-import { CounterDrawing, ToolFrame } from './ToolsPage'
-
-type Release = { title: string; platform: string; status: string; description: string; url: string | null; sha256: string | null; size: string | null; button: string }
-
-function PlatformDownload({ release }: { release: Release }) {
-  const available = !!release.url && release.url.startsWith('https://') && /^[a-f0-9]{64}$/.test(release.sha256 ?? '')
-  const file = available ? new URL(release.url!) : null
-  // Keep our hosted files same-origin on both the custom domain and previews.
-  const href = file?.origin === 'https://harshvardhanpareek.com' ? file.pathname : release.url!
-  return <article className="platform-download"><div className="platform-heading"><h2>{release.title}</h2><span>{release.platform}</span></div><p className="release-status">{release.status}</p><p className="release-description">{release.description}</p>
-    {available ? <a className="download-action" href={href} download={file!.pathname.split('/').pop()}>{release.button} <span aria-hidden>↓</span></a> : <button className="download-action" type="button" disabled>Download not available yet</button>}
-    <p className="download-detail">{available ? `${release.size} · Setup preview` : 'A download will appear here when the package is prepared.'}</p>
-    {available && <details className="download-checksum"><summary>Verify your download</summary><p>SHA-256</p><code>{release.sha256}</code></details>}
-  </article>
-}
-
+import { ToolFrame } from './ToolsPage'
 export function CounterDownloadsPage() {
-  return <ToolFrame><main id="tool-content" className="counter-main">
-    <Link to="/" className="tool-back">← All tools</Link>
-    <section className="counter-intro"><div><p className="tool-eyebrow">GATE DESK / CCTV COUNTER</p><h1>Your gate passes.<br/><span>Your camera evidence.</span></h1><p>A desktop workspace for owners, with phone access being built for owners and workers. Start with the setup for your factory computer.</p></div><div className="counter-illustration"><CounterDrawing/><span>DESKTOP AT THE FACTORY · PHONE ON THE MOVE</span></div></section>
-    <aside className="pilot-notice"><strong>Factory pilot, still in development.</strong><p>These are setup previews, not a production counting system. Automatic counting is not ready for operational decisions. No factory counting accuracy is claimed.</p></aside>
-    <section className="download-platforms" aria-label="Desktop downloads"><PlatformDownload release={releases.windows}/><PlatformDownload release={releases.macos}/></section>
-    <section className="counter-plan" aria-label="Planned subscription"><div><p className="tool-eyebrow">PLANNED GATE DESK SUBSCRIPTION</p><h2>₹200 <span>/ month</span></h2></div><p>Payments are not enabled for this preview. AutoPay will require your explicit approval through a supported payment provider before any recurring charge.</p></section>
-    <section className="counter-explainer"><h2>One factory. Connected records.</h2><div><article><h3>Owner on the computer</h3><p>The desktop is the place for CCTV setup, processing and reviewing incoming and outgoing records.</p></article><article><h3>Owner or worker on the phone</h3><p>Owner sign-in and worker invitation codes are being prepared for Android and iPhone. Device testing is still pending.</p></article><article><h3>Keep pending work visible</h3><p>When the computer is off, phone saves remain pending. Recorded-footage catch-up and off-site synchronization still need factory testing.</p></article></div></section>
-    <div className="counter-privacy"><span aria-hidden>↳</span><p>Factory footage, gate-pass photographs and credentials belong on your authorized devices. This website distributes setup files; it does not receive CCTV footage.</p></div>
-  </main></ToolFrame>
+ const [platform,setPlatform]=useState<'windows'|'macos'>('windows')
+ const [detail,setDetail]=useState<'setup'|'limits'|'verify'>('setup')
+ const release=releases[platform], file=release.url?new URL(release.url):null
+ const available=!!file && file.protocol==='https:' && /^[a-f0-9]{64}$/.test(release.sha256??'')
+ const href=file?.origin==='https://harshvardhanpareek.com'?file.pathname:release.url
+ return <ToolFrame><main id="tool-content" className="download-screen">
+ <div className="download-title"><p className="tool-eyebrow">GATE DESK / 01</p><h1>CCTV<br/><em>Counter.</em></h1><p className="download-status">Source preview · In development</p><p className="download-essential">Not ready for factory counting.<br/>Runtime and counting model are not included.</p></div>
+ <section className="download-panel" aria-label="Desktop downloads"><div className="platform-switch" aria-label="Choose your computer"><button aria-pressed={platform==='windows'} onClick={()=>setPlatform('windows')}>Windows</button><button aria-pressed={platform==='macos'} onClick={()=>setPlatform('macos')}>Mac</button></div>
+ <div className="platform-identity"><span>{platform==='windows'?'⊞':'◉'}</span><div><h2>{release.title}</h2><p>{release.platform}</p></div><small>{release.size}</small></div>
+ <nav className="detail-tabs" aria-label="Download information">{(['setup','limits','verify'] as const).map(tab=><button key={tab} aria-pressed={detail===tab} onClick={()=>setDetail(tab)}>{tab==='setup'?'Requirements':tab==='limits'?'Preview limits':'Checksum'}</button>)}</nav>
+ <div className="download-info" aria-live="polite">{detail==='setup'?<><h3>Before you download</h3><p>Requires an existing reviewed Python 3.12.14 {platform==='windows'?'x64':'arm64'} environment and internet for setup.</p><p>Python.org has no binary installer for this version.</p></>:detail==='limits'?<><h3>{platform==='windows'?'Clean-PC setup is unverified.':'Native Mac testing is pending.'}</h3><p>These ZIPs contain source and setup scripts. They are not complete installers. {platform==='macos'?'Phone TLS is unsupported in this preview.':'Physical-phone and off-site sync testing remain pending.'}</p><p>₹200/month planned. Payments are disabled.</p></>:<><h3>SHA-256</h3><code>{release.sha256}</code><p>Compare this with the downloaded ZIP’s hash.</p></>}</div>
+ {available?<a className="stage-cta" href={href} download={file!.pathname.split('/').pop()}>Download {release.title} preview <span>↓</span></a>:<button disabled>Download unavailable</button>}
+ <p className="download-note">Factory footage stays on your authorized devices.</p>
+ </section></main></ToolFrame>
 }

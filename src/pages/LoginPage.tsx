@@ -3,9 +3,9 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { boundUsername, MIN_PASSWORD_LENGTH } from '../lib/auth'
 import { IconArrow } from '../components/Icons'
 import { FabricStage } from '../components/FabricStage'
-import { Footer } from '../components/Footer'
-import { GuideLinks } from '../components/GuideLinks'
-import { StudioFaq } from '../components/StudioFaq'
+
+
+
 import { PrimaryButton } from '../components/PrimaryButton'
 import { StudioBar } from '../components/StudioBar'
 import { studioFieldClass, studioLabelClass } from '../components/studio'
@@ -215,13 +215,13 @@ export function LoginPage({ onSuccess }: Props) {
   const heading = finishing
     ? 'Finish setup on this device'
     : signingIn
-      ? 'Welcome to the studio.'
-      : 'Create your studio account.'
+      ? 'Sign in.'
+      : 'Create account.'
   const blurb = finishing
     ? FINISH_SETUP_HINT
     : signingIn
-      ? 'Sign in to keep your cost sheets together.'
-      : 'Choose a unique handle and password. They stay on this device. Two people named Rahul need different IDs (rahul_loom / rahul2).'
+      ? 'Your fabric cost calculator.'
+      : 'Choose a unique user ID and password.'
   const cloudBlocked = error === CLOUD_UNAVAILABLE || error === CLOUD_NOT_CONFIGURED
   const actionLabel = pendingCloud
     ? 'Retry'
@@ -241,17 +241,12 @@ export function LoginPage({ onSuccess }: Props) {
         : 'Creating account…'
 
   return (
-    <div className="studio-atmosphere landing-page flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">
+    <div className="studio-atmosphere landing-page screen-login text-ink">
       <StudioBar landing />
 
       <main className="entrance">
-        <section className="landing-hero" aria-labelledby="hero-title">
-          <div className="hero-copy"><h1 id="hero-title">Know the fabric.<br/>Know the <span>cost.</span></h1><p>From warp and weft to your final quote. A considered costing studio for the people who make fabric.</p><div className="hero-actions"><a className="hero-primary" href="#studio">Start a cost sheet <IconArrow/></a><a className="hero-secondary" href="#method">Explore the process <IconArrow/></a></div></div>
-          <div className="hero-object"><span className="hero-wordmark" aria-hidden="true">FABRIC</span><FabricStage/></div>
-          <div className="hero-foot"><span>Built for Ichalkaranji’s loom floor</span><span>Single yarn. Multiple possibilities.</span><a href="#studio">Scroll to your studio <IconArrow/></a></div>
-        </section>
         <section className="studio-entry">
-          <div className="entry-story"><h2>Your craft.<br/>A clearer calculation.</h2><p>You know the cloth. Bring the reed, pick, yarn counts and rates. We’ll bring every component together in one readable cost sheet.</p><div className="entry-spec"><span>WARP + WEFT</span><span>SIZING + MAKING</span><span>YOUR FINAL COST</span></div><p className="entry-note">Your existing account works here. Sign in to begin.</p></div>
+          <div className="login-scene"><span className="login-wordmark" aria-hidden="true">FABRIC<br/>COST</span><FabricStage/><p>Warp. Weft. Your cost.</p></div>
           <section className="entrance-form" id="studio" aria-label="Studio account"><div className="entrance-form-inner">
             <h2 className="font-display">{readyName ? 'Your studio account is ready.' : heading}</h2>
             <p className="entrance-blurb">{readyName ? `Keep ${readyName} and your password somewhere you can find them.` : blurb}</p>
@@ -375,24 +370,8 @@ export function LoginPage({ onSuccess }: Props) {
         </section>
 
         </section>
-        <section className="process-section" id="method"><div className="process-heading"><h2>From the first thread<br/>to the final figure.</h2><p>A familiar mill sheet. A more complete view.</p></div><ol className="process-steps"><li><span>01</span><h3>Define the construction.</h3><p>Choose single or multiple yarns. Enter reed, pick, counts and reedspace.</p></li><li><span>02</span><h3>Account for the work.</h3><p>Add yarn rates, sizing, weft wastage and making charges in paise per pick.</p></li><li><span>03</span><h3>Make the quote yours.</h3><p>Read the breakdown, compare markups, edit inputs, and print your cost sheet.</p></li></ol></section>
-        <details className="entrance-about">
-          <summary className="flex min-h-11 cursor-pointer list-none items-center text-sm font-semibold text-plum [&::-webkit-details-marker]:hidden">
-            About the studio
-          </summary>
-          <div className="space-y-3 pb-1">
-            <p className="text-sm leading-relaxed text-plum/70">
-              Every thread. Every rupee. Clearly accounted for. A fabric cost calculator for Ichalkaranji powerloom grey fabric costing — warp, weft, reed, pick, sizing and job
-              rate on one mill sheet, single or multiple yarns, with voice entry if you want it.
-              Harshvardhan Pareek is the maker.
-            </p>
-            <StudioFaq />
-          </div>
-        </details>
       </main>
 
-      <GuideLinks className="mx-auto w-full max-w-6xl px-[max(1rem,env(safe-area-inset-left))] pr-[max(1rem,env(safe-area-inset-right))] sm:px-8" />
-      <Footer className="px-[max(1rem,env(safe-area-inset-left))] py-2.5 pr-[max(1rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8 sm:py-4" />
     </div>
   )
 }

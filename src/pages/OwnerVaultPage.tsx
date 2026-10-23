@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { Footer } from '../components/Footer'
+import { PageControls } from '../components/PageControls'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { Eyebrow, SectionLabel } from '../components/SectionLabel'
 import { StudioBar, StudioBarAction } from '../components/StudioBar'
@@ -101,8 +101,7 @@ function MostUsedQuality({ quality }: { quality: RankedQuality | null }) {
         </>
       ) : (
         <p className="mt-3 text-sm leading-relaxed text-ivory/75">
-          No calculations yet. Qualities appear here after the first Calculate — reed, warp / pick,
-          quality label, and fabric name when they are on the sheet.
+          No calculations recorded.
         </p>
       )}
     </div>
@@ -139,6 +138,8 @@ function QualityRankList({ items }: { items: RankedQuality[] }) {
 }
 
 export function OwnerVaultPage() {
+  const [section,setSection]=useState('Overview')
+  const [page,setPage]=useState(0)
   const [pin, setPin] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [unlocked, setUnlocked] = useState(() => isOwnerUnlocked())
@@ -171,6 +172,7 @@ export function OwnerVaultPage() {
     setLoading(true)
     try {
       const snap = await loadOwnerSnapshot()
+      setPage(0)
       setAccounts(snap.accounts)
       setCalcs(snap.calcs)
       setSource(snap.source)
@@ -202,16 +204,16 @@ export function OwnerVaultPage() {
 
   if (!unlocked) {
     return (
-      <div className="studio-atmosphere flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">
+      <div className="studio-atmosphere owner-screen text-ink">
         <StudioBar />
         <main className="mx-auto flex w-full min-w-0 max-w-md flex-1 flex-col justify-center px-4 py-8 sm:px-5 sm:py-10">
           <StudioSheet>
             <Eyebrow>Private ledger</Eyebrow>
             <h1 className="font-display mt-2 text-3xl font-semibold tracking-[-0.03em] text-ink">Owner vault</h1>
-            <p className="mt-2 text-sm text-plum/70">Enter the studio gate to read account and quality reports.</p>
+            <p className="mt-2 text-sm text-plum/70">Sign in to view account activity and cost sheets.</p>
             <form onSubmit={submitPin} className="mt-6 space-y-4">
               <label className="block">
-                <span className={`mb-1.5 block ${studioLabelClass}`}>Gate</span>
+                <span className={`mb-1.5 block ${studioLabelClass}`}>Owner password</span>
                 <input
                   type="password"
                   value={pin}
@@ -233,7 +235,7 @@ export function OwnerVaultPage() {
             </form>
           </StudioSheet>
         </main>
-        <Footer className="px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-8" />
+
       </div>
     )
   }
@@ -242,7 +244,7 @@ export function OwnerVaultPage() {
     source === 'supabase' ? 'Live workspace' : source === 'mixed' ? 'Workspace + this device' : 'This device'
 
   return (
-    <div className="studio-atmosphere flex min-h-dvh min-w-0 flex-col overflow-x-hidden text-ink">
+    <div className="studio-atmosphere owner-screen text-ink">
       <StudioBar
         trailing={
           <>
@@ -262,148 +264,26 @@ export function OwnerVaultPage() {
         }
       />
 
-      <main className="owner-workspace mx-auto w-full min-w-0 flex-1 space-y-4 px-4 py-4 sm:space-y-6 sm:px-8 sm:py-8">
-        <div className="ledger-heading">
-          <h1 className="font-display mt-1.5 text-[1.65rem] font-semibold tracking-[-0.03em] text-ink sm:mt-2 sm:text-[1.85rem]">
-            Usage ledger
-          </h1>
-          <p className="mt-1.5 max-w-[46ch] text-sm leading-relaxed text-plum/75 sm:text-[0.95rem]">
-            See the qualities your users calculate most, account activity, and every recorded cost sheet.
-          </p>
-        </div>
-
-        <section className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">
-          <StudioSheet>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Accounts</p>
-            <p className="mt-1 font-display text-3xl font-semibold tabular-nums text-ink">{accounts.length}</p>
-          </StudioSheet>
-          <StudioSheet>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Calculations</p>
-            <p className="mt-1 font-display text-3xl font-semibold tabular-nums text-ink">{calcs.length}</p>
-          </StudioSheet>
-          <StudioSheet>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-plum/70">Single / Multi</p>
-            <p className="mt-1 font-display text-3xl font-semibold tabular-nums text-ink">
-              {report.modeCounts.single} / {report.modeCounts.multi}
-            </p>
-          </StudioSheet>
-        </section>
-
+      <main className="owner-workspace owner-paged">
+        <header className="ledger-heading"><h1>Usage ledger</h1><span>{sourceLabel}</span></header>
+        <nav className="ledger-tabs" aria-label="Ledger sections">{['Overview','Qualities','Brokers','Accounts','Calculations'].map(name=><button key={name} aria-pressed={section===name} onClick={()=>{setSection(name);setPage(0)}}>{name}</button>)}</nav>
         <div className="ledger-filters">
-          <label>SEARCH RECORDS<input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Quality, broker or user"/></label>
-          <label>PERIOD<select value={period} onChange={e=>setPeriod(e.target.value)}><option value="all">All recorded time</option><option value="7">Last 7 days</option><option value="30">Last 30 days</option><option value="90">Last 90 days</option></select></label>
-          <label className="check-label"><input type="checkbox" checked={hideChecks} onChange={e=>setHideChecks(e.target.checked)}/>Hide Codex verification entries</label>
+          <label>SEARCH<input type="search" value={query} onChange={e=>{setQuery(e.target.value);setPage(0)}} placeholder="Quality, broker or user"/></label>
+          <label>PERIOD<select value={period} onChange={e=>{setPeriod(e.target.value);setPage(0)}}><option value="all">All time</option><option value="7">7 days</option><option value="30">30 days</option><option value="90">90 days</option></select></label>
+          <label className="check-label"><input type="checkbox" checked={hideChecks} onChange={e=>{setHideChecks(e.target.checked);setPage(0)}}/>Hide verification entries</label>
           <button onClick={()=>exportCsv(calcs)} disabled={!calcs.length}>Export CSV ↗</button>
         </div>
         {error?<p className="ledger-message" role="alert">{error}</p>:null}
-        <p className="text-xs text-plum/65">Showing {calcs.length} of {allCalcs.length} recorded calculations. Rankings use the filtered records. Quality means reed × pick. Source: {sourceLabel}.</p>
-        <div className="ledger-top"><MostUsedQuality quality={report.topQuality} /><QualityRankList items={report.rankedQualities} /></div>
-
-
-
-        <RankList title="Most-used broker / sheet names" items={report.topFabrics} />
-
-        <StudioSheet>
-          <SectionLabel>Accounts</SectionLabel>
-          <p className="mt-1.5 text-xs leading-relaxed text-plum/60">
-            Last active updates on successful sign-in and Calculate. Account passwords are never shown.
-          </p>
-          {accounts.length === 0 ? (
-            <EmptyHint>No accounts recorded yet. Fresh studios start empty.</EmptyHint>
-          ) : (
-            <>
-              <ul className="mt-3 space-y-2 md:hidden">
-                {accounts.map((account) => (
-                  <li
-                    key={usernameNorm(account.username)}
-                    className="rounded-[14px] border border-plum/10 bg-paper/50 px-3.5 py-3"
-                  >
-                    <p className="font-medium text-ink">{account.username}</p>
-                    <p className="mt-1 text-xs text-plum/65" title={formatWhen(account.lastActiveAt)}>
-                      Last active {formatRelative(account.lastActiveAt)}
-                    </p>
-                    <p className="text-xs text-plum/50">Created {formatWhen(account.createdAt)}</p>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3 hidden overflow-x-auto md:block">
-                <table className="w-full min-w-[32rem] text-left text-sm">
-                  <thead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-plum/50">
-                    <tr>
-                      <th className="pb-2 font-semibold">User ID</th>
-                      <th className="pb-2 font-semibold">Last active</th>
-                      <th className="pb-2 font-semibold">Created</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {accounts.map((account) => (
-                      <tr key={usernameNorm(account.username)} className="border-t border-plum/10">
-                        <td className="py-2.5 font-medium text-ink">{account.username}</td>
-                        <td className="py-2.5 text-plum/70" title={formatWhen(account.lastActiveAt)}>
-                          {formatRelative(account.lastActiveAt)}
-                        </td>
-                        <td className="py-2.5 text-plum/70">{formatWhen(account.createdAt)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-        </StudioSheet>
-
-        <StudioSheet>
-          <SectionLabel>Recent calculations</SectionLabel>
-          {calcs.length === 0 ? (
-            <EmptyHint>No calculate events yet.</EmptyHint>
-          ) : (
-            <>
-              <ul className="mt-3 space-y-2 md:hidden">
-                {calcs.slice(0, 40).map((row) => (
-                  <li key={row.id} className="rounded-[14px] border border-plum/10 bg-paper/50 px-3.5 py-3">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <p className="min-w-0 break-words font-medium text-ink">{row.fabricName || 'Untitled'}</p>
-                      <p className="shrink-0 tabular-nums font-semibold text-plum">{formatInr(row.finalCost)}</p>
-                    </div>
-                    <p className="mt-1 text-xs text-plum/65">
-                      {row.username} · {row.mode} · {row.qualityLabel || '—'}
-                    </p>
-                    <p className="text-xs text-plum/50">{formatWhen(row.createdAt)}</p>
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-3 hidden overflow-x-auto md:block">
-                <table className="w-full min-w-[40rem] text-left text-sm">
-                  <thead className="text-[11px] font-semibold uppercase tracking-[0.14em] text-plum/50">
-                    <tr>
-                      <th className="pb-2 font-semibold">When</th>
-                      <th className="pb-2 font-semibold">User</th>
-                      <th className="pb-2 font-semibold">Fabric</th>
-                      <th className="pb-2 font-semibold">Mode</th>
-                      <th className="pb-2 font-semibold">Quality</th>
-                      <th className="pb-2 font-semibold">Final</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {calcs.slice(0, 40).map((row) => (
-                      <tr key={row.id} className="border-t border-plum/10">
-                        <td className="py-2.5 text-plum/70">{formatWhen(row.createdAt)}</td>
-                        <td className="py-2.5 text-ink">{row.username}</td>
-                        <td className="py-2.5 text-ink">{row.fabricName || '—'}</td>
-                        <td className="py-2.5 capitalize text-ink">{row.mode}</td>
-                        <td className="py-2.5 text-ink">{row.qualityLabel || '—'}</td>
-                        <td className="py-2.5 tabular-nums font-semibold text-plum">{formatInr(row.finalCost)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          )}
-        </StudioSheet>
+        <p className="ledger-source">{calcs.length} of {allCalcs.length} calculations. Filters apply to calculations and rankings.</p>
+        <section className="ledger-page">
+        {section==='Overview'&&<><div className="ledger-counts"><span>{accounts.length}<small>Accounts</small></span><span>{calcs.length}<small>Calculations</small></span><span>{report.modeCounts.single} / {report.modeCounts.multi}<small>Single / Multi</small></span></div><MostUsedQuality quality={report.topQuality}/></>}
+        {section==='Qualities'&&<QualityRankList items={report.rankedQualities.slice(page*3,page*3+3)}/>}
+        {section==='Brokers'&&<RankList title="Broker / sheet names" items={report.topFabrics.slice(page*3,page*3+3)}/>}
+        {section==='Accounts'&&<><h2>Accounts</h2>{accounts.length===0?<EmptyHint>No accounts recorded.</EmptyHint>:<ul>{accounts.slice(page*3,page*3+3).map(account=><li key={usernameNorm(account.username)}><strong>{account.username}</strong><span title={formatWhen(account.lastActiveAt)}>Active {formatRelative(account.lastActiveAt)}</span><small>Created {formatWhen(account.createdAt)}</small></li>)}</ul>}</>}
+        {section==='Calculations'&&<><h2>Calculations</h2>{calcs.length===0?<EmptyHint>No calculations recorded.</EmptyHint>:<ul>{calcs.slice(page*3,page*3+3).map(row=><li key={row.id}><strong>{row.fabricName||'Untitled'} · {formatInr(row.finalCost)}</strong><span>{row.username} · {row.mode} · {row.qualityLabel||'—'}</span><small>{formatWhen(row.createdAt)}</small></li>)}</ul>}</>}
+        </section>
+        {section!=='Overview'&&<PageControls page={page} count={Math.max(1,Math.ceil((section==='Qualities'?report.rankedQualities.length:section==='Brokers'?report.topFabrics.length:section==='Accounts'?accounts.length:calcs.length)/3))} onChange={setPage}/>}
       </main>
-
-      <Footer className="px-4 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-8" />
     </div>
   )
 }
