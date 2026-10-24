@@ -19,3 +19,17 @@ export function acceptedDesktopDownload(release: DesktopRelease): URL | null {
     return url.protocol === 'https:' && !url.username && !url.password ? url : null
   } catch { return null }
 }
+
+// Requested test-package publication does not grant final-release acceptance.
+export function authorizedTrialDownload(trial: {
+  kind: string; publicationAuthorized: boolean; url: string; sha256: string
+}): URL | null {
+  if (!trial.publicationAuthorized || !['windows-trial', 'mac-qualification'].includes(trial.kind)
+      || !/^[a-f0-9]{64}$/.test(trial.sha256)) return null
+  try {
+    const url = new URL(trial.url)
+    return url.origin === 'https://github.com' && !url.username && !url.password
+      && url.pathname.startsWith('/harshvardhanpareekofficial-maker/swadcost-pwa/releases/download/')
+      && url.pathname.endsWith('.zip') && !url.search && !url.hash ? url : null
+  } catch { return null }
+}

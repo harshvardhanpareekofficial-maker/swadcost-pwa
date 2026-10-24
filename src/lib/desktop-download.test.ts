@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { acceptedDesktopDownload } from './desktop-download'
+import { acceptedDesktopDownload, authorizedTrialDownload } from './desktop-download'
 import releases from './desktop-releases.json'
+import trials from './desktop-trials.json'
 
 const candidate = {
   url: 'https://example.com/installer.zip', sha256: 'a'.repeat(64),
@@ -22,5 +23,21 @@ describe('accepted desktop downloads', () => {
   it('requires an exact digest and permits an accepted HTTPS artifact', () => {
     expect(acceptedDesktopDownload({ ...candidate, sha256: null })).toBeNull()
     expect(acceptedDesktopDownload(candidate)?.href).toBe(candidate.url)
+  })
+})
+
+describe('authorized trial downloads', () => {
+  it('offers the requested files without promoting either final release', () => {
+    for (const platform of ['windows', 'macos'] as const) {
+      expect(authorizedTrialDownload(trials[platform])?.href).toBe(trials[platform].url)
+      expect(acceptedDesktopDownload(releases[platform])).toBeNull()
+    }
+  })
+  it('requires publication authorization and a test-package kind', () => {
+    expect(authorizedTrialDownload({ ...trials.windows, publicationAuthorized: false })).toBeNull()
+    expect(authorizedTrialDownload({ ...trials.windows, kind: 'final' })).toBeNull()
+  })
+  it.each(['https://example.com/file.zip', 'https://github.com/another-owner/project/releases/download/v1/a.zip', 'https://github.com/harshvardhanpareekofficial-maker/swadcost-pwa/releases/download/v1/a.zip?token=secret'])('rejects an unexpected destination %s', url => {
+    expect(authorizedTrialDownload({ ...trials.windows, url })).toBeNull()
   })
 })

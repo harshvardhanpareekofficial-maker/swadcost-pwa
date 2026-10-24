@@ -1,0 +1,24 @@
+{
+  "windows": {
+    "kind": "windows-trial",
+    "publicationAuthorized": true,
+    "status": "Windows trial",
+    "size": "412 MB ZIP",
+    "button": "Download Windows trial",
+    "setup": "Extract the ZIP, then run Install Gate Desk.cmd once. Open the new Gate Desk desktop shortcut. Python, dependencies and the experimental bag model are included.",
+    "description": "Local installation and launcher checks passed. A different clean PC, physical phones and factory counting still need testing. This is not a final factory release.",
+    "url": "https://github.com/harshvardhanpareekofficial-maker/swadcost-pwa/releases/download/gate-desk-desktop-trials-20261024/GateDesk-Windows-Offline-Trial-20261024-r14.zip",
+    "sha256": "fdbb582c9fee6f1b3a71926398f11f5a76064b7e26c985deb4f3e089f832960f"
+  },
+  "macos": {
+    "kind": "mac-qualification",
+    "publicationAuthorized": true,
+    "status": "Mac compatibility check",
+    "size": "471 MB ZIP",
+    "button": "Download Mac check",
+    "setup": "Extract the ZIP. In Terminal, open its folder and run sh \"./Check This Mac.command\". Python, dependencies and the experimental bag model are included. This checks compatibility; it does not install the app.",
+    "description": "Apple-silicon Mac only. Dependencies require macOS 14 or later; actual Mac support, installation, model execution and phone TLS remain unverified. Not a factory installer.",
+    "url": "https://github.com/harshvardhanpareekofficial-maker/swadcost-pwa/releases/download/gate-desk-desktop-trials-20261024/GateDesk-Mac-Offline-Qualification-20261023-r2.zip",
+    "sha256": "fcfb4f17e1c21767452dbbdf1689b12e1b89e3b5768a23fd605eebc2e37ac82f"
+  }
+}

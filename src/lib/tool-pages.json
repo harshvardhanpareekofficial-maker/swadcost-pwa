@@ -6,7 +6,7 @@
   },
   "/cctv-counter": {
     "title": "Gate Desk CCTV Counter | Windows & Apple-silicon Mac setup",
-    "description": "Complete Windows and Apple-silicon Mac installers are in preparation; counting accuracy is not yet accepted. Downloads await installation and phone-sync checks.",
-    "heading": "Gate Desk CCTV Counter installers"
+    "description": "Download the bundled Windows trial or Apple-silicon Mac compatibility-check package. Runtime and experimental bag model included; counting accuracy is not yet accepted.",
+    "heading": "Gate Desk CCTV Counter test packages"
   }
 }
