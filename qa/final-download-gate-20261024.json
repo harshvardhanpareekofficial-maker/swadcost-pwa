@@ -1,0 +1,14 @@
+{
+  "scope": "Remove preview links; only accepted complete desktop artifacts can be offered",
+  "first_run": {
+    "tests_passed": 15,
+    "tests_failed": 1,
+    "failure": "Crawler test expects explicit counting-accuracy limitation; restored that limitation in updated metadata"
+  },
+  "next_checks": [
+    "Affected crawler test",
+    "TypeScript/production build",
+    "Browser Windows/Mac disabled download state"
+  ],
+  "public_uploads": false
+}

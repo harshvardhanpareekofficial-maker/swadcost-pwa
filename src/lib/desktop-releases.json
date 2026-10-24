@@ -2,21 +2,31 @@
   "windows": {
     "title": "Windows",
     "platform": "64-bit PC",
-    "status": "Source preview · clean-PC setup unverified",
-    "description": "Developer source preview. Requires an existing reviewed Python 3.12.14 x64 installation and internet; Python.org provides no binary installer for that version. No runtime or counting model included.",
-    "url": "https://harshvardhanpareek.com/downloads/GateDesk-Windows-source-preview-20261018.zip",
-    "sha256": "d92f754f7928f88b9c7ec132d17ff7268fc36add8c908b4b46f6e7549036ce62",
-    "size": "446 KB",
-    "button": "Download Windows source preview"
+    "status": "Factory release pending",
+    "description": "Local bundled builds exist. Installation on a fresh PC, phone synchronization and factory counting still need acceptance.",
+    "url": null,
+    "sha256": null,
+    "size": "Pending release",
+    "button": "Installer not available yet",
+    "releaseApproved": false,
+    "runtimeIncluded": false,
+    "modelIncluded": false,
+    "installationAccepted": false,
+    "phoneSyncAccepted": false
   },
   "macos": {
     "title": "Mac",
-    "platform": "Apple silicon · M-series",
-    "status": "Source preview · native Mac testing pending",
-    "description": "Apple-silicon source with online setup scripts. Requires an existing reviewed arm64 Python 3.12.14 interpreter. No runtime or model included. Mac execution is unverified; phone TLS is not supported in this preview.",
-    "url": "https://harshvardhanpareek.com/downloads/GateDesk-AppleSilicon-source-preview-r2.zip",
-    "sha256": "77cd31c51753a56fb98372838de2e46940bdddebee56f2a090a564c6d2a5a272",
-    "size": "465 KB",
-    "button": "Download Mac source preview"
+    "platform": "Apple silicon \u00b7 M-series",
+    "status": "Mac testing pending",
+    "description": "The bundled Apple-silicon build still needs installation, model and phone-connection testing on a Mac.",
+    "url": null,
+    "sha256": null,
+    "size": "Pending release",
+    "button": "Installer not available yet",
+    "releaseApproved": false,
+    "runtimeIncluded": false,
+    "modelIncluded": false,
+    "installationAccepted": false,
+    "phoneSyncAccepted": false
   }
 }
