@@ -41,3 +41,15 @@ describe('authorized trial downloads', () => {
     expect(authorizedTrialDownload({ ...trials.windows, url })).toBeNull()
   })
 })
+
+
+describe('Android APK publication', () => {
+  it('offers the exact authorized development APK', () => {
+    expect(authorizedTrialDownload(trials.android)?.href).toBe(trials.android.url)
+    expect(authorizedTrialDownload({...trials.android, publicationAuthorized:false})).toBeNull()
+  })
+  it('keeps APK and desktop artifact extensions separate', () => {
+    expect(authorizedTrialDownload({...trials.android, url:trials.windows.url})).toBeNull()
+    expect(authorizedTrialDownload({...trials.windows, url:trials.android.url})).toBeNull()
+  })
+})

@@ -20,5 +20,16 @@
     "description": "Apple-silicon Mac only. Dependencies require macOS 14 or later; actual Mac support, installation, model execution and phone TLS remain unverified. Not a factory installer.",
     "url": "https://github.com/harshvardhanpareekofficial-maker/swadcost-pwa/releases/download/gate-desk-desktop-trials-20261024/GateDesk-Mac-Offline-Qualification-20261023-r2.zip",
     "sha256": "fcfb4f17e1c21767452dbbdf1689b12e1b89e3b5768a23fd605eebc2e37ac82f"
+  },
+  "android": {
+    "kind": "android-dev",
+    "publicationAuthorized": true,
+    "status": "Android development app",
+    "size": "29 KB APK",
+    "button": "Download Android APK",
+    "setup": "Install the APK, open Gate Desk Dev, enter your factory HTTPS address, then tap Connect to factory and sign in. The factory phone service must be running and reachable.",
+    "description": "Android 8 or later. Version 0.3-dev. This phone client connects to the factory host; the counting model runs on the computer. Physical-phone and off-site use remain unverified. APK files do not install on iPhone.",
+    "url": "https://github.com/harshvardhanpareekofficial-maker/swadcost-pwa/releases/download/gate-desk-desktop-trials-20261024/GateDesk-Android-0.3-dev.apk",
+    "sha256": "bf0eaf54716cdfa9b8387f7899da8297a8e55ce12bff7c15eac23040c0053196"
   }
 }
