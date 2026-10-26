@@ -1,0 +1,25 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:04.000
+1 / Open harshvardhanpareek.com
+Choose Desktop downloads under CCTV Counter.
+
+00:00:04.000 --> 00:00:07.000
+2 / Choose Mac
+Select the Mac tab to get the right file.
+
+00:00:07.000 --> 00:00:10.000
+3 / Download the file
+Click Download Mac check. Wait for the download to finish.
+
+00:00:10.000 --> 00:00:14.000
+4 / Check the release status
+Compatibility check only. This does not install Gate Desk.
+
+00:00:14.000 --> 00:00:22.000
+After the ZIP finishes downloading:
+1. Double-click the ZIP to extract it.
+2. Open Terminal in the extracted folder.
+3. Run: sh "./Check This Mac.command"
+4. Keep the check output for the Mac review.
+Compatibility check only. This does not install Gate Desk.
