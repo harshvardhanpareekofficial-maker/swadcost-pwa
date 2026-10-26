@@ -1,0 +1,160 @@
+WEBVTT
+
+00:00:00.000 --> 00:00:03.621
+This is the order for setting up Gate Desk at your
+
+00:00:03.621 --> 00:00:07.242
+factory. It is a guided pilot checklist, not a recording of
+
+00:00:07.242 --> 00:00:10.863
+a completed factory installation. Use the Windows trial for these steps.
+
+00:00:10.863 --> 00:00:14.485
+The current Mac download checks compatibility; it is not a finished
+
+00:00:14.485 --> 00:00:18.106
+installer.
+
+00:00:19.500 --> 00:00:24.182
+Choose one computer as the factory host. It holds the accounts,
+
+00:00:24.182 --> 00:00:28.865
+original documents and counting model. Keep it powered on while phones
+
+00:00:28.865 --> 00:00:33.548
+need to send records. Do not create a different factory on
+
+00:00:33.548 --> 00:00:38.231
+every office computer. Keep the installed folder and its runtime data.
+
+00:00:39.500 --> 00:00:43.488
+Connect the recorder LAN port and computer to the same router
+
+00:00:43.488 --> 00:00:47.476
+or switch using Ethernet. Ask your CCTV installer for the supported
+
+00:00:47.476 --> 00:00:51.464
+local stream address and access details. Local video can work without
+
+00:00:51.464 --> 00:00:55.452
+internet when the equipment supports it and the local network stays
+
+00:00:55.452 --> 00:00:59.441
+powered. A cable alone is not enough.
+
+00:01:00.500 --> 00:01:05.579
+Open CCTV Counter on the website and download the Windows trial.
+
+00:01:05.579 --> 00:01:10.658
+Extract the entire ZIP. Open the extracted folder and run Install
+
+00:01:10.658 --> 00:01:15.737
+Gate Desk dot cmd once. Then open the new desktop shortcut.
+
+00:01:15.737 --> 00:01:20.816
+Python, dependencies and the experimental bag model are included.
+
+00:01:22.000 --> 00:01:26.059
+On first launch, choose Set up this factory and create your
+
+00:01:26.059 --> 00:01:30.118
+owner account. If the factory already exists, sign in instead. Keep
+
+00:01:30.118 --> 00:01:34.177
+credentials private. The address one twenty seven dot zero dot zero
+
+00:01:34.177 --> 00:01:38.237
+dot one opens this computer. It is not the factory address
+
+00:01:38.237 --> 00:01:42.296
+to enter on a phone.
+
+00:01:43.500 --> 00:01:48.151
+After creating the owner account, stop the host cleanly. In the
+
+00:01:48.151 --> 00:01:52.802
+installed folder, run Configure Bundled Model dot cmd and authenticate as
+
+00:01:52.802 --> 00:01:57.453
+the owner. Follow its output before reopening the desktop launcher. The
+
+00:01:57.453 --> 00:02:02.104
+included model is experimental and bag only. It does not establish
+
+00:02:02.104 --> 00:02:06.755
+reliable beam, cloth or factory counts.
+
+00:02:08.000 --> 00:02:12.713
+In Account and Plans, open Camera setup. Enter the camera identifier,
+
+00:02:12.713 --> 00:02:17.426
+name, local address, stream port, path and credentials supplied for your
+
+00:02:17.426 --> 00:02:22.139
+recorder. Saving a draft does not start recording or prove counting.
+
+00:02:22.139 --> 00:02:26.852
+Before counting, verify the feed, source clock, recording retention, gaps and
+
+00:02:26.852 --> 00:02:31.565
+complete operation boundaries.
+
+00:02:33.000 --> 00:02:37.983
+Phone connection needs a real factory HTTPS address and a certificate
+
+00:02:37.983 --> 00:02:42.966
+trusted by the phone. This part still needs assisted setup and
+
+00:02:42.966 --> 00:02:47.949
+device testing. In Phone connection setup, enter the provisioned address, host
+
+00:02:47.949 --> 00:02:52.932
+IP, port and certificate file paths. Save settings only does not
+
+00:02:52.932 --> 00:02:57.915
+start the service. Complete the owner restart handoff, then verify reachability.
+
+00:02:59.000 --> 00:03:04.312
+Install the Android APK and open Gate Desk Dev. Enter the
+
+00:03:04.312 --> 00:03:09.624
+actual factory HTTPS address, tap Connect to factory, and sign in.
+
+00:03:09.624 --> 00:03:14.936
+A worker uses an owner-issued, expiring single-use invitation. APK files do
+
+00:03:14.936 --> 00:03:20.248
+not install on iPhone. Physical Android and iPhone acceptance is still
+
+00:03:20.248 --> 00:03:25.560
+pending. Installing the APK does not establish a working connection.
+
+00:03:27.000 --> 00:03:32.142
+Use a test gate pass first. Check its original document, quantity
+
+00:03:32.142 --> 00:03:37.284
+and units on the host. After enrollment, test saving offline and
+
+00:03:37.284 --> 00:03:42.426
+reconnecting. Wait for acknowledgment, and verify that a retry creates no
+
+00:03:42.426 --> 00:03:47.568
+duplicate. Compare a complete recorded operation with a manual count. Unknown
+
+00:03:47.568 --> 00:03:52.710
+counts must remain unknown, not zero or a final discrepancy.
+
+00:03:54.000 --> 00:03:58.779
+Finally, test outside factory Wi-Fi using mobile data. Off-site sync needs
+
+00:03:58.779 --> 00:04:03.558
+internet and a reachable receiving host. If the PC is off,
+
+00:04:03.558 --> 00:04:08.337
+phone records remain local and pending. Keep runtime data and backups;
+
+00:04:08.337 --> 00:04:13.116
+never delete records to troubleshoot. These checks are still required before
+
+00:04:13.116 --> 00:04:17.895
+treating Gate Desk as ready for factory use.

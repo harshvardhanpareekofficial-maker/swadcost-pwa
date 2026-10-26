@@ -1,0 +1,38 @@
+Gate Desk factory pilot setup
+Illustrated narrated guide; not a recording of a completed factory installation.
+
+START HERE - Set up Gate Desk at your factory
+This is the order for setting up Gate Desk at your factory. It is a guided pilot checklist, not a recording of a completed factory installation. Use the Windows trial for these steps. The current Mac download checks compatibility; it is not a finished installer.
+
+01 / COMPUTER - Choose one factory host
+Choose one computer as the factory host. It holds the accounts, original documents and counting model. Keep it powered on while phones need to send records. Do not create a different factory on every office computer. Keep the installed folder and its runtime data.
+
+02 / LOCAL NETWORK - Connect the recorder and PC
+Connect the recorder LAN port and computer to the same router or switch using Ethernet. Ask your CCTV installer for the supported local stream address and access details. Local video can work without internet when the equipment supports it and the local network stays powered. A cable alone is not enough.
+
+03 / INSTALL - Install the Windows trial
+Open CCTV Counter on the website and download the Windows trial. Extract the entire ZIP. Open the extracted folder and run Install Gate Desk dot cmd once. Then open the new desktop shortcut. Python, dependencies and the experimental bag model are included.
+
+04 / OWNER - Create the owner account
+On first launch, choose Set up this factory and create your owner account. If the factory already exists, sign in instead. Keep credentials private. The address one twenty seven dot zero dot zero dot one opens this computer. It is not the factory address to enter on a phone.
+
+05 / MODEL - Activate the included model
+After creating the owner account, stop the host cleanly. In the installed folder, run Configure Bundled Model dot cmd and authenticate as the owner. Follow its output before reopening the desktop launcher. The included model is experimental and bag only. It does not establish reliable beam, cloth or factory counts.
+
+06 / CAMERA - Save and verify camera setup
+In Account and Plans, open Camera setup. Enter the camera identifier, name, local address, stream port, path and credentials supplied for your recorder. Saving a draft does not start recording or prove counting. Before counting, verify the feed, source clock, recording retention, gaps and complete operation boundaries.
+
+07 / HTTPS - ASSISTED SETUP - Prepare the phone connection
+Phone connection needs a real factory HTTPS address and a certificate trusted by the phone. This part still needs assisted setup and device testing. In Phone connection setup, enter the provisioned address, host IP, port and certificate file paths. Save settings only does not start the service. Complete the owner restart handoff, then verify reachability.
+
+08 / ANDROID - Connect and enroll the phone
+Install the Android APK and open Gate Desk Dev. Enter the actual factory HTTPS address, tap Connect to factory, and sign in. A worker uses an owner-issued, expiring single-use invitation. APK files do not install on iPhone. Physical Android and iPhone acceptance is still pending. Installing the APK does not establish a working connection.
+
+09 / VERIFY BEFORE REAL USE - Run a small end-to-end trial
+Use a test gate pass first. Check its original document, quantity and units on the host. After enrollment, test saving offline and reconnecting. Wait for acknowledgment, and verify that a retry creates no duplicate. Compare a complete recorded operation with a manual count. Unknown counts must remain unknown, not zero or a final discrepancy.
+
+10 / BEFORE YOU RELY ON IT - Check off-site access and retain records
+Finally, test outside factory Wi-Fi using mobile data. Off-site sync needs internet and a reachable receiving host. If the PC is off, phone records remain local and pending. Keep runtime data and backups; never delete records to troubleshoot. These checks are still required before treating Gate Desk as ready for factory use.
+
+Network reference: https://www.hikvisionindia.com/support/faq/network-and-operation
+Package and source: Windows r14 READ-ME-FIRST; current Account & Plans; PC/phone offline catch-up contract.
